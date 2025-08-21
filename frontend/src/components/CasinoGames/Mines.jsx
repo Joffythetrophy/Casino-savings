@@ -3,7 +3,7 @@ import { Card } from '../ui/card';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import CasinoGameLayout, { BettingPanel, useWallet, CRTCoin } from './CasinoGameLayout';
-import { useToast } from '../hooks/use-toast';
+import { useToast } from '../../hooks/use-toast';
 import { Bomb, Gem } from 'lucide-react';
 
 const Mines = ({ onBack }) => {

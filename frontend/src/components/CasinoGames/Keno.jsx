@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Card } from '../ui/card';
 import { Button } from '../ui/button';
 import CasinoGameLayout, { BettingPanel, useWallet, CRTCoin } from './CasinoGameLayout';
-import { useToast } from '../hooks/use-toast';
+import { useToast } from '../../hooks/use-toast';
 
 const Keno = ({ onBack }) => {
   const [selectedNumbers, setSelectedNumbers] = useState([]);

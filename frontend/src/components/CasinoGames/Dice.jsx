@@ -4,7 +4,7 @@ import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Slider } from '../ui/slider';
 import CasinoGameLayout, { BettingPanel, useWallet, CRTCoin } from './CasinoGameLayout';
-import { useToast } from '../hooks/use-toast';
+import { useToast } from '../../hooks/use-toast';
 
 const Dice = ({ onBack }) => {
   const [prediction, setPrediction] = useState(50);

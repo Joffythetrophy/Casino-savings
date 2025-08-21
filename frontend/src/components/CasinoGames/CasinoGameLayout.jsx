@@ -2,7 +2,7 @@ import React, { useState, useContext, useEffect } from 'react';
 import { Card } from '../ui/card';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
-import { useToast } from '../hooks/use-toast';
+import { useToast } from '../../hooks/use-toast';
 import { ArrowLeft, Coins, TrendingUp, TrendingDown } from 'lucide-react';
 
 // CRT Token Component
