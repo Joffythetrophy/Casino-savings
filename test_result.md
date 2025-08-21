@@ -104,6 +104,127 @@
 
 user_problem_statement: "Test the Casino Savings dApp frontend that we just built. This is a comprehensive casino gaming platform with real CRT token integration and multiple games."
 
+frontend:
+  - task: "Casino Lobby Navigation and UI"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/components/CasinoLobby.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "NA"
+          agent: "testing"
+          comment: "Ready for testing - Casino lobby with game selection, stats display, recent winners section"
+
+  - task: "Slot Machine Game"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/components/CasinoGames/SlotMachine.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "NA"
+          agent: "testing"
+          comment: "Ready for testing - Slot spinning, betting, win/loss mechanics, animations"
+
+  - task: "Roulette Game"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/components/CasinoGames/Roulette.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "NA"
+          agent: "testing"
+          comment: "Ready for testing - Number selection, wheel spinning, betting options, payouts"
+
+  - task: "Dice Game"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/components/CasinoGames/Dice.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "NA"
+          agent: "testing"
+          comment: "Ready for testing - Prediction settings, rolling mechanics, multiplier calculations"
+
+  - task: "Plinko Game"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/components/CasinoGames/Plinko.jsx"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: true
+    status_history:
+        - working: "NA"
+          agent: "testing"
+          comment: "Ready for testing - Ball dropping, multiplier slots, betting"
+
+  - task: "Keno Game"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/components/CasinoGames/Keno.jsx"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: true
+    status_history:
+        - working: "NA"
+          agent: "testing"
+          comment: "Ready for testing - Number selection, drawing, payout calculations"
+
+  - task: "Mines Game"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/components/CasinoGames/Mines.jsx"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: true
+    status_history:
+        - working: "NA"
+          agent: "testing"
+          comment: "Ready for testing - Mine placement, gem finding, cash out functionality"
+
+  - task: "Wallet Integration and CRT Token Display"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/components/CasinoGames/CasinoGameLayout.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "NA"
+          agent: "testing"
+          comment: "Ready for testing - CRT token display, balance updates, betting functionality"
+
+  - task: "Game Statistics and Tracking"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/components/CasinoGames/CasinoGameLayout.jsx"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: true
+    status_history:
+        - working: "NA"
+          agent: "testing"
+          comment: "Ready for testing - Stats tracking, win/loss ratios, total amounts"
+
+  - task: "Navigation Flow Between Games"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/components/CasinoLobby.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "NA"
+          agent: "testing"
+          comment: "Ready for testing - Moving between games and back to lobby"
+
 backend:
   - task: "Basic API connectivity and health check"
     implemented: true
