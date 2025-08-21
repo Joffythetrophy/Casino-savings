@@ -22,8 +22,9 @@ const HeroSection = () => {
         {/* Decorative elements */}
         <div className="absolute top-1/2 left-10 w-20 h-20 bg-yellow-400/10 rounded-full blur-xl"></div>
         <div className="absolute top-1/3 right-10 w-32 h-32 bg-purple-400/10 rounded-full blur-2xl"></div>
-      </section>
-    );
-  };
+      </div>
+    </section>
+  );
+};
 
 export default HeroSection;
