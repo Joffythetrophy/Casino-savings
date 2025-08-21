@@ -329,7 +329,13 @@ metadata:
   run_ui: false
 
 test_plan:
-  current_focus: []
+  current_focus:
+    - "Casino Lobby Navigation and UI"
+    - "Slot Machine Game"
+    - "Roulette Game"
+    - "Dice Game"
+    - "Wallet Integration and CRT Token Display"
+    - "Navigation Flow Between Games"
   stuck_tasks: []
   test_all: true
   test_priority: "high_first"
