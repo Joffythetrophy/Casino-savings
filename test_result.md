@@ -102,7 +102,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "Test the Casino Savings dApp backend API that we just built with multi-chain blockchain integration."
+user_problem_statement: "Test the Casino Savings dApp frontend that we just built. This is a comprehensive casino gaming platform with real CRT token integration and multiple games."
 
 backend:
   - task: "Basic API connectivity and health check"
