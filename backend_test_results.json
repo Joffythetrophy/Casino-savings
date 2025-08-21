@@ -1,1 +1,85 @@
-null
+{
+  "total": 11,
+  "passed": 0,
+  "failed": 11,
+  "success_rate": 0.0,
+  "results": [
+    {
+      "test": "Basic Connectivity",
+      "success": false,
+      "details": "HTTP 502: ",
+      "timestamp": "2025-08-21T23:20:14.863480",
+      "response_data": null
+    },
+    {
+      "test": "Health Check",
+      "success": false,
+      "details": "HTTP 502: ",
+      "timestamp": "2025-08-21T23:20:14.869927",
+      "response_data": null
+    },
+    {
+      "test": "Auth Challenge Generation",
+      "success": false,
+      "details": "HTTP 502: ",
+      "timestamp": "2025-08-21T23:20:14.880484",
+      "response_data": null
+    },
+    {
+      "test": "Auth Verification",
+      "success": false,
+      "details": "No challenge data available",
+      "timestamp": "2025-08-21T23:20:14.880535",
+      "response_data": null
+    },
+    {
+      "test": "Balance Endpoints",
+      "success": false,
+      "details": "No auth token available",
+      "timestamp": "2025-08-21T23:20:14.880545",
+      "response_data": null
+    },
+    {
+      "test": "Game Betting",
+      "success": false,
+      "details": "No auth token available",
+      "timestamp": "2025-08-21T23:20:14.880552",
+      "response_data": null
+    },
+    {
+      "test": "Game History",
+      "success": false,
+      "details": "No auth token available",
+      "timestamp": "2025-08-21T23:20:14.880557",
+      "response_data": null
+    },
+    {
+      "test": "Savings Tracking",
+      "success": false,
+      "details": "No auth token available",
+      "timestamp": "2025-08-21T23:20:14.880563",
+      "response_data": null
+    },
+    {
+      "test": "WebSocket Connection",
+      "success": false,
+      "details": "WebSocket error: server rejected WebSocket connection: HTTP 502",
+      "timestamp": "2025-08-21T23:20:14.958642",
+      "response_data": null
+    },
+    {
+      "test": "Legacy Status Create",
+      "success": false,
+      "details": "HTTP 502: ",
+      "timestamp": "2025-08-21T23:20:14.966451",
+      "response_data": null
+    },
+    {
+      "test": "Legacy Status List",
+      "success": false,
+      "details": "HTTP 502: ",
+      "timestamp": "2025-08-21T23:20:14.972492",
+      "response_data": null
+    }
+  ]
+}
