@@ -425,7 +425,8 @@ class CasinoAPITester:
 async def main():
     """Main test runner"""
     async with CasinoAPITester(BACKEND_URL) as tester:
-        summary = await tester.run_all_tests()
+        await tester.run_all_tests()
+        summary = tester.print_summary()
         
         # Save detailed results
         with open("/app/backend_test_results.json", "w") as f:
