@@ -360,14 +360,13 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Casino Lobby Navigation and UI"
-    - "Slot Machine Game"
     - "Roulette Game"
-    - "Dice Game"
-    - "Wallet Integration and CRT Token Display"
-    - "Navigation Flow Between Games"
+    - "Dice Game" 
+    - "Plinko Game"
+    - "Keno Game"
+    - "Mines Game"
   stuck_tasks: []
-  test_all: true
+  test_all: false
   test_priority: "high_first"
 
 agent_communication:
