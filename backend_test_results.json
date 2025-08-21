@@ -1,85 +1,278 @@
 {
-  "total": 11,
-  "passed": 0,
-  "failed": 11,
-  "success_rate": 0.0,
+  "total": 14,
+  "passed": 14,
+  "failed": 0,
+  "success_rate": 100.0,
   "results": [
     {
       "test": "Basic Connectivity",
-      "success": false,
-      "details": "HTTP 502: ",
-      "timestamp": "2025-08-21T23:20:14.863480",
-      "response_data": null
+      "success": true,
+      "details": "API accessible, version: 1.0.0",
+      "timestamp": "2025-08-21T23:20:47.569161",
+      "response_data": {
+        "message": "Casino Savings dApp API",
+        "version": "1.0.0",
+        "supported_networks": [
+          "Solana",
+          "TRON",
+          "Dogecoin"
+        ],
+        "supported_tokens": [
+          "CRT",
+          "SOL",
+          "TRX",
+          "DOGE"
+        ]
+      }
     },
     {
       "test": "Health Check",
-      "success": false,
-      "details": "HTTP 502: ",
-      "timestamp": "2025-08-21T23:20:14.869927",
-      "response_data": null
+      "success": true,
+      "details": "All services checked, 2/3 healthy",
+      "timestamp": "2025-08-21T23:20:47.580517",
+      "response_data": {
+        "status": "degraded",
+        "services": {
+          "solana": {
+            "success": false,
+            "error": "'NewType' object has no attribute 'Confirmed'"
+          },
+          "dogecoin": {
+            "success": true,
+            "version": "1.14.6",
+            "blocks": 4500000,
+            "network": "mainnet"
+          },
+          "tron": {
+            "success": true,
+            "network": "mainnet"
+          }
+        },
+        "timestamp": "2025-08-21T23:20:47.577112"
+      }
     },
     {
       "test": "Auth Challenge Generation",
-      "success": false,
-      "details": "HTTP 502: ",
-      "timestamp": "2025-08-21T23:20:14.880484",
-      "response_data": null
+      "success": true,
+      "details": "Challenge generated successfully",
+      "timestamp": "2025-08-21T23:20:47.630392",
+      "response_data": {
+        "success": true,
+        "challenge": "Hello, please sign this message to authenticate with Casino dApp!\n\nChain: Multi-Chain Casino\nAddress: DemoWallet123456789ABC\nApp: CasinoSavings\nTime: 2025-08-21T23:20:47.586700\nNonce: 8c64d3a67e6fa8e4be349119fba94ff1\n\nThis signature will be used to verify your wallet ownership.",
+        "challenge_hash": "ae1d932ef4d1143fed8ea61698588a71931607e71b0b0de939acef9a053f2c43",
+        "network": "solana"
+      }
     },
     {
       "test": "Auth Verification",
-      "success": false,
-      "details": "No challenge data available",
-      "timestamp": "2025-08-21T23:20:14.880535",
-      "response_data": null
+      "success": true,
+      "details": "JWT token generated, expires in 86400s",
+      "timestamp": "2025-08-21T23:20:47.642414",
+      "response_data": {
+        "success": true,
+        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ3YWxsZXRfYWRkcmVzcyI6IkRlbW9XYWxsZXQxMjM0NTY3ODlBQkMiLCJuZXR3b3JrIjoic29sYW5hIiwiZXhwIjoxNzU1OTA0ODQ3LCJpYXQiOjE3NTU4MTg0NDcsInR5cGUiOiJ3YWxsZXRfYXV0aCJ9._PFiZTubrMNqIQjdMV1znTfpPTiUfRV84ZeUHXsRh34",
+        "wallet_address": "DemoWallet123456789ABC",
+        "network": "solana",
+        "expires_in": 86400
+      }
     },
     {
-      "test": "Balance Endpoints",
-      "success": false,
-      "details": "No auth token available",
-      "timestamp": "2025-08-21T23:20:14.880545",
-      "response_data": null
+      "test": "Multi-chain Balance",
+      "success": true,
+      "details": "All 3 currencies retrieved",
+      "timestamp": "2025-08-21T23:20:47.717337",
+      "response_data": {
+        "wallet_address": "DemoWallet123456789ABC",
+        "balances": {
+          "CRT": {
+            "crt_balance": 0.0,
+            "raw_balance": 0,
+            "usd_value": 0.0,
+            "price_per_token": 0.005045,
+            "last_updated": "2025-08-21T23:20:47.673046"
+          },
+          "DOGE": {
+            "success": true,
+            "balance": 100.0,
+            "unconfirmed": 0.0,
+            "total": 100.0,
+            "address": "DemoWallet123456789ABC"
+          },
+          "TRX": {
+            "success": true,
+            "balance": 0.0,
+            "address": "DemoWallet123456789ABC"
+          }
+        },
+        "last_updated": "2025-08-21T23:20:47.673073"
+      }
+    },
+    {
+      "test": "CRT Balance",
+      "success": true,
+      "details": "Balance retrieved successfully",
+      "timestamp": "2025-08-21T23:20:47.726340",
+      "response_data": {
+        "success": true,
+        "data": {
+          "crt_balance": 0.0,
+          "raw_balance": 0,
+          "usd_value": 0.0,
+          "price_per_token": 0.005045,
+          "last_updated": "2025-08-21T23:20:47.723129"
+        }
+      }
+    },
+    {
+      "test": "DOGE Balance",
+      "success": true,
+      "details": "Balance retrieved successfully",
+      "timestamp": "2025-08-21T23:20:47.734350",
+      "response_data": {
+        "success": true,
+        "data": {
+          "success": true,
+          "balance": 100.0,
+          "unconfirmed": 0.0,
+          "total": 100.0,
+          "address": "DemoWallet123456789ABC"
+        }
+      }
+    },
+    {
+      "test": "TRX Balance",
+      "success": true,
+      "details": "Balance retrieved successfully",
+      "timestamp": "2025-08-21T23:20:47.783549",
+      "response_data": {
+        "success": true,
+        "data": {
+          "success": true,
+          "balance": 0.0,
+          "address": "DemoWallet123456789ABC"
+        }
+      }
     },
     {
       "test": "Game Betting",
-      "success": false,
-      "details": "No auth token available",
-      "timestamp": "2025-08-21T23:20:14.880552",
-      "response_data": null
+      "success": true,
+      "details": "Bet placed: loss, payout: 0",
+      "timestamp": "2025-08-21T23:20:47.814611",
+      "response_data": {
+        "success": true,
+        "game_id": "game_eb0e2573",
+        "bet_amount": 10.0,
+        "currency": "CRT",
+        "result": "loss",
+        "payout": 0,
+        "savings_contribution": 10.0
+      }
     },
     {
       "test": "Game History",
-      "success": false,
-      "details": "No auth token available",
-      "timestamp": "2025-08-21T23:20:14.880557",
-      "response_data": null
+      "success": true,
+      "details": "Retrieved 1 game records",
+      "timestamp": "2025-08-21T23:20:47.866002",
+      "response_data": {
+        "success": true,
+        "games": [
+          {
+            "_id": "68a7a9cfeb7e49dc09c7793b",
+            "wallet_address": "DemoWallet123456789ABC",
+            "game_type": "slots",
+            "bet_amount": 10.0,
+            "currency": "CRT",
+            "network": "solana",
+            "timestamp": "2025-08-21T23:20:47.792000",
+            "game_id": "game_eb0e2573",
+            "result": "loss",
+            "payout": 0,
+            "status": "completed"
+          }
+        ],
+        "total_games": 1
+      }
     },
     {
       "test": "Savings Tracking",
-      "success": false,
-      "details": "No auth token available",
-      "timestamp": "2025-08-21T23:20:14.880563",
-      "response_data": null
+      "success": true,
+      "details": "Savings data retrieved: 1 games, 0.0% win rate",
+      "timestamp": "2025-08-21T23:20:47.878940",
+      "response_data": {
+        "success": true,
+        "wallet_address": "DemoWallet123456789ABC",
+        "savings_by_currency": [
+          {
+            "_id": "CRT",
+            "total_saved": 10.0
+          }
+        ],
+        "stats": {
+          "total_games": 1,
+          "total_wins": 0,
+          "total_losses": 1,
+          "win_rate": 0.0
+        }
+      }
     },
     {
       "test": "WebSocket Connection",
-      "success": false,
-      "details": "WebSocket error: server rejected WebSocket connection: HTTP 502",
-      "timestamp": "2025-08-21T23:20:14.958642",
-      "response_data": null
+      "success": true,
+      "details": "WebSocket connection and balance update successful",
+      "timestamp": "2025-08-21T23:20:47.966289",
+      "response_data": {
+        "type": "balance_update",
+        "wallet": "DemoWallet123456789ABC",
+        "data": {
+          "wallet_address": "DemoWallet123456789ABC",
+          "balances": {
+            "CRT": {
+              "crt_balance": 0.0,
+              "raw_balance": 0,
+              "usd_value": 0.0,
+              "price_per_token": 0.005045,
+              "last_updated": "2025-08-21T23:20:47.962077"
+            },
+            "DOGE": {
+              "success": true,
+              "balance": 100.0,
+              "unconfirmed": 0.0,
+              "total": 100.0,
+              "address": "DemoWallet123456789ABC"
+            },
+            "TRX": {
+              "success": true,
+              "balance": 0.0,
+              "address": "DemoWallet123456789ABC"
+            }
+          },
+          "last_updated": "2025-08-21T23:20:47.962104"
+        }
+      }
     },
     {
       "test": "Legacy Status Create",
-      "success": false,
-      "details": "HTTP 502: ",
-      "timestamp": "2025-08-21T23:20:14.966451",
-      "response_data": null
+      "success": true,
+      "details": "Status check created with ID: 7cad1fbd-f510-4952-9ff6-2fe009e045c5",
+      "timestamp": "2025-08-21T23:20:47.994970",
+      "response_data": {
+        "id": "7cad1fbd-f510-4952-9ff6-2fe009e045c5",
+        "client_name": "test_client",
+        "timestamp": "2025-08-21T23:20:47.976903"
+      }
     },
     {
       "test": "Legacy Status List",
-      "success": false,
-      "details": "HTTP 502: ",
-      "timestamp": "2025-08-21T23:20:14.972492",
-      "response_data": null
+      "success": true,
+      "details": "Retrieved 1 status records",
+      "timestamp": "2025-08-21T23:20:48.009504",
+      "response_data": [
+        {
+          "id": "7cad1fbd-f510-4952-9ff6-2fe009e045c5",
+          "client_name": "test_client",
+          "timestamp": "2025-08-21T23:20:47.976000"
+        }
+      ]
     }
   ]
 }
