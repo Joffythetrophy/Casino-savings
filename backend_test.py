@@ -387,9 +387,6 @@ class CasinoAPITester:
         
         # Legacy endpoints
         await self.test_legacy_endpoints()
-        
-        # Summary
-        self.print_summary()
     
     def print_summary(self):
         """Print test summary"""
