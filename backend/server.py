@@ -45,7 +45,31 @@ auth_manager = WalletAuthManager()
 # Global state for WebSocket connections
 active_connections: Dict[str, List[WebSocket]] = {}
 
-# Models
+# Enhanced models for wallet system
+class UserWallet(BaseModel):
+    wallet_address: str
+    deposit_balance: Dict[str, float] = {"CRT": 0.0, "DOGE": 0.0, "TRX": 0.0}
+    winnings_balance: Dict[str, float] = {"CRT": 0.0, "DOGE": 0.0, "TRX": 0.0}
+    savings_balance: Dict[str, float] = {"CRT": 0.0, "DOGE": 0.0, "TRX": 0.0}
+    session_start_balance: Dict[str, float] = {"CRT": 0.0, "DOGE": 0.0, "TRX": 0.0}
+    session_peak_balance: Dict[str, float] = {"CRT": 0.0, "DOGE": 0.0, "TRX": 0.0}
+    last_updated: datetime = Field(default_factory=datetime.utcnow)
+
+class GameSession(BaseModel):
+    session_id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    wallet_address: str
+    currency: str
+    starting_balance: float
+    current_balance: float
+    peak_balance: float
+    total_wagered: float = 0.0
+    total_winnings: float = 0.0
+    games_played: int = 0
+    is_active: bool = True
+    started_at: datetime = Field(default_factory=datetime.utcnow)
+    ended_at: Optional[datetime] = None
+
+# Legacy models (kept for backward compatibility)
 class StatusCheck(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     client_name: str
@@ -53,14 +77,6 @@ class StatusCheck(BaseModel):
 
 class StatusCheckCreate(BaseModel):
     client_name: str
-
-class UserBalance(BaseModel):
-    wallet_address: str
-    network: str
-    currency: str
-    balance: float
-    usd_value: float = 0.0
-    last_updated: datetime = Field(default_factory=datetime.utcnow)
 
 class GameBet(BaseModel):
     wallet_address: str
