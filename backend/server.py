@@ -280,33 +280,117 @@ async def get_game_history(wallet_address: str, wallet_info: Dict = Depends(get_
 # Savings endpoints
 @api_router.get("/savings/{wallet_address}")
 async def get_savings_info(wallet_address: str, wallet_info: Dict = Depends(get_authenticated_wallet)):
-    """Get savings information"""
+    """Get real savings information from actual game losses"""
     try:
         if wallet_address != wallet_info["wallet_address"]:
             raise HTTPException(status_code=403, detail="Unauthorized")
         
-        # Calculate total savings from game losses
-        pipeline = [
+        # Get all game losses (which become savings)
+        losses_pipeline = [
             {"$match": {"wallet_address": wallet_address, "result": "loss"}},
-            {"$group": {"_id": "$currency", "total_saved": {"$sum": "$bet_amount"}}}
+            {"$group": {
+                "_id": "$currency", 
+                "total_saved": {"$sum": "$bet_amount"},
+                "count": {"$sum": 1}
+            }}
         ]
         
-        savings_by_currency = await db.game_bets.aggregate(pipeline).to_list(100)
+        savings_by_currency = await db.game_bets.aggregate(losses_pipeline).to_list(100)
         
+        # Get savings history (all losses become savings entries)
+        savings_history_cursor = db.game_bets.find({
+            "wallet_address": wallet_address, 
+            "result": "loss"
+        }).sort("timestamp", -1).limit(50)
+        
+        savings_history = await savings_history_cursor.to_list(50)
+        
+        # Calculate running totals for each currency
+        currency_totals = {}
+        processed_history = []
+        
+        # Process in reverse chronological order to calculate running totals
+        for transaction in reversed(savings_history):
+            currency = transaction["currency"]
+            amount = transaction["bet_amount"]
+            
+            if currency not in currency_totals:
+                currency_totals[currency] = 0
+            currency_totals[currency] += amount
+            
+            # Add to processed history with running total
+            processed_transaction = {
+                "_id": str(transaction["_id"]),
+                "date": transaction["timestamp"].strftime("%Y-%m-%d %H:%M"),
+                "game": transaction["game_type"],
+                "currency": currency,
+                "amount": amount,
+                "game_result": "Loss",
+                "running_total": currency_totals[currency],
+                "game_id": transaction["game_id"]
+            }
+            processed_history.append(processed_transaction)
+        
+        # Reverse back to chronological order (newest first)
+        processed_history.reverse()
+        
+        # Calculate totals
         total_games = await db.game_bets.count_documents({"wallet_address": wallet_address})
         total_wins = await db.game_bets.count_documents({"wallet_address": wallet_address, "result": "win"})
         total_losses = await db.game_bets.count_documents({"wallet_address": wallet_address, "result": "loss"})
         
+        # Calculate USD values (mock prices for demo)
+        price_map = {"CRT": 5.02, "DOGE": 0.24, "TRX": 0.51}
+        total_usd = sum(
+            item["total_saved"] * price_map.get(item["_id"], 0) 
+            for item in savings_by_currency
+        )
+        
         return {
             "success": True,
             "wallet_address": wallet_address,
-            "savings_by_currency": savings_by_currency,
+            "total_savings": {
+                currency_data["_id"]: currency_data["total_saved"] 
+                for currency_data in savings_by_currency
+            },
+            "total_usd": total_usd,
+            "savings_history": processed_history,
             "stats": {
                 "total_games": total_games,
                 "total_wins": total_wins,
                 "total_losses": total_losses,
                 "win_rate": (total_wins / total_games * 100) if total_games > 0 else 0
             }
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.post("/savings/withdraw")
+async def withdraw_savings(
+    request: Dict[str, Any], 
+    wallet_info: Dict = Depends(get_authenticated_wallet)
+):
+    """Withdraw from savings (future functionality)"""
+    try:
+        wallet_address = request.get("wallet_address")
+        currency = request.get("currency")
+        amount = request.get("amount")
+        
+        if wallet_address != wallet_info["wallet_address"]:
+            raise HTTPException(status_code=403, detail="Unauthorized")
+        
+        # For now, just return success - in production this would:
+        # 1. Verify sufficient savings balance
+        # 2. Create withdrawal transaction on blockchain
+        # 3. Update savings records
+        
+        return {
+            "success": True,
+            "message": "Withdrawal functionality will be implemented with real blockchain integration",
+            "wallet_address": wallet_address,
+            "currency": currency,
+            "amount": amount
         }
         
     except Exception as e:
