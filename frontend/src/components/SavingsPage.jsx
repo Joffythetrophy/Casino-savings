@@ -62,6 +62,41 @@ const SavingsPage = () => {
   const [error, setError] = useState(null);
   const navigate = useNavigate();
   
+import React, { useState, useEffect } from 'react';
+import { Card } from './ui/card';
+import { Button } from './ui/button';
+import Header from './Header';
+import { 
+  PiggyBank, 
+  TrendingUp, 
+  Calendar,
+  BarChart3,
+  Download,
+  Eye,
+  Coins,
+  ArrowLeft
+} from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+const API = `${BACKEND_URL}/api`;
+
+const CRTCoin = ({ size = 'w-5 h-5' }) => (
+  <img 
+    src="https://customer-assets.emergentagent.com/job_blockchain-casino/artifacts/nx4ol97f_copilot_image_1755811225489.jpeg"
+    alt="CRT Token"
+    className={`${size} rounded-full`}
+  />
+);
+
+const SavingsPage = () => {
+  const [savingsData, setSavingsData] = useState(null);
+  const [selectedTimeframe, setSelectedTimeframe] = useState('all');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const navigate = useNavigate();
+  
   // Demo wallet address - in production this would come from wallet connection
   const walletAddress = "demo_wallet_123";
   
