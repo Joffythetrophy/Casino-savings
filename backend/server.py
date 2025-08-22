@@ -443,10 +443,10 @@ async def withdraw_savings(
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-# WebSocket endpoint for real-time balance updates
-@api_router.websocket("/ws/balance/{wallet_address}")
-async def websocket_balance_monitor(websocket: WebSocket, wallet_address: str):
-    """WebSocket endpoint for real-time balance monitoring"""
+# WebSocket endpoint for real-time wallet updates
+@api_router.websocket("/ws/wallet/{wallet_address}")
+async def websocket_wallet_monitor(websocket: WebSocket, wallet_address: str):
+    """WebSocket endpoint for real-time wallet monitoring"""
     await websocket.accept()
     
     if wallet_address not in active_connections:
@@ -454,12 +454,21 @@ async def websocket_balance_monitor(websocket: WebSocket, wallet_address: str):
     active_connections[wallet_address].append(websocket)
     
     try:
-        # Send initial balance
-        balance_data = await get_multi_chain_balance(wallet_address, {"wallet_address": wallet_address})
+        # Send initial wallet info
+        wallet_record = await db.user_wallets.find_one({"wallet_address": wallet_address})
+        if not wallet_record:
+            # Create new wallet record
+            new_wallet = UserWallet(wallet_address=wallet_address)
+            await db.user_wallets.insert_one(new_wallet.dict())
+            wallet_record = new_wallet.dict()
+        
         await websocket.send_text(json.dumps({
-            "type": "balance_update",
+            "type": "wallet_update",
             "wallet": wallet_address,
-            "data": balance_data
+            "data": {
+                "success": True,
+                "wallet": wallet_record
+            }
         }))
         
         # Keep connection alive and handle messages
@@ -467,13 +476,16 @@ async def websocket_balance_monitor(websocket: WebSocket, wallet_address: str):
             data = await websocket.receive_text()
             message = json.loads(data)
             
-            if message.get("type") == "refresh_balance":
-                # Refresh and send updated balance
-                updated_balance = await get_multi_chain_balance(wallet_address, {"wallet_address": wallet_address})
+            if message.get("type") == "refresh_wallet":
+                # Refresh and send updated wallet info
+                updated_wallet = await db.user_wallets.find_one({"wallet_address": wallet_address})
                 await websocket.send_text(json.dumps({
-                    "type": "balance_update", 
+                    "type": "wallet_update", 
                     "wallet": wallet_address,
-                    "data": updated_balance
+                    "data": {
+                        "success": True,
+                        "wallet": updated_wallet
+                    }
                 }))
                 
     except Exception as e:
