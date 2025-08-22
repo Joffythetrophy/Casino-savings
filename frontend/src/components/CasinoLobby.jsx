@@ -191,40 +191,8 @@ const CasinoLobby = () => {
                 />
               </div>
               <p className="text-xl text-gray-300 max-w-2xl mx-auto">
-                Play your favorite games with real CRT tokens. Every loss contributes to your savings vault!
+                Your private crypto casino with intelligent savings. Play, win, and automatically save your progress!
               </p>
-            </div>
-
-            {/* Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
-              <StatCard
-                title="Total Players Online"
-                value="1,247"
-                icon={Users}
-                change="+12%"
-                color="text-green-400"
-              />
-              <StatCard
-                title="Total CRT Wagered"
-                value="2.4M"
-                icon={CRTCoin}
-                change="+34%"
-                color="text-yellow-400"
-              />
-              <StatCard
-                title="Games Played Today"
-                value="15,692"
-                icon={Dices}
-                change="+8%"
-                color="text-blue-400"
-              />
-              <StatCard
-                title="Biggest Win"
-                value="50,000"
-                icon={Trophy}
-                change="24h"
-                color="text-purple-400"
-              />
             </div>
 
             {/* Games Grid */}
