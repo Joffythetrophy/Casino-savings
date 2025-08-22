@@ -164,65 +164,389 @@ async def verify_wallet_connection(request: VerifyRequest):
         "expires_in": 86400  # 24 hours
     }
 
-# Balance endpoints
-@api_router.get("/balance/{wallet_address}")
-async def get_multi_chain_balance(wallet_address: str, wallet_info: Dict = Depends(get_authenticated_wallet)):
-    """Get balance across all supported networks"""
-    balances = {}
-    
-    # Get CRT balance (Solana)
+# Enhanced wallet management endpoints
+@api_router.get("/wallet/{wallet_address}")
+async def get_wallet_info(wallet_address: str, wallet_info: Dict = Depends(get_authenticated_wallet)):
+    """Get comprehensive wallet information"""
     try:
-        crt_balance = await crt_manager.get_crt_balance(wallet_address)
-        balances["CRT"] = crt_balance
+        if wallet_address != wallet_info["wallet_address"]:
+            raise HTTPException(status_code=403, detail="Unauthorized")
+        
+        # Get or create wallet record
+        wallet_record = await db.user_wallets.find_one({"wallet_address": wallet_address})
+        
+        if not wallet_record:
+            # Create new wallet record
+            new_wallet = UserWallet(wallet_address=wallet_address)
+            await db.user_wallets.insert_one(new_wallet.dict())
+            wallet_record = new_wallet.dict()
+        
+        return {
+            "success": True,
+            "wallet": wallet_record
+        }
+        
     except Exception as e:
-        balances["CRT"] = {"error": str(e), "balance": 0.0}
-    
-    # Get DOGE balance
-    try:
-        doge_balance = await doge_manager.get_balance(wallet_address)
-        balances["DOGE"] = doge_balance
-    except Exception as e:
-        balances["DOGE"] = {"error": str(e), "balance": 0.0}
-    
-    # Get TRX balance
-    try:
-        trx_balance = await tron_tx_manager.get_trx_balance(wallet_address)
-        balances["TRX"] = trx_balance
-    except Exception as e:
-        balances["TRX"] = {"error": str(e), "balance": 0.0}
-    
-    return {
-        "wallet_address": wallet_address,
-        "balances": balances,
-        "last_updated": datetime.utcnow().isoformat()
-    }
+        raise HTTPException(status_code=500, detail=str(e))
 
-@api_router.get("/balance/crt/{wallet_address}")
-async def get_crt_balance(wallet_address: str):
-    """Get CRT token balance"""
+@api_router.post("/wallet/deposit")
+async def deposit_funds(request: Dict[str, Any], wallet_info: Dict = Depends(get_authenticated_wallet)):
+    """Deposit funds to deposit wallet"""
     try:
-        balance = await crt_manager.get_crt_balance(wallet_address)
-        return {"success": True, "data": balance}
+        wallet_address = request.get("wallet_address")
+        currency = request.get("currency")
+        amount = float(request.get("amount", 0))
+        
+        if wallet_address != wallet_info["wallet_address"]:
+            raise HTTPException(status_code=403, detail="Unauthorized")
+        
+        if amount <= 0:
+            raise HTTPException(status_code=400, detail="Invalid amount")
+        
+        # Update wallet record
+        await db.user_wallets.update_one(
+            {"wallet_address": wallet_address},
+            {
+                "$inc": {f"deposit_balance.{currency}": amount},
+                "$set": {"last_updated": datetime.utcnow()}
+            },
+            upsert=True
+        )
+        
+        # Record transaction
+        transaction_record = {
+            "wallet_address": wallet_address,
+            "type": "deposit",
+            "currency": currency,
+            "amount": amount,
+            "timestamp": datetime.utcnow(),
+            "status": "completed"
+        }
+        await db.wallet_transactions.insert_one(transaction_record)
+        
+        return {
+            "success": True,
+            "message": f"Deposited {amount} {currency}",
+            "transaction_id": str(transaction_record["_id"]) if "_id" in transaction_record else None
+        }
+        
     except Exception as e:
-        return {"success": False, "error": str(e)}
+        raise HTTPException(status_code=500, detail=str(e))
 
-@api_router.get("/balance/doge/{wallet_address}")
-async def get_doge_balance(wallet_address: str):
-    """Get DOGE balance"""
+@api_router.post("/wallet/withdraw")
+async def withdraw_funds(request: Dict[str, Any], wallet_info: Dict = Depends(get_authenticated_wallet)):
+    """Withdraw funds from winnings or savings wallet"""
     try:
-        balance = await doge_manager.get_balance(wallet_address)
-        return {"success": True, "data": balance}
+        wallet_address = request.get("wallet_address")
+        wallet_type = request.get("wallet_type")  # "winnings" or "savings"
+        currency = request.get("currency")
+        amount = float(request.get("amount", 0))
+        
+        if wallet_address != wallet_info["wallet_address"]:
+            raise HTTPException(status_code=403, detail="Unauthorized")
+        
+        if amount <= 0:
+            raise HTTPException(status_code=400, detail="Invalid amount")
+        
+        # Get current wallet
+        wallet_record = await db.user_wallets.find_one({"wallet_address": wallet_address})
+        if not wallet_record:
+            raise HTTPException(status_code=404, detail="Wallet not found")
+        
+        # Check balance
+        current_balance = wallet_record.get(f"{wallet_type}_balance", {}).get(currency, 0)
+        if current_balance < amount:
+            raise HTTPException(status_code=400, detail="Insufficient balance")
+        
+        # Update wallet record
+        await db.user_wallets.update_one(
+            {"wallet_address": wallet_address},
+            {
+                "$inc": {f"{wallet_type}_balance.{currency}": -amount},
+                "$set": {"last_updated": datetime.utcnow()}
+            }
+        )
+        
+        # Record transaction
+        transaction_record = {
+            "wallet_address": wallet_address,
+            "type": f"withdraw_{wallet_type}",
+            "currency": currency,
+            "amount": amount,
+            "timestamp": datetime.utcnow(),
+            "status": "completed"
+        }
+        await db.wallet_transactions.insert_one(transaction_record)
+        
+        return {
+            "success": True,
+            "message": f"Withdrew {amount} {currency} from {wallet_type}",
+            "transaction_id": str(transaction_record["_id"]) if "_id" in transaction_record else None
+        }
+        
     except Exception as e:
-        return {"success": False, "error": str(e)}
+        raise HTTPException(status_code=500, detail=str(e))
 
-@api_router.get("/balance/trx/{wallet_address}")
-async def get_trx_balance(wallet_address: str):
-    """Get TRX balance"""
+@api_router.post("/wallet/convert")
+async def convert_crypto(request: Dict[str, Any], wallet_info: Dict = Depends(get_authenticated_wallet)):
+    """Convert cryptocurrency within deposit wallet"""
     try:
-        balance = await tron_tx_manager.get_trx_balance(wallet_address)
-        return {"success": True, "data": balance}
+        wallet_address = request.get("wallet_address")
+        from_currency = request.get("from_currency")
+        to_currency = request.get("to_currency")
+        amount = float(request.get("amount", 0))
+        
+        if wallet_address != wallet_info["wallet_address"]:
+            raise HTTPException(status_code=403, detail="Unauthorized")
+        
+        if amount <= 0:
+            raise HTTPException(status_code=400, detail="Invalid amount")
+        
+        # Mock conversion rates - in production these would be live rates
+        conversion_rates = {
+            "CRT_DOGE": 21.5, "CRT_TRX": 9.8,
+            "DOGE_CRT": 0.047, "DOGE_TRX": 0.456,
+            "TRX_CRT": 0.102, "TRX_DOGE": 2.19
+        }
+        
+        rate_key = f"{from_currency}_{to_currency}"
+        if rate_key not in conversion_rates:
+            raise HTTPException(status_code=400, detail="Conversion not supported")
+        
+        converted_amount = amount * conversion_rates[rate_key]
+        
+        # Get current wallet
+        wallet_record = await db.user_wallets.find_one({"wallet_address": wallet_address})
+        if not wallet_record:
+            raise HTTPException(status_code=404, detail="Wallet not found")
+        
+        # Check balance
+        current_balance = wallet_record.get("deposit_balance", {}).get(from_currency, 0)
+        if current_balance < amount:
+            raise HTTPException(status_code=400, detail="Insufficient balance")
+        
+        # Update wallet record
+        await db.user_wallets.update_one(
+            {"wallet_address": wallet_address},
+            {
+                "$inc": {
+                    f"deposit_balance.{from_currency}": -amount,
+                    f"deposit_balance.{to_currency}": converted_amount
+                },
+                "$set": {"last_updated": datetime.utcnow()}
+            }
+        )
+        
+        # Record transaction
+        transaction_record = {
+            "wallet_address": wallet_address,
+            "type": "conversion",
+            "from_currency": from_currency,
+            "to_currency": to_currency,
+            "from_amount": amount,
+            "to_amount": converted_amount,
+            "rate": conversion_rates[rate_key],
+            "timestamp": datetime.utcnow(),
+            "status": "completed"
+        }
+        await db.wallet_transactions.insert_one(transaction_record)
+        
+        return {
+            "success": True,
+            "message": f"Converted {amount} {from_currency} to {converted_amount:.4f} {to_currency}",
+            "converted_amount": converted_amount,
+            "rate": conversion_rates[rate_key]
+        }
+        
     except Exception as e:
-        return {"success": False, "error": str(e)}
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.post("/session/start")
+async def start_game_session(request: Dict[str, Any], wallet_info: Dict = Depends(get_authenticated_wallet)):
+    """Start a new gaming session with smart savings tracking"""
+    try:
+        wallet_address = request.get("wallet_address")
+        currency = request.get("currency")
+        starting_balance = float(request.get("starting_balance", 0))
+        
+        if wallet_address != wallet_info["wallet_address"]:
+            raise HTTPException(status_code=403, detail="Unauthorized")
+        
+        # End any active session first
+        await db.game_sessions.update_many(
+            {"wallet_address": wallet_address, "is_active": True},
+            {
+                "$set": {
+                    "is_active": False,
+                    "ended_at": datetime.utcnow()
+                }
+            }
+        )
+        
+        # Create new session
+        new_session = GameSession(
+            wallet_address=wallet_address,
+            currency=currency,
+            starting_balance=starting_balance,
+            current_balance=starting_balance,
+            peak_balance=starting_balance
+        )
+        
+        await db.game_sessions.insert_one(new_session.dict())
+        
+        # Update wallet session tracking
+        await db.user_wallets.update_one(
+            {"wallet_address": wallet_address},
+            {
+                "$set": {
+                    f"session_start_balance.{currency}": starting_balance,
+                    f"session_peak_balance.{currency}": starting_balance,
+                    "last_updated": datetime.utcnow()
+                }
+            },
+            upsert=True
+        )
+        
+        return {
+            "success": True,
+            "session_id": new_session.session_id,
+            "message": f"Started session with {starting_balance} {currency}"
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.post("/session/update")
+async def update_game_session(request: Dict[str, Any], wallet_info: Dict = Depends(get_authenticated_wallet)):
+    """Update session balance and track peak for smart savings"""
+    try:
+        wallet_address = request.get("wallet_address")
+        currency = request.get("currency")
+        current_balance = float(request.get("current_balance", 0))
+        
+        if wallet_address != wallet_info["wallet_address"]:
+            raise HTTPException(status_code=403, detail="Unauthorized")
+        
+        # Get active session
+        session = await db.game_sessions.find_one({
+            "wallet_address": wallet_address,
+            "currency": currency,
+            "is_active": True
+        })
+        
+        if not session:
+            return {"success": False, "message": "No active session found"}
+        
+        # Update peak if current balance is higher
+        new_peak = max(session.get("peak_balance", 0), current_balance)
+        
+        # Update session
+        await db.game_sessions.update_one(
+            {"session_id": session["session_id"]},
+            {
+                "$set": {
+                    "current_balance": current_balance,
+                    "peak_balance": new_peak
+                },
+                "$inc": {"games_played": 1}
+            }
+        )
+        
+        # Update wallet peak tracking
+        await db.user_wallets.update_one(
+            {"wallet_address": wallet_address},
+            {
+                "$set": {
+                    f"session_peak_balance.{currency}": new_peak,
+                    "last_updated": datetime.utcnow()
+                }
+            }
+        )
+        
+        return {
+            "success": True,
+            "current_balance": current_balance,
+            "peak_balance": new_peak,
+            "session_id": session["session_id"]
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.post("/session/end")
+async def end_game_session(request: Dict[str, Any], wallet_info: Dict = Depends(get_authenticated_wallet)):
+    """End session and calculate smart savings"""
+    try:
+        wallet_address = request.get("wallet_address")
+        currency = request.get("currency")
+        final_balance = float(request.get("final_balance", 0))
+        
+        if wallet_address != wallet_info["wallet_address"]:
+            raise HTTPException(status_code=403, detail="Unauthorized")
+        
+        # Get active session
+        session = await db.game_sessions.find_one({
+            "wallet_address": wallet_address,
+            "currency": currency,
+            "is_active": True
+        })
+        
+        if not session:
+            return {"success": False, "message": "No active session found"}
+        
+        # Smart Savings Logic:
+        # If player loses everything (final_balance = 0), save the peak balance reached
+        savings_amount = 0
+        if final_balance == 0 and session.get("peak_balance", 0) > 0:
+            savings_amount = session["peak_balance"]
+            
+            # Add to savings wallet
+            await db.user_wallets.update_one(
+                {"wallet_address": wallet_address},
+                {
+                    "$inc": {f"savings_balance.{currency}": savings_amount},
+                    "$set": {"last_updated": datetime.utcnow()}
+                },
+                upsert=True
+            )
+            
+            # Record savings transaction
+            savings_record = {
+                "wallet_address": wallet_address,
+                "type": "smart_savings",
+                "currency": currency,
+                "amount": savings_amount,
+                "session_id": session["session_id"],
+                "peak_balance": session["peak_balance"],
+                "starting_balance": session["starting_balance"],
+                "timestamp": datetime.utcnow(),
+                "status": "completed"
+            }
+            await db.wallet_transactions.insert_one(savings_record)
+        
+        # End session
+        await db.game_sessions.update_one(
+            {"session_id": session["session_id"]},
+            {
+                "$set": {
+                    "current_balance": final_balance,
+                    "is_active": False,
+                    "ended_at": datetime.utcnow()
+                }
+            }
+        )
+        
+        return {
+            "success": True,
+            "session_ended": True,
+            "final_balance": final_balance,
+            "peak_balance": session.get("peak_balance", 0),
+            "savings_added": savings_amount,
+            "message": f"Session ended. {savings_amount} {currency} added to savings!" if savings_amount > 0 else "Session ended."
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 # Game endpoints
 @api_router.post("/games/bet")
