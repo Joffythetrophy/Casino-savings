@@ -25,7 +25,26 @@ const CRTCoin = ({ size = 'w-5 h-5' }) => (
 const SavingsPage = () => {
   const [savingsData, setSavingsData] = useState(null);
   const [selectedTimeframe, setSelectedTimeframe] = useState('all');
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  
+  useEffect(() => {
+    // Initialize with empty state - real data comes from playing games
+    const emptyState = {
+      total_savings: {},
+      total_usd: 0,
+      savings_history: [],
+      stats: {
+        total_games: 0,
+        total_wins: 0,
+        total_losses: 0,
+        win_rate: 0
+      }
+    };
+    
+    setSavingsData(emptyState);
+    setLoading(false);
+  }, []);
   
 import React, { useState, useEffect } from 'react';
 import { Card } from './ui/card';
