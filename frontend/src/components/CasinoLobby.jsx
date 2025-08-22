@@ -221,31 +221,42 @@ const CasinoLobby = () => {
               </div>
             </div>
 
-            {/* Recent Winners */}
-            <Card className="p-6 bg-gradient-to-r from-gray-800/30 to-gray-900/30 border border-yellow-400/20">
-              <h3 className="text-2xl font-bold text-yellow-400 mb-6">🎉 Recent Big Winners</h3>
-              <div className="space-y-4">
-                {[
-                  { game: 'Plinko', amount: '12,500', player: '0x7a...f2b9', time: '2 mins ago' },
-                  { game: 'Slots', amount: '8,940', player: '0x3c...8d1a', time: '5 mins ago' },
-                  { game: 'Mines', amount: '15,670', player: '0x9e...4c2f', time: '8 mins ago' },
-                  { game: 'Dice', amount: '6,780', player: '0x2f...9a8b', time: '12 mins ago' }
-                ].map((winner, index) => (
-                  <div key={index} className="flex items-center justify-between p-4 bg-gray-800/50 rounded-lg">
-                    <div className="flex items-center space-x-4">
-                      <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                      <span className="text-yellow-400 font-bold">{winner.game}</span>
-                      <span className="text-gray-300">{winner.player}</span>
+            {/* Recent Activity - Private Session Stats */}
+            <Card className="p-6 bg-gradient-to-r from-gray-800/30 to-gray-900/30 border border-yellow-400/20 mb-12">
+              <h3 className="text-2xl font-bold text-yellow-400 mb-6">💼 Your Wallet System</h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="bg-blue-800/20 p-6 rounded-lg border border-blue-400/20">
+                  <div className="flex items-center space-x-3 mb-4">
+                    <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
+                      <Coins className="w-4 h-4 text-white" />
                     </div>
-                    <div className="flex items-center space-x-4">
-                      <div className="flex items-center space-x-1">
-                        <CRTCoin size="w-5 h-5" />
-                        <span className="text-green-400 font-bold">{winner.amount}</span>
-                      </div>
-                      <span className="text-gray-400 text-sm">{winner.time}</span>
-                    </div>
+                    <h4 className="text-lg font-bold text-blue-400">Deposit Wallet</h4>
                   </div>
-                ))}
+                  <p className="text-gray-300 text-sm mb-4">Add funds to start playing. Supports CRT, DOGE, and TRX.</p>
+                  <div className="text-2xl font-bold text-white">Ready to deposit</div>
+                </div>
+                
+                <div className="bg-green-800/20 p-6 rounded-lg border border-green-400/20">
+                  <div className="flex items-center space-x-3 mb-4">
+                    <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
+                      <Trophy className="w-4 h-4 text-white" />
+                    </div>
+                    <h4 className="text-lg font-bold text-green-400">Winnings Wallet</h4>
+                  </div>
+                  <p className="text-gray-300 text-sm mb-4">Collect your game winnings here. Withdraw anytime.</p>
+                  <div className="text-2xl font-bold text-white">0.00 CRT</div>
+                </div>
+                
+                <div className="bg-purple-800/20 p-6 rounded-lg border border-purple-400/20">
+                  <div className="flex items-center space-x-3 mb-4">
+                    <div className="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center">
+                      <PiggyBank className="w-4 h-4 text-white" />
+                    </div>
+                    <h4 className="text-lg font-bold text-purple-400">Savings Vault</h4>
+                  </div>
+                  <p className="text-gray-300 text-sm mb-4">Automatic savings from your session losses and winnings.</p>
+                  <div className="text-2xl font-bold text-white">0.00 Total</div>
+                </div>
               </div>
             </Card>
 
