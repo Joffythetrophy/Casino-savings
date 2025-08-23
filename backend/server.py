@@ -96,6 +96,14 @@ class GameBet(BaseModel):
     network: str
     timestamp: datetime = Field(default_factory=datetime.utcnow)
 
+class RegisterRequest(BaseModel):
+    wallet_address: str
+    password: str
+
+class LoginRequest(BaseModel):
+    wallet_address: str
+    password: str
+
 # Basic routes
 @api_router.get("/")
 async def root():
