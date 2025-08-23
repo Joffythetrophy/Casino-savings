@@ -34,7 +34,7 @@ const SavingsPage = () => {
         setLoading(true);
         
         // Get authenticated user
-        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        const user = JSON.parse(localStorage.getItem('casino_user') || '{}');
         console.log('User from localStorage:', user);
         
         if (!user.wallet_address) {
