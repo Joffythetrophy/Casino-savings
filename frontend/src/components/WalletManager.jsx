@@ -12,7 +12,9 @@ import {
   PiggyBank,
   Trophy,
   RefreshCw,
-  ArrowLeft
+  ArrowLeft,
+  QrCode,
+  Copy
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '../hooks/use-toast';
