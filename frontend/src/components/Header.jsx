@@ -25,9 +25,9 @@ const Header = ({ isWalletConnected }) => {
           {/* Navigation */}
           <nav className="hidden md:flex items-center space-x-8">
             <Link 
-              to="/games" 
+              to="/" 
               className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-300 ${
-                isActive('/games') 
+                isActive('/') 
                   ? 'bg-yellow-400 text-black font-medium' 
                   : 'text-gray-300 hover:text-yellow-400 hover:bg-white/10'
               }`}
@@ -46,6 +46,18 @@ const Header = ({ isWalletConnected }) => {
             >
               <PiggyBank className="w-4 h-4" />
               <span>Savings</span>
+            </Link>
+            
+            <Link 
+              to="/wallet" 
+              className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-300 ${
+                isActive('/wallet') 
+                  ? 'bg-yellow-400 text-black font-medium' 
+                  : 'text-gray-300 hover:text-yellow-400 hover:bg-white/10'
+              }`}
+            >
+              <Wallet className="w-4 h-4" />
+              <span>Wallet</span>
             </Link>
             
             <Link 
