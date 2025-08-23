@@ -361,6 +361,7 @@ const WalletManager = () => {
                         <option value="CRT">CRT</option>
                         <option value="DOGE">DOGE</option>
                         <option value="TRX">TRX</option>
+                        <option value="USDC">USDC</option>
                       </select>
                       <div className="flex items-center px-4 py-3 bg-black/20 rounded border border-gray-600">
                         {getCurrencyIcon(convertTo)}
