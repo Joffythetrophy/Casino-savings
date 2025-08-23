@@ -758,7 +758,9 @@ class WalletAPITester:
         for result in self.test_results:
             if not result["success"]:
                 test_name = result["test"]
-                if test_name in ["Basic Connectivity", "Auth Challenge Generation", "Auth Verification", 
+                if test_name in ["Basic Connectivity", "User Registration", "User Login", 
+                               "Real Crypto Conversion Rates", "Integration Flow",
+                               "Auth Challenge Generation", "Auth Verification", 
                                "Game Betting", "Savings System", "Database Integration"]:
                     critical_failures.append(result)
                 else:
