@@ -104,6 +104,11 @@ class LoginRequest(BaseModel):
     wallet_address: str
     password: str
 
+class DepositRequest(BaseModel):
+    wallet_address: str
+    currency: str
+    amount: float
+
 # Basic routes
 @api_router.get("/")
 async def root():
