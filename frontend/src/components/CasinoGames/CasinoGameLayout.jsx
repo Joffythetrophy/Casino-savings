@@ -81,13 +81,50 @@ export const WalletProvider = ({ children }) => {
   };
   
   const updateBalance = async (amount) => {
-    // Optimistically update balance
+    // This function should not be used directly for bets anymore
+    // Use placeBet() instead for proper API integration
     setBalance(prev => Math.max(0, prev + amount));
-    
-    // Refresh from backend to ensure accuracy
-    setTimeout(() => {
-      fetchBalance();
-    }, 1000);
+  };
+  
+  const placeBet = async (gameType, betAmount, currency = 'CRT') => {
+    try {
+      // Get authenticated user
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      if (!user.wallet_address) {
+        throw new Error('No authenticated user found');
+      }
+      
+      // Call the real betting API
+      const response = await axios.post(`${BACKEND_URL}/api/games/bet`, {
+        wallet_address: user.wallet_address,
+        game_type: gameType,
+        bet_amount: betAmount,
+        currency: currency,
+        network: 'solana'
+      });
+      
+      if (response.data.success) {
+        // Refresh balance from backend to get updated values
+        await fetchBalance();
+        
+        return {
+          success: true,
+          result: response.data.result,
+          payout: response.data.payout,
+          savings_contribution: response.data.savings_contribution,
+          liquidity_added: response.data.liquidity_added,
+          message: response.data.message
+        };
+      } else {
+        throw new Error(response.data.message || 'Bet failed');
+      }
+    } catch (error) {
+      console.error('Error placing bet:', error);
+      return {
+        success: false,
+        error: error.message
+      };
+    }
   };
 
   return (
