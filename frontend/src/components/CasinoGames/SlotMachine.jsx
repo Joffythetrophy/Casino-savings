@@ -70,55 +70,87 @@ const SlotMachine = ({ onBack }) => {
     if (spinning || betAmount > balance) return;
     
     setSpinning(true);
-    updateBalance(-betAmount);
     
-    // Animate spinning
-    const spinDuration = 2000;
-    const spinInterval = 100;
-    const spins = spinDuration / spinInterval;
-    
-    let currentSpin = 0;
-    const spinAnimation = setInterval(() => {
-      setReels([spinReel(), spinReel(), spinReel()]);
-      currentSpin++;
+    try {
+      // Place real bet through backend API
+      const betResult = await placeBet('Slot Machine', betAmount);
       
-      if (currentSpin >= spins) {
-        clearInterval(spinAnimation);
-        
-        // Final result
-        const finalReels = [spinReel(), spinReel(), spinReel()];
-        setReels(finalReels);
-        
-        const winAmount = checkWin(finalReels);
-        const totalWin = winAmount * betAmount;
-        
-        if (totalWin > 0) {
-          updateBalance(totalWin);
-          setLastWin(totalWin);
-          toast({
-            title: "🎉 Winner!",
-            description: `You won ${totalWin.toFixed(2)} CRT!`,
-          });
-          
-          setStats(prev => ({
-            totalBets: prev.totalBets + 1,
-            totalWon: prev.totalWon + totalWin,
-            totalLost: prev.totalLost,
-            winRate: ((prev.totalWon + totalWin) / ((prev.totalBets + 1) * 10) * 100)
-          }));
-        } else {
-          setLastWin(0);
-          setStats(prev => ({
-            totalBets: prev.totalBets + 1,
-            totalWon: prev.totalWon,
-            totalLost: prev.totalLost + betAmount,
-            winRate: (prev.totalWon / ((prev.totalBets + 1) * 10) * 100)
-          }));
-        }
-        
+      if (!betResult.success) {
+        toast({
+          title: "❌ Bet Failed",
+          description: betResult.error || "Could not place bet",
+          variant: "destructive"
+        });
         setSpinning(false);
+        return;
       }
-    }, spinInterval);
+      
+      // Animate spinning
+      const spinDuration = 2000;
+      const spinInterval = 100;
+      const spins = spinDuration / spinInterval;
+      
+      let currentSpin = 0;
+      const spinAnimation = setInterval(() => {
+        setReels([spinReel(), spinReel(), spinReel()]);
+        currentSpin++;
+        
+        if (currentSpin >= spins) {
+          clearInterval(spinAnimation);
+          
+          // Final result - use backend result
+          const finalReels = [spinReel(), spinReel(), spinReel()];
+          setReels(finalReels);
+          
+          const isWin = betResult.result === 'win';
+          const payout = betResult.payout || 0;
+          
+          if (isWin && payout > 0) {
+            setLastWin(payout);
+            toast({
+              title: "🎉 Winner!",
+              description: `You won ${payout.toFixed(2)} CRT!`,
+              duration: 5000
+            });
+            
+            setStats(prev => ({
+              totalBets: prev.totalBets + 1,
+              totalWon: prev.totalWon + payout,
+              totalLost: prev.totalLost,
+              winRate: ((prev.totalWon + payout) / ((prev.totalWon + payout) + prev.totalLost) * 100)
+            }));
+          } else {
+            // Loss - show savings message
+            const savingsAdded = betResult.savings_contribution || betAmount;
+            const liquidityAdded = betResult.liquidity_added || 0;
+            
+            toast({
+              title: "💰 Saved to Vault!",
+              description: `Lost ${betAmount} CRT but saved ${savingsAdded.toFixed(2)} CRT to your vault! (+${liquidityAdded.toFixed(2)} to liquidity)`,
+              duration: 5000
+            });
+            
+            setStats(prev => ({
+              totalBets: prev.totalBets + 1,
+              totalWon: prev.totalWon,
+              totalLost: prev.totalLost + betAmount,
+              winRate: prev.totalWon / (prev.totalWon + prev.totalLost + betAmount) * 100
+            }));
+          }
+          
+          setSpinning(false);
+        }
+      }, spinInterval);
+      
+    } catch (error) {
+      console.error('Error in handleSpin:', error);
+      toast({
+        title: "❌ Error",
+        description: "Failed to place bet. Please try again.",
+        variant: "destructive"
+      });
+      setSpinning(false);
+    }
   };
 
   return (
