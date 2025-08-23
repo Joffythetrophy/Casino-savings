@@ -217,48 +217,48 @@ async def get_wallet_info(wallet_address: str):
         print(f"Error in get_wallet_info: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-@api_router.post("/wallet/deposit")
-async def deposit_funds(request: Dict[str, Any], wallet_info: Dict = Depends(get_authenticated_wallet)):
-    """Deposit funds to deposit wallet"""
+@app.post("/api/wallet/deposit")
+async def deposit_to_wallet(request: DepositRequest):
+    """Deposit funds to user wallet"""
     try:
-        wallet_address = request.get("wallet_address")
-        currency = request.get("currency")
-        amount = float(request.get("amount", 0))
+        # Find user by wallet address
+        user = await db.users.find_one({"wallet_address": request.wallet_address})
         
-        if wallet_address != wallet_info["wallet_address"]:
-            raise HTTPException(status_code=403, detail="Unauthorized")
+        if not user:
+            return {"success": False, "message": "User not found"}
         
-        if amount <= 0:
-            raise HTTPException(status_code=400, detail="Invalid amount")
+        # Update deposit balance
+        update_field = f"deposit_balance.{request.currency}"
+        current_balance = user.get("deposit_balance", {}).get(request.currency, 0)
+        new_balance = current_balance + request.amount
         
-        # Update wallet record
-        await db.user_wallets.update_one(
-            {"wallet_address": wallet_address},
-            {
-                "$inc": {f"deposit_balance.{currency}": amount},
-                "$set": {"last_updated": datetime.utcnow()}
-            },
-            upsert=True
+        await db.users.update_one(
+            {"wallet_address": request.wallet_address},
+            {"$set": {update_field: new_balance}}
         )
         
         # Record transaction
-        transaction_record = {
-            "wallet_address": wallet_address,
+        transaction = {
+            "transaction_id": str(uuid.uuid4()),
+            "wallet_address": request.wallet_address,
             "type": "deposit",
-            "currency": currency,
-            "amount": amount,
-            "timestamp": datetime.utcnow(),
+            "currency": request.currency,
+            "amount": request.amount,
+            "timestamp": datetime.now(),
             "status": "completed"
         }
-        await db.wallet_transactions.insert_one(transaction_record)
+        
+        await db.transactions.insert_one(transaction)
         
         return {
             "success": True,
-            "message": f"Deposited {amount} {currency}",
-            "transaction_id": str(transaction_record["_id"]) if "_id" in transaction_record else None
+            "message": f"Deposited {request.amount} {request.currency}",
+            "new_balance": new_balance,
+            "transaction_id": transaction["transaction_id"]
         }
         
     except Exception as e:
+        print(f"Error in deposit_to_wallet: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @api_router.post("/wallet/withdraw")
