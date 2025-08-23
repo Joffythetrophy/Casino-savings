@@ -1206,7 +1206,23 @@ async def get_crypto_price(currency: str):
         raise HTTPException(status_code=500, detail=f"Failed to fetch price data: {str(e)}")
 
 
-# WebSocket endpoint for real-time updates
+# Test endpoint to add savings (for demo purposes)
+@app.post("/api/test/add-savings")
+async def add_test_savings(request: Dict[str, Any]):
+    """Add test savings to user account"""
+    try:
+        wallet_address = request.get("wallet_address")
+        savings = request.get("savings", {"CRT": 100, "DOGE": 50, "TRX": 80, "USDC": 20})
+        
+        await db.users.update_one(
+            {"wallet_address": wallet_address},
+            {"$set": {"savings_balance": savings}}
+        )
+        
+        return {"success": True, "message": "Test savings added", "savings": savings}
+        
+    except Exception as e:
+        return {"success": False, "message": str(e)}
 @api_router.websocket("/ws/wallet/{wallet_address}")
 async def websocket_wallet_monitor(websocket: WebSocket, wallet_address: str):
     """WebSocket endpoint for real-time wallet monitoring"""
