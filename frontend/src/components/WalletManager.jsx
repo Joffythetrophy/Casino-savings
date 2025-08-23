@@ -35,21 +35,8 @@ const WalletManager = () => {
     savings: { CRT: 0, DOGE: 0, TRX: 0, USDC: 0 }
   });
   
-  const [conversionRates] = useState({
-    // Mock conversion rates - in production these would be live
-    CRT_DOGE: 21.5,
-    CRT_TRX: 9.8,
-    CRT_USDC: 0.15,
-    DOGE_CRT: 0.047,
-    DOGE_TRX: 0.456,
-    DOGE_USDC: 0.007,
-    TRX_CRT: 0.102,
-    TRX_DOGE: 2.19,
-    TRX_USDC: 0.015,
-    USDC_CRT: 6.67,
-    USDC_DOGE: 142.86,
-    USDC_TRX: 66.67
-  });
+  const [conversionRates, setConversionRates] = useState({});
+  const [loading, setLoading] = useState(true);
   
   const [activeTab, setActiveTab] = useState('deposit');
   const [convertAmount, setConvertAmount] = useState('');
@@ -61,12 +48,74 @@ const WalletManager = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  // Get backend URL from environment
+  const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+  
   // Mock wallet addresses - in production these would be unique per user
   const walletAddresses = {
     CRT: 'CRT1x9f8k3m2q7w6e5r4t3y2u1i0p9o8i7u6y5t4r3e2w1q',
     DOGE: 'DBXTSy8BQQnBMxBGYo3VVSm4iXbRh7tWgE',
     TRX: 'TR7NHqjeKQxGTCi8q8ZY4pL3kiSRtwjAYB',
     USDC: '0x742d35Cc6634C0532925a3b8D4C31Ebe7F8C9E4B'
+  };
+
+  useEffect(() => {
+    fetchWalletBalances();
+    fetchConversionRates();
+  }, []);
+
+  const fetchWalletBalances = async () => {
+    try {
+      setLoading(true);
+      // TODO: Replace with real wallet address from authentication
+      const testWallet = 'RealWallet9876543210XYZ';
+      
+      const response = await axios.get(`${BACKEND_URL}/api/wallet/${testWallet}`);
+      
+      if (response.data.success && response.data.wallet) {
+        const wallet = response.data.wallet;
+        setWallets({
+          deposit: wallet.deposit_balance || { CRT: 0, DOGE: 0, TRX: 0, USDC: 0 },
+          winnings: wallet.winnings_balance || { CRT: 0, DOGE: 0, TRX: 0, USDC: 0 },
+          savings: wallet.savings_balance || { CRT: 0, DOGE: 0, TRX: 0, USDC: 0 }
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching wallet balances:', error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch wallet balances",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchConversionRates = async () => {
+    try {
+      // TODO: Replace with real-time conversion rates from backend
+      const response = await axios.get(`${BACKEND_URL}/api/conversion/rates`);
+      if (response.data.success) {
+        setConversionRates(response.data.rates);
+      }
+    } catch (error) {
+      console.error('Error fetching conversion rates:', error);
+      // Fallback to mock rates if API fails
+      setConversionRates({
+        CRT_DOGE: 21.5,
+        CRT_TRX: 9.8,
+        CRT_USDC: 0.15,
+        DOGE_CRT: 0.047,
+        DOGE_TRX: 0.456,
+        DOGE_USDC: 0.007,
+        TRX_CRT: 0.102,
+        TRX_DOGE: 2.19,
+        TRX_USDC: 0.015,
+        USDC_CRT: 6.67,
+        USDC_DOGE: 142.86,
+        USDC_TRX: 66.67
+      });
+    }
   };
 
   const generateQRCodeURL = (currency, address) => {
