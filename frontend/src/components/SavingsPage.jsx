@@ -35,6 +35,8 @@ const SavingsPage = () => {
         
         // Get authenticated user
         const user = JSON.parse(localStorage.getItem('user') || '{}');
+        console.log('User from localStorage:', user);
+        
         if (!user.wallet_address) {
           console.error('No authenticated user found');
           setSavingsData({
@@ -49,10 +51,15 @@ const SavingsPage = () => {
 
         // Fetch real savings data from backend
         const backendUrl = import.meta.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
+        console.log('Backend URL:', backendUrl);
+        console.log('Fetching wallet data for:', user.wallet_address);
         
         // Get wallet data (includes savings_balance)
         const walletResponse = await fetch(`${backendUrl}/api/wallet/${user.wallet_address}`);
+        console.log('Wallet response status:', walletResponse.status);
+        
         const walletData = await walletResponse.json();
+        console.log('Wallet data received:', walletData);
         
         if (walletData.success) {
           const savings = walletData.wallet.savings_balance || {};
