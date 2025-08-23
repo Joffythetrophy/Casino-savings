@@ -777,7 +777,166 @@ async def withdraw_savings(
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-# WebSocket endpoint for real-time wallet updates
+# Real-time crypto conversion endpoints
+@app.get("/api/conversion/rates")
+async def get_conversion_rates():
+    """Get real-time conversion rates for supported cryptocurrencies"""
+    cache_key = "conversion_rates"
+    
+    # Check cache first
+    if redis_client:
+        try:
+            cached_rates = redis_client.get(cache_key)
+            if cached_rates:
+                return {"success": True, "rates": json.loads(cached_rates), "source": "cache"}
+        except Exception as e:
+            print(f"Redis cache error: {e}")
+    
+    try:
+        # Get current prices for our supported currencies
+        # Map our internal names to CoinGecko IDs
+        coin_mapping = {
+            'DOGE': 'dogecoin',
+            'TRX': 'tron',
+            'USDC': 'usd-coin'
+            # CRT would need to be mapped to actual token ID when available
+        }
+        
+        prices = cg.get_price(
+            ids=list(coin_mapping.values()),
+            vs_currencies='usd',
+            include_24hr_change=True
+        )
+        
+        # Calculate conversion rates between currencies
+        rates = {}
+        currency_prices = {}
+        
+        # Store USD prices
+        for internal_name, coingecko_id in coin_mapping.items():
+            if coingecko_id in prices:
+                currency_prices[internal_name] = prices[coingecko_id]['usd']
+        
+        # Add mock CRT price (replace with real price when available)
+        currency_prices['CRT'] = 0.15  # Mock price in USD
+        
+        # Calculate all conversion pairs
+        currencies = list(currency_prices.keys())
+        for from_currency in currencies:
+            for to_currency in currencies:
+                if from_currency != to_currency:
+                    rate_key = f"{from_currency}_{to_currency}"
+                    if currency_prices[from_currency] > 0:
+                        rates[rate_key] = currency_prices[to_currency] / currency_prices[from_currency]
+        
+        result = {
+            "success": True,
+            "rates": rates,
+            "prices_usd": currency_prices,
+            "last_updated": datetime.now().isoformat(),
+            "source": "coingecko"
+        }
+        
+        # Cache for 30 seconds
+        if redis_client:
+            try:
+                redis_client.setex(cache_key, 30, json.dumps(result))
+            except Exception as e:
+                print(f"Redis cache set error: {e}")
+        
+        return result
+        
+    except Exception as e:
+        # Return fallback rates if API fails
+        fallback_rates = {
+            "CRT_DOGE": 21.5, "CRT_TRX": 9.8, "CRT_USDC": 0.15,
+            "DOGE_CRT": 0.047, "DOGE_TRX": 0.456, "DOGE_USDC": 0.007,
+            "TRX_CRT": 0.102, "TRX_DOGE": 2.19, "TRX_USDC": 0.015,
+            "USDC_CRT": 6.67, "USDC_DOGE": 142.86, "USDC_TRX": 66.67
+        }
+        
+        return {
+            "success": True,
+            "rates": fallback_rates,
+            "source": "fallback",
+            "error": str(e)
+        }
+
+@app.get("/api/crypto/price/{currency}")
+async def get_crypto_price(currency: str):
+    """Get current price for a specific cryptocurrency"""
+    cache_key = f"price_{currency.lower()}"
+    
+    # Check cache first
+    if redis_client:
+        try:
+            cached_price = redis_client.get(cache_key)
+            if cached_price:
+                return {"success": True, "data": json.loads(cached_price)}
+        except Exception as e:
+            print(f"Redis cache error: {e}")
+    
+    try:
+        # Map currency to CoinGecko ID
+        coin_mapping = {
+            'DOGE': 'dogecoin',
+            'TRX': 'tron', 
+            'USDC': 'usd-coin',
+            'BTC': 'bitcoin',
+            'ETH': 'ethereum'
+        }
+        
+        if currency.upper() == 'CRT':
+            # Mock CRT data (replace with real data when available)
+            result = {
+                "currency": "CRT",
+                "price_usd": 0.15,
+                "price_change_24h": 2.5,
+                "market_cap": 15000000,
+                "volume_24h": 500000,
+                "last_updated": datetime.now().isoformat()
+            }
+        else:
+            coingecko_id = coin_mapping.get(currency.upper())
+            if not coingecko_id:
+                raise HTTPException(status_code=404, detail="Currency not supported")
+            
+            data = cg.get_price(
+                ids=coingecko_id,
+                vs_currencies='usd',
+                include_24hr_change=True,
+                include_market_cap=True,
+                include_24hr_vol=True
+            )
+            
+            if coingecko_id not in data:
+                raise HTTPException(status_code=404, detail="Currency data not found")
+            
+            result = {
+                "currency": currency.upper(),
+                "price_usd": data[coingecko_id]['usd'],
+                "price_change_24h": data[coingecko_id].get('usd_24h_change', 0),
+                "market_cap": data[coingecko_id].get('usd_market_cap', 0),
+                "volume_24h": data[coingecko_id].get('usd_24h_vol', 0),
+                "last_updated": datetime.now().isoformat()
+            }
+        
+        # Cache for 30 seconds
+        if redis_client:
+            try:
+                redis_client.setex(cache_key, 30, json.dumps(result))
+            except Exception as e:
+                print(f"Redis cache set error: {e}")
+        
+        return {"success": True, "data": result}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to fetch price data: {str(e)}")
+
+
+# WebSocket endpoint for real-time updates
 @api_router.websocket("/ws/wallet/{wallet_address}")
 async def websocket_wallet_monitor(websocket: WebSocket, wallet_address: str):
     """WebSocket endpoint for real-time wallet monitoring"""
