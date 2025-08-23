@@ -785,6 +785,74 @@ async def withdraw_savings(
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+# Authentication endpoints
+@app.post("/api/auth/register")
+async def register_user(request: RegisterRequest):
+    """Register a new user with wallet address"""
+    try:
+        # Check if wallet address already exists
+        existing_user = await db.users.find_one({"wallet_address": request.wallet_address})
+        if existing_user:
+            return {"success": False, "message": "Wallet address already registered"}
+        
+        # Create user ID
+        user_id = str(uuid.uuid4())
+        
+        # Hash password (basic implementation - use proper hashing in production)
+        import hashlib
+        password_hash = hashlib.sha256(request.password.encode()).hexdigest()
+        
+        # Create user document
+        user_doc = {
+            "user_id": user_id,
+            "wallet_address": request.wallet_address,
+            "password_hash": password_hash,
+            "created_at": datetime.now(),
+            "deposit_balance": {"CRT": 0, "DOGE": 0, "TRX": 0, "USDC": 0},
+            "winnings_balance": {"CRT": 0, "DOGE": 0, "TRX": 0, "USDC": 0},
+            "savings_balance": {"CRT": 0, "DOGE": 0, "TRX": 0, "USDC": 0}
+        }
+        
+        # Insert user
+        await db.users.insert_one(user_doc)
+        
+        return {
+            "success": True,
+            "message": "User registered successfully",
+            "user_id": user_id,
+            "created_at": user_doc["created_at"].isoformat()
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/auth/login")
+async def login_user(request: LoginRequest):
+    """Login user with wallet address and password"""
+    try:
+        # Find user by wallet address
+        user = await db.users.find_one({"wallet_address": request.wallet_address})
+        if not user:
+            return {"success": False, "message": "Wallet address not found"}
+        
+        # Verify password (basic implementation)
+        import hashlib
+        password_hash = hashlib.sha256(request.password.encode()).hexdigest()
+        
+        if user["password_hash"] != password_hash:
+            return {"success": False, "message": "Invalid password"}
+        
+        return {
+            "success": True,
+            "message": "Login successful",
+            "user_id": user["user_id"],
+            "created_at": user["created_at"].isoformat()
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 # Real-time crypto conversion endpoints
 @app.get("/api/conversion/rates")
 async def get_conversion_rates():
