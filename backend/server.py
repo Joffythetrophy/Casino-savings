@@ -286,7 +286,7 @@ async def deposit_to_wallet(request: DepositRequest):
 
 @app.post("/api/wallet/withdraw")  
 async def withdraw_from_wallet(request: WithdrawRequest):
-    """Withdraw funds from user wallet"""
+    """Withdraw funds from user wallet with liquidity limits"""
     try:
         # Find user by wallet address
         user = await db.users.find_one({"wallet_address": request.wallet_address})
@@ -301,6 +301,26 @@ async def withdraw_from_wallet(request: WithdrawRequest):
         if current_balance < request.amount:
             return {"success": False, "message": "Insufficient balance"}
         
+        # Check liquidity pool for withdrawal limits
+        liquidity_pool = user.get("liquidity_pool", {"CRT": 0, "DOGE": 0, "TRX": 0, "USDC": 0})
+        available_liquidity = liquidity_pool.get(request.currency, 0)
+        
+        # Withdrawal limit: 20% of available liquidity or minimum $10 equivalent
+        mock_prices = {"CRT": 0.15, "DOGE": 0.08, "TRX": 0.12, "USDC": 1.0}
+        min_withdrawal_usd = 10
+        min_withdrawal_tokens = min_withdrawal_usd / mock_prices.get(request.currency, 1)
+        
+        max_withdrawal = max(available_liquidity * 0.2, min_withdrawal_tokens)
+        
+        if request.amount > max_withdrawal:
+            return {
+                "success": False, 
+                "message": f"Withdrawal limited due to liquidity. Max: {max_withdrawal:.4f} {request.currency}",
+                "available_liquidity": available_liquidity,
+                "max_withdrawal": max_withdrawal,
+                "suggestion": "Add more liquidity by playing games to increase withdrawal limits"
+            }
+        
         # Update balance
         new_balance = current_balance - request.amount
         update_field = f"{request.wallet_type}_balance.{request.currency}"
@@ -310,6 +330,15 @@ async def withdraw_from_wallet(request: WithdrawRequest):
             {"$set": {update_field: new_balance}}
         )
         
+        # Reduce liquidity pool to simulate real withdrawal
+        if available_liquidity > 0:
+            liquidity_reduction = min(request.amount, available_liquidity * 0.1)
+            new_liquidity = available_liquidity - liquidity_reduction
+            await db.users.update_one(
+                {"wallet_address": request.wallet_address},
+                {"$set": {f"liquidity_pool.{request.currency}": max(0, new_liquidity)}}
+            )
+        
         # Record transaction
         transaction = {
             "transaction_id": str(uuid.uuid4()),
@@ -318,6 +347,7 @@ async def withdraw_from_wallet(request: WithdrawRequest):
             "wallet_type": request.wallet_type,
             "currency": request.currency,
             "amount": request.amount,
+            "liquidity_used": liquidity_reduction if available_liquidity > 0 else 0,
             "timestamp": datetime.now(),
             "status": "completed"
         }
@@ -328,6 +358,7 @@ async def withdraw_from_wallet(request: WithdrawRequest):
             "success": True,
             "message": f"Withdrew {request.amount} {request.currency}",
             "new_balance": new_balance,
+            "liquidity_remaining": available_liquidity - (liquidity_reduction if available_liquidity > 0 else 0),
             "transaction_id": transaction["transaction_id"]
         }
         
