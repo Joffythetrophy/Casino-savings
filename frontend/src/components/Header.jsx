@@ -82,6 +82,27 @@ const Header = ({ isWalletConnected }) => {
               <span className="text-green-400 text-sm font-medium">Solana Live</span>
             </div>
           </div>
+
+          {/* User Info & Actions */}
+          <div className="flex items-center space-x-4">
+            {isAuthenticated && user ? (
+              <div className="flex items-center space-x-4">
+                <div className="flex items-center space-x-2 text-gray-300">
+                  <User className="w-4 h-4" />
+                  <span className="hidden md:block text-sm">
+                    {user.wallet_address.substring(0, 8)}...
+                  </span>
+                </div>
+                <button
+                  onClick={logout}
+                  className="flex items-center space-x-2 px-3 py-2 rounded-lg text-gray-300 hover:text-yellow-400 hover:bg-white/10 transition-all duration-300"
+                >
+                  <LogOut className="w-4 h-4" />
+                  <span className="hidden md:block">Logout</span>
+                </button>
+              </div>
+            ) : null}
+          </div>
         </div>
       </div>
     </header>
