@@ -93,27 +93,19 @@ const WalletManager = () => {
 
   const fetchConversionRates = async () => {
     try {
-      // TODO: Replace with real-time conversion rates from backend
       const response = await axios.get(`${BACKEND_URL}/api/conversion/rates`);
       if (response.data.success) {
         setConversionRates(response.data.rates);
+        console.log('✅ Real-time conversion rates loaded:', response.data.source);
       }
     } catch (error) {
       console.error('Error fetching conversion rates:', error);
-      // Fallback to mock rates if API fails
+      // Fallback to basic rates if API fails
       setConversionRates({
-        CRT_DOGE: 21.5,
-        CRT_TRX: 9.8,
-        CRT_USDC: 0.15,
-        DOGE_CRT: 0.047,
-        DOGE_TRX: 0.456,
-        DOGE_USDC: 0.007,
-        TRX_CRT: 0.102,
-        TRX_DOGE: 2.19,
-        TRX_USDC: 0.015,
-        USDC_CRT: 6.67,
-        USDC_DOGE: 142.86,
-        USDC_TRX: 66.67
+        CRT_DOGE: 21.5, CRT_TRX: 9.8, CRT_USDC: 0.15,
+        DOGE_CRT: 0.047, DOGE_TRX: 0.456, DOGE_USDC: 0.007,
+        TRX_CRT: 0.102, TRX_DOGE: 2.19, TRX_USDC: 0.015,
+        USDC_CRT: 6.67, USDC_DOGE: 142.86, USDC_TRX: 66.67
       });
     }
   };
