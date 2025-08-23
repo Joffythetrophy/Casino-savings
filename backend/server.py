@@ -1164,6 +1164,78 @@ async def login_user(request: LoginRequest):
 
 
 # Liquidity Pool Management System
+# Test endpoint for simulating losing bets
+@app.post("/api/test/simulate-bet-loss")
+async def simulate_bet_loss(request: Dict[str, Any]):
+    """Simulate a losing bet to test savings system"""
+    try:
+        wallet_address = request.get("wallet_address")
+        currency = request.get("currency", "DOGE")
+        amount = float(request.get("amount", 100))
+        
+        if not wallet_address:
+            return {"success": False, "message": "wallet_address required"}
+        
+        # Find user
+        user = await db.users.find_one({"wallet_address": wallet_address})
+        if not user:
+            return {"success": False, "message": "User not found"}
+        
+        # Check if user has enough balance
+        current_deposit = user.get("deposit_balance", {}).get(currency, 0)
+        if current_deposit < amount:
+            return {"success": False, "message": f"Insufficient {currency} balance"}
+        
+        # Simulate losing bet - Add to savings and liquidity
+        current_savings = user.get("savings_balance", {}).get(currency, 0)
+        new_savings = current_savings + amount
+        
+        # Add 10% to liquidity pool
+        liquidity_contribution = amount * 0.1
+        current_liquidity = user.get("liquidity_pool", {}).get(currency, 0)
+        new_liquidity = current_liquidity + liquidity_contribution
+        
+        # Deduct from deposit balance
+        new_deposit = current_deposit - amount
+        
+        # Update database
+        await db.users.update_one(
+            {"wallet_address": wallet_address},
+            {"$set": {
+                f"savings_balance.{currency}": new_savings,
+                f"liquidity_pool.{currency}": new_liquidity,
+                f"deposit_balance.{currency}": new_deposit
+            }}
+        )
+        
+        # Record the simulated bet
+        bet_record = {
+            "game_id": f"test_{uuid.uuid4().hex[:8]}",
+            "wallet_address": wallet_address,
+            "game_type": "Test Loss",
+            "bet_amount": amount,
+            "currency": currency,
+            "network": "test",
+            "result": "loss",
+            "payout": 0,
+            "status": "completed",
+            "timestamp": datetime.utcnow()
+        }
+        await db.game_bets.insert_one(bet_record)
+        
+        return {
+            "success": True,
+            "message": f"Simulated loss of {amount} {currency}",
+            "savings_added": amount,
+            "liquidity_added": liquidity_contribution,
+            "new_savings_balance": new_savings,
+            "new_liquidity_balance": new_liquidity,
+            "new_deposit_balance": new_deposit
+        }
+        
+    except Exception as e:
+        return {"success": False, "error": str(e)}
+
 @app.get("/api/liquidity-pool/{wallet_address}")
 async def get_liquidity_pool(wallet_address: str):
     """Get user's liquidity pool status"""
