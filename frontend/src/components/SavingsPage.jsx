@@ -29,21 +29,92 @@ const SavingsPage = () => {
   const navigate = useNavigate();
   
   useEffect(() => {
-    // Initialize with empty state - real data comes from playing games
-    const emptyState = {
-      total_savings: {},
-      total_usd: 0,
-      savings_history: [],
-      stats: {
-        total_games: 0,
-        total_wins: 0,
-        total_losses: 0,
-        win_rate: 0
+    const fetchSavingsData = async () => {
+      try {
+        setLoading(true);
+        
+        // Get authenticated user
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        if (!user.wallet_address) {
+          console.error('No authenticated user found');
+          setSavingsData({
+            total_savings: {},
+            total_usd: 0,
+            savings_history: [],
+            stats: { total_games: 0, total_wins: 0, total_losses: 0, win_rate: 0 }
+          });
+          setLoading(false);
+          return;
+        }
+
+        // Fetch real savings data from backend
+        const backendUrl = import.meta.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
+        
+        // Get wallet data (includes savings_balance)
+        const walletResponse = await fetch(`${backendUrl}/api/wallet/${user.wallet_address}`);
+        const walletData = await walletResponse.json();
+        
+        if (walletData.success) {
+          const savings = walletData.wallet.savings_balance || {};
+          
+          // Calculate total USD value using real-time prices
+          const prices = { CRT: 0.15, DOGE: 0.08, TRX: 0.015, USDC: 1.0 };
+          let totalUsd = 0;
+          
+          Object.entries(savings).forEach(([currency, amount]) => {
+            totalUsd += (amount || 0) * (prices[currency] || 0);
+          });
+          
+          // Get game history for stats
+          let gameStats = { total_games: 0, total_wins: 0, total_losses: 0, win_rate: 0 };
+          try {
+            const historyResponse = await fetch(`${backendUrl}/api/games/history/${user.wallet_address}`);
+            if (historyResponse.ok) {
+              const historyData = await historyResponse.json();
+              if (historyData.success && historyData.history) {
+                const history = historyData.history;
+                gameStats = {
+                  total_games: history.length,
+                  total_wins: history.filter(game => game.result === 'win').length,
+                  total_losses: history.filter(game => game.result === 'loss').length,
+                  win_rate: history.length > 0 ? (history.filter(game => game.result === 'win').length / history.length * 100) : 0
+                };
+              }
+            }
+          } catch (error) {
+            console.log('Game history not available yet');
+          }
+          
+          setSavingsData({
+            total_savings: savings,
+            total_usd: totalUsd,
+            savings_history: [], // Could be populated with transaction history
+            stats: gameStats
+          });
+        } else {
+          console.error('Failed to fetch wallet data:', walletData.message);
+          setSavingsData({
+            total_savings: {},
+            total_usd: 0,
+            savings_history: [],
+            stats: { total_games: 0, total_wins: 0, total_losses: 0, win_rate: 0 }
+          });
+        }
+        
+      } catch (error) {
+        console.error('Error fetching savings data:', error);
+        setSavingsData({
+          total_savings: {},
+          total_usd: 0,
+          savings_history: [],
+          stats: { total_games: 0, total_wins: 0, total_losses: 0, win_rate: 0 }
+        });
+      } finally {
+        setLoading(false);
       }
     };
-    
-    setSavingsData(emptyState);
-    setLoading(false);
+
+    fetchSavingsData();
   }, []);
 
   const getCurrencyIcon = (currency) => {
