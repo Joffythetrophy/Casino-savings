@@ -97,7 +97,7 @@ export const BettingPanel = ({
   gameActive = false 
 }) => {
   const [betAmount, setBetAmount] = useState(10);
-  const { balance } = useWallet();
+  const { balance, loading } = useWallet();
 
   const quickBets = [1, 5, 10, 25, 50];
 
@@ -106,6 +106,14 @@ export const BettingPanel = ({
       onBet(betAmount);
     }
   };
+
+  if (loading) {
+    return (
+      <Card className="p-4 bg-gray-900/50 border-yellow-400/20">
+        <div className="text-center text-gray-400">Loading wallet...</div>
+      </Card>
+    );
+  }
 
   return (
     <Card className="p-4 bg-gray-900/50 border-yellow-400/20">
@@ -130,7 +138,7 @@ export const BettingPanel = ({
             />
             <Button
               onClick={handleBet}
-              disabled={disabled || gameActive || betAmount > balance}
+              disabled={disabled || gameActive || betAmount > balance || loading}
               className="bg-gradient-to-r from-yellow-400 to-yellow-600 text-black font-bold hover:from-yellow-300 hover:to-yellow-500"
             >
               {gameActive ? 'Playing...' : 'Bet'}
