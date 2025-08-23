@@ -11,6 +11,8 @@ import uuid
 from datetime import datetime
 import asyncio
 import json
+from pycoingecko import CoinGeckoAPI
+import redis
 
 # Import blockchain managers
 from blockchain.solana_manager import SolanaManager, SPLTokenManager, CRTTokenManager
