@@ -54,6 +54,8 @@ const WalletManager = () => {
   const [convertAmount, setConvertAmount] = useState('');
   const [convertFrom, setConvertFrom] = useState('CRT');
   const [convertTo, setConvertTo] = useState('DOGE');
+  const [showQRCode, setShowQRCode] = useState(false);
+  const [qrCurrency, setQrCurrency] = useState('CRT');
   
   const navigate = useNavigate();
   const { toast } = useToast();
