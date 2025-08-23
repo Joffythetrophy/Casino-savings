@@ -109,6 +109,12 @@ class DepositRequest(BaseModel):
     currency: str
     amount: float
 
+class WithdrawRequest(BaseModel):
+    wallet_address: str
+    wallet_type: str
+    currency: str
+    amount: float
+
 # Basic routes
 @api_router.get("/")
 async def root():
