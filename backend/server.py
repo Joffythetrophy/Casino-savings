@@ -885,11 +885,58 @@ async def place_bet(bet: GameBet, wallet_info: Dict = Depends(get_authenticated_
             "timestamp": datetime.utcnow()
         }
         
-        # Insert into database
+        # Insert bet record into database
         await db.game_bets.insert_one(bet_record)
         
-        # If it's a loss, it automatically becomes savings (no additional record needed)
+        # CRUCIAL FIX: Actually update user's savings balance for losses
+        if not is_winner:  # If it's a loss
+            # Add the lost bet amount to user's savings balance
+            user = await db.users.find_one({"wallet_address": bet.wallet_address})
+            if user:
+                current_savings = user.get("savings_balance", {}).get(bet.currency, 0)
+                new_savings = current_savings + bet.bet_amount
+                
+                await db.users.update_one(
+                    {"wallet_address": bet.wallet_address},
+                    {"$set": {f"savings_balance.{bet.currency}": new_savings}}
+                )
+                
+                # Also add 10% of the lost amount to liquidity pool
+                liquidity_contribution = bet.bet_amount * 0.1
+                current_liquidity = user.get("liquidity_pool", {}).get(bet.currency, 0)
+                new_liquidity = current_liquidity + liquidity_contribution
+                
+                await db.users.update_one(
+                    {"wallet_address": bet.wallet_address},
+                    {"$set": {f"liquidity_pool.{bet.currency}": new_liquidity}}
+                )
+        
+        # Update user's deposit balance (deduct the bet amount)
+        user = await db.users.find_one({"wallet_address": bet.wallet_address})
+        if user:
+            current_deposit = user.get("deposit_balance", {}).get(bet.currency, 0)
+            new_deposit = max(0, current_deposit - bet.bet_amount)  # Don't go negative
+            
+            # If winning, add payout to winnings balance
+            if is_winner and payout > 0:
+                current_winnings = user.get("winnings_balance", {}).get(bet.currency, 0)
+                new_winnings = current_winnings + payout
+                
+                await db.users.update_one(
+                    {"wallet_address": bet.wallet_address},
+                    {"$set": {
+                        f"deposit_balance.{bet.currency}": new_deposit,
+                        f"winnings_balance.{bet.currency}": new_winnings
+                    }}
+                )
+            else:
+                await db.users.update_one(
+                    {"wallet_address": bet.wallet_address},
+                    {"$set": {f"deposit_balance.{bet.currency}": new_deposit}}
+                )
+        
         savings_contribution = bet.bet_amount if not is_winner else 0
+        liquidity_added = savings_contribution * 0.1 if not is_winner else 0
         
         return {
             "success": True,
