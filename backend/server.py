@@ -210,7 +210,192 @@ async def verify_wallet_connection(request: VerifyRequest):
         "expires_in": 86400  # 24 hours
     }
 
-# Enhanced wallet management endpoints
+# Real blockchain balance endpoints (new endpoints for real blockchain integration)
+@api_router.get("/wallet/balance/{currency}")
+async def get_real_balance(currency: str, wallet_address: str):
+    """Get real blockchain balance for specific currency"""
+    try:
+        currency = currency.upper()
+        balance_info = {"success": False, "balance": 0.0, "currency": currency}
+        
+        if currency == "DOGE":
+            # Get real DOGE balance using BlockCypher
+            doge_balance = await doge_manager.get_balance(wallet_address)
+            if doge_balance.get("success"):
+                balance_info = {
+                    "success": True,
+                    "balance": doge_balance.get("balance", 0.0),
+                    "unconfirmed": doge_balance.get("unconfirmed", 0.0),
+                    "total": doge_balance.get("total", 0.0),
+                    "currency": currency,
+                    "address": wallet_address,
+                    "source": "blockcypher"
+                }
+            else:
+                balance_info["error"] = doge_balance.get("error", "Failed to fetch DOGE balance")
+                
+        elif currency == "TRX":
+            # Get real TRX balance using TRON API
+            trx_balance = await tron_tx_manager.get_trx_balance(wallet_address)
+            if trx_balance.get("success"):
+                balance_info = {
+                    "success": True,
+                    "balance": trx_balance.get("balance", 0.0),
+                    "currency": currency,
+                    "address": wallet_address,
+                    "source": "trongrid"
+                }
+            else:
+                balance_info["error"] = trx_balance.get("error", "Failed to fetch TRX balance")
+                
+        elif currency == "CRT":
+            # Get real CRT balance using Solana API
+            crt_balance = await crt_manager.get_crt_balance(wallet_address)
+            if crt_balance.get("success"):
+                balance_info = {
+                    "success": True,
+                    "balance": crt_balance.get("crt_balance", 0.0),
+                    "usd_value": crt_balance.get("usd_value", 0.0),
+                    "currency": currency,
+                    "address": wallet_address,
+                    "mint_address": crt_balance.get("mint_address"),
+                    "source": "solana_rpc"
+                }
+            else:
+                balance_info["error"] = crt_balance.get("error", "Failed to fetch CRT balance")
+                
+        elif currency == "SOL":
+            # Get SOL balance for transaction fees
+            sol_balance = await solana_manager.get_balance(wallet_address)
+            if sol_balance.get("success"):
+                balance_info = {
+                    "success": True,
+                    "balance": sol_balance.get("balance", 0.0),
+                    "lamports": sol_balance.get("lamports", 0),
+                    "currency": currency,
+                    "address": wallet_address,
+                    "source": "solana_rpc"
+                }
+            else:
+                balance_info["error"] = sol_balance.get("error", "Failed to fetch SOL balance")
+        else:
+            balance_info["error"] = f"Unsupported currency: {currency}"
+        
+        return balance_info
+        
+    except Exception as e:
+        print(f"Error in get_real_balance: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.get("/wallet/balances")
+async def get_all_real_balances(wallet_address: str):
+    """Get all real blockchain balances for a wallet address"""
+    try:
+        balances = {}
+        errors = {}
+        
+        # Get DOGE balance
+        try:
+            doge_result = await doge_manager.get_balance(wallet_address)
+            if doge_result.get("success"):
+                balances["DOGE"] = {
+                    "balance": doge_result.get("balance", 0.0),
+                    "unconfirmed": doge_result.get("unconfirmed", 0.0),
+                    "source": "blockcypher"
+                }
+            else:
+                errors["DOGE"] = doge_result.get("error", "Failed to fetch")
+        except Exception as e:
+            errors["DOGE"] = str(e)
+        
+        # Get TRX balance
+        try:
+            trx_result = await tron_tx_manager.get_trx_balance(wallet_address)
+            if trx_result.get("success"):
+                balances["TRX"] = {
+                    "balance": trx_result.get("balance", 0.0),
+                    "source": "trongrid"
+                }
+            else:
+                errors["TRX"] = trx_result.get("error", "Failed to fetch")
+        except Exception as e:
+            errors["TRX"] = str(e)
+        
+        # Get CRT balance
+        try:
+            crt_result = await crt_manager.get_crt_balance(wallet_address)
+            if crt_result.get("success"):
+                balances["CRT"] = {
+                    "balance": crt_result.get("crt_balance", 0.0),
+                    "usd_value": crt_result.get("usd_value", 0.0),
+                    "source": "solana_rpc"
+                }
+            else:
+                errors["CRT"] = crt_result.get("error", "Failed to fetch")
+        except Exception as e:
+            errors["CRT"] = str(e)
+        
+        # Get SOL balance for fees
+        try:
+            sol_result = await solana_manager.get_balance(wallet_address)
+            if sol_result.get("success"):
+                balances["SOL"] = {
+                    "balance": sol_result.get("balance", 0.0),
+                    "lamports": sol_result.get("lamports", 0),
+                    "source": "solana_rpc"
+                }
+            else:
+                errors["SOL"] = sol_result.get("error", "Failed to fetch")
+        except Exception as e:
+            errors["SOL"] = str(e)
+        
+        return {
+            "success": True,
+            "wallet_address": wallet_address,
+            "balances": balances,
+            "errors": errors if errors else None,
+            "last_updated": datetime.utcnow().isoformat()
+        }
+        
+    except Exception as e:
+        print(f"Error in get_all_real_balances: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+# CRT Token specific endpoints
+@api_router.get("/crt/info")
+async def get_crt_token_info():
+    """Get CRT token information"""
+    try:
+        token_info = await crt_manager.get_token_info()
+        price_info = await crt_manager.get_crt_price()
+        
+        return {
+            "success": True,
+            "token_info": token_info,
+            "current_price": price_info.get("price", 0.15),
+            "mint_address": crt_manager.crt_mint,
+            "decimals": crt_manager.decimals,
+            "last_updated": datetime.utcnow().isoformat()
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.post("/crt/simulate-deposit")
+async def simulate_crt_deposit(request: Dict[str, Any]):
+    """Simulate a CRT deposit (for testing purposes)"""
+    try:
+        wallet_address = request.get("wallet_address")
+        amount = request.get("amount", 1000000.0)  # Default 1M CRT
+        
+        if not wallet_address:
+            raise HTTPException(status_code=400, detail="wallet_address is required")
+        
+        result = await crt_manager.simulate_deposit(wallet_address, amount)
+        return result
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 @app.get("/api/wallet/{wallet_address}")
 async def get_wallet_info(wallet_address: str):
     """Get wallet balance information for a user"""
