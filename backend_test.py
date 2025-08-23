@@ -1066,7 +1066,10 @@ class WalletAPITester:
                 if test_name in ["Basic Connectivity", "User Registration", "User Login", 
                                "Real Crypto Conversion Rates", "Integration Flow",
                                "Auth Challenge Generation", "Auth Verification", 
-                               "Game Betting", "Savings System", "Database Integration"]:
+                               "Game Betting", "Savings System", "Database Integration",
+                               "Real DOGE Balance", "Real TRX Balance", "Real CRT Balance", 
+                               "Real SOL Balance", "All Blockchain Balances", "CRT Token Info",
+                               "CRT Simulate Deposit"]:
                     critical_failures.append(result)
                 else:
                     minor_issues.append(result)
