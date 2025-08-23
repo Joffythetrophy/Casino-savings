@@ -87,8 +87,6 @@ const CasinoLobby = () => {
       description: 'Classic 3-reel slots with CRT multipliers',
       icon: Dices,
       component: SlotMachine,
-      players: 234,
-      jackpot: '15,420',
       isHot: true
     },
     {
@@ -97,8 +95,6 @@ const CasinoLobby = () => {
       description: 'European roulette with crypto betting',
       icon: CircleDot,
       component: Roulette,
-      players: 156,
-      jackpot: '8,932',
     },
     {
       id: 'dice',
@@ -106,8 +102,6 @@ const CasinoLobby = () => {
       description: 'Provably fair dice with custom multipliers',
       icon: Dices,
       component: Dice,
-      players: 89,
-      jackpot: '5,621',
       isHot: true
     },
     {
@@ -116,8 +110,6 @@ const CasinoLobby = () => {
       description: 'Drop balls for massive multipliers',
       icon: Zap,
       component: Plinko,
-      players: 167,
-      jackpot: '12,100'
     },
     {
       id: 'keno',
@@ -125,8 +117,6 @@ const CasinoLobby = () => {
       description: 'Pick numbers and win big payouts',
       icon: Target,
       component: Keno,
-      players: 78,
-      jackpot: '3,456'
     },
     {
       id: 'mines',
@@ -134,8 +124,6 @@ const CasinoLobby = () => {
       description: 'Find gems while avoiding mines',
       icon: Bomb,
       component: Mines,
-      players: 123,
-      jackpot: '7,890'
     }
   ];
 
