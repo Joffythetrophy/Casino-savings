@@ -63,6 +63,7 @@ const WalletManager = () => {
   useEffect(() => {
     fetchWalletBalances();
     fetchConversionRates();
+    fetchLiquidityData();
   }, []);
 
   const fetchWalletBalances = async () => {
