@@ -999,14 +999,23 @@ class WalletAPITester:
     
     async def run_all_tests(self):
         """Run all wallet management tests"""
-        print(f"🚀 Starting Real Money Integration Tests - New Authentication & Crypto Price Endpoints")
+        print(f"🚀 Starting Real Blockchain Integration Tests - New Blockchain Balance & CRT Token Endpoints")
         print(f"📡 Testing against: {self.base_url}")
         print("=" * 70)
         
         # Run tests in logical order
         await self.test_basic_connectivity()
         
-        # NEW: Real-money integration endpoints
+        # NEW: Real blockchain integration endpoints (HIGH PRIORITY)
+        await self.test_real_blockchain_balance_doge()
+        await self.test_real_blockchain_balance_trx()
+        await self.test_real_blockchain_balance_crt()
+        await self.test_real_blockchain_balance_sol()
+        await self.test_all_blockchain_balances()
+        await self.test_crt_token_info()
+        await self.test_crt_simulate_deposit()
+        
+        # Real-money integration endpoints
         await self.test_user_registration()
         await self.test_user_login()
         await self.test_real_crypto_conversion_rates()
