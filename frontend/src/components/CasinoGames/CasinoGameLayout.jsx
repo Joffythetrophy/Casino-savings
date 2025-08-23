@@ -4,6 +4,7 @@ import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { useToast } from '../../hooks/use-toast';
 import { ArrowLeft, Coins, TrendingUp, TrendingDown } from 'lucide-react';
+import axios from 'axios';
 
 // CRT Token Component
 const CRTCoin = ({ size = 'w-8 h-8', className = '' }) => {
