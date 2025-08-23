@@ -27,9 +27,9 @@ const CRTCoin = ({ size = 'w-5 h-5' }) => (
 
 const WalletManager = () => {
   const [wallets, setWallets] = useState({
-    deposit: { CRT: 0, DOGE: 0, TRX: 0 },
-    winnings: { CRT: 0, DOGE: 0, TRX: 0 },
-    savings: { CRT: 0, DOGE: 0, TRX: 0 }
+    deposit: { CRT: 0, DOGE: 0, TRX: 0, USDC: 0 },
+    winnings: { CRT: 0, DOGE: 0, TRX: 0, USDC: 0 },
+    savings: { CRT: 0, DOGE: 0, TRX: 0, USDC: 0 }
   });
   
   const [conversionRates] = useState({
