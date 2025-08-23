@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Coins, TrendingUp, Gamepad2, PiggyBank, Zap, Wallet } from 'lucide-react';
+import { Coins, TrendingUp, Gamepad2, PiggyBank, Zap, Wallet, LogOut, User } from 'lucide-react';
+import { useAuth } from './UserAuth';
 
 const Header = ({ isWalletConnected }) => {
   const location = useLocation();
