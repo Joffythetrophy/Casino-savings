@@ -89,7 +89,7 @@ export const WalletProvider = ({ children }) => {
   const placeBet = async (gameType, betAmount, currency = 'CRT') => {
     try {
       // Get authenticated user
-      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      const user = JSON.parse(localStorage.getItem('casino_user') || '{}');
       if (!user.wallet_address) {
         throw new Error('No authenticated user found');
       }
