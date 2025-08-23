@@ -227,6 +227,20 @@ const WalletManager = () => {
                 Deposit
               </Button>
             </div>
+            
+            {/* QR Code Button */}
+            <div className="flex space-x-2">
+              <Button
+                onClick={() => {
+                  setQrCurrency(selectedCurrency);
+                  setShowQRCode(true);
+                }}
+                className="flex-1 bg-blue-600 hover:bg-blue-500"
+              >
+                <QrCode className="w-4 h-4 mr-2" />
+                Show {selectedCurrency} QR Code
+              </Button>
+            </div>
           </div>
         )}
         
