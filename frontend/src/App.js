@@ -22,47 +22,87 @@ function AppContent() {
     );
   }
 
-  if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
-        <Router>
-          <Header />
-        </Router>
-        <div className="flex items-center justify-center min-h-[80vh]">
-          <div className="text-center">
-            <h1 className="text-4xl font-bold text-white mb-4">Welcome to Casino Savings</h1>
-            <p className="text-gray-300 mb-8">Login or create an account to start playing and saving</p>
-            <button 
-              onClick={() => setShowAuthModal(true)}
-              className="bg-gradient-to-r from-yellow-400 to-yellow-600 text-black font-bold py-3 px-8 rounded-lg text-lg hover:from-yellow-300 hover:to-yellow-500 transition-all"
-            >
-              Get Started
-            </button>
-          </div>
-        </div>
-        <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} />
-        <Toaster />
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
       <Router>
         <Header />
-        <Routes>
-          <Route path="/" element={
-            <>
-              <HeroSection />
-              <CasinoLobby />
-            </>
-          } />
-          <Route path="/savings" element={<SavingsPage />} />
-          <Route path="/trading" element={<TradingPage />} />
-          <Route path="/wallet" element={<WalletManager />} />
-        </Routes>
-        <Toaster />
+        {!isAuthenticated ? (
+          <>
+            <Routes>
+              <Route path="/" element={
+                <div className="flex items-center justify-center min-h-[80vh]">
+                  <div className="text-center">
+                    <h1 className="text-4xl font-bold text-white mb-4">Welcome to Casino Savings</h1>
+                    <p className="text-gray-300 mb-8">Login or create an account to start playing and saving</p>
+                    <button 
+                      onClick={() => setShowAuthModal(true)}
+                      className="bg-gradient-to-r from-yellow-400 to-yellow-600 text-black font-bold py-3 px-8 rounded-lg text-lg hover:from-yellow-300 hover:to-yellow-500 transition-all"
+                    >
+                      Get Started
+                    </button>
+                  </div>
+                </div>
+              } />
+              <Route path="/wallet" element={
+                <div className="flex items-center justify-center min-h-[80vh]">
+                  <div className="text-center">
+                    <h1 className="text-4xl font-bold text-white mb-4">Authentication Required</h1>
+                    <p className="text-gray-300 mb-8">Please login to access your wallet</p>
+                    <button 
+                      onClick={() => setShowAuthModal(true)}
+                      className="bg-gradient-to-r from-yellow-400 to-yellow-600 text-black font-bold py-3 px-8 rounded-lg text-lg hover:from-yellow-300 hover:to-yellow-500 transition-all"
+                    >
+                      Login
+                    </button>
+                  </div>
+                </div>
+              } />
+              <Route path="/savings" element={
+                <div className="flex items-center justify-center min-h-[80vh]">
+                  <div className="text-center">
+                    <h1 className="text-4xl font-bold text-white mb-4">Authentication Required</h1>
+                    <p className="text-gray-300 mb-8">Please login to access your savings</p>
+                    <button 
+                      onClick={() => setShowAuthModal(true)}
+                      className="bg-gradient-to-r from-yellow-400 to-yellow-600 text-black font-bold py-3 px-8 rounded-lg text-lg hover:from-yellow-300 hover:to-yellow-500 transition-all"
+                    >
+                      Login
+                    </button>
+                  </div>
+                </div>
+              } />
+              <Route path="*" element={
+                <div className="flex items-center justify-center min-h-[80vh]">
+                  <div className="text-center">
+                    <h1 className="text-4xl font-bold text-white mb-4">Welcome to Casino Savings</h1>
+                    <p className="text-gray-300 mb-8">Login or create an account to start playing and saving</p>
+                    <button 
+                      onClick={() => setShowAuthModal(true)}
+                      className="bg-gradient-to-r from-yellow-400 to-yellow-600 text-black font-bold py-3 px-8 rounded-lg text-lg hover:from-yellow-300 hover:to-yellow-500 transition-all"
+                    >
+                      Get Started
+                    </button>
+                  </div>
+                </div>
+              } />
+            </Routes>
+            <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} />
+          </>
+        ) : (
+          <Routes>
+            <Route path="/" element={
+              <>
+                <HeroSection />
+                <CasinoLobby />
+              </>
+            } />
+            <Route path="/savings" element={<SavingsPage />} />
+            <Route path="/trading" element={<TradingPage />} />
+            <Route path="/wallet" element={<WalletManager />} />
+          </Routes>
+        )}
       </Router>
+      <Toaster />
     </div>
   );
 }
