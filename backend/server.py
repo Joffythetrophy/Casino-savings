@@ -183,28 +183,33 @@ async def verify_wallet_connection(request: VerifyRequest):
     }
 
 # Enhanced wallet management endpoints
-@api_router.get("/wallet/{wallet_address}")
-async def get_wallet_info(wallet_address: str, wallet_info: Dict = Depends(get_authenticated_wallet)):
-    """Get comprehensive wallet information"""
+@app.get("/api/wallet/{wallet_address}")
+async def get_wallet_info(wallet_address: str):
+    """Get wallet balance information for a user"""
     try:
-        if wallet_address != wallet_info["wallet_address"]:
-            raise HTTPException(status_code=403, detail="Unauthorized")
+        # Find user by wallet address (simplified for now)
+        user = await db.users.find_one({"wallet_address": wallet_address})
         
-        # Get or create wallet record
-        wallet_record = await db.user_wallets.find_one({"wallet_address": wallet_address})
+        if not user:
+            return {"success": False, "message": "Wallet not found"}
         
-        if not wallet_record:
-            # Create new wallet record
-            new_wallet = UserWallet(wallet_address=wallet_address)
-            await db.user_wallets.insert_one(new_wallet.dict())
-            wallet_record = new_wallet.dict()
+        # Convert ObjectId to string to avoid serialization issues
+        user_data = {
+            "user_id": user["user_id"],
+            "wallet_address": user["wallet_address"],
+            "deposit_balance": user.get("deposit_balance", {"CRT": 0, "DOGE": 0, "TRX": 0, "USDC": 0}),
+            "winnings_balance": user.get("winnings_balance", {"CRT": 0, "DOGE": 0, "TRX": 0, "USDC": 0}),
+            "savings_balance": user.get("savings_balance", {"CRT": 0, "DOGE": 0, "TRX": 0, "USDC": 0}),
+            "created_at": user["created_at"].isoformat() if "created_at" in user else None
+        }
         
         return {
             "success": True,
-            "wallet": wallet_record
+            "wallet": user_data
         }
         
     except Exception as e:
+        print(f"Error in get_wallet_info: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @api_router.post("/wallet/deposit")
