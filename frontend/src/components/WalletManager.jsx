@@ -154,41 +154,81 @@ const WalletManager = () => {
     }
   };
 
-  const handleDeposit = (currency, amount) => {
+  const handleDeposit = async (currency, amount) => {
     if (amount <= 0) return;
     
-    setWallets(prev => ({
-      ...prev,
-      deposit: {
-        ...prev.deposit,
-        [currency]: prev.deposit[currency] + amount
+    try {
+      const testWallet = 'RealWallet9876543210XYZ'; // TODO: Replace with real wallet from auth
+      
+      const response = await axios.post(`${BACKEND_URL}/api/wallet/deposit`, {
+        wallet_address: testWallet,
+        currency: currency,
+        amount: amount
+      });
+      
+      if (response.data.success) {
+        await fetchWalletBalances(); // Refresh balances
+        toast({
+          title: "Deposit Successful!",
+          description: response.data.message,
+        });
+      } else {
+        toast({
+          title: "Deposit Failed",
+          description: response.data.message || "Failed to process deposit",
+        });
       }
-    }));
-    
-    toast({
-      title: "Deposit Successful!",
-      description: `Added ${amount} ${currency} to your deposit wallet`,
-    });
+    } catch (error) {
+      console.error('Deposit error:', error);
+      toast({
+        title: "Deposit Error",
+        description: "Failed to process deposit request",
+      });
+    }
   };
 
-  const handleWithdraw = (walletType, currency, amount) => {
+  const handleWithdraw = async (walletType, currency, amount) => {
     if (amount <= 0 || wallets[walletType][currency] < amount) return;
     
-    setWallets(prev => ({
-      ...prev,
-      [walletType]: {
-        ...prev[walletType],
-        [currency]: prev[walletType][currency] - amount
+    try {
+      const testWallet = 'RealWallet9876543210XYZ'; // TODO: Replace with real wallet from auth
+      
+      const response = await axios.post(`${BACKEND_URL}/api/wallet/withdraw`, {
+        wallet_address: testWallet,
+        wallet_type: walletType,
+        currency: currency,
+        amount: amount
+      });
+      
+      if (response.data.success) {
+        await fetchWalletBalances(); // Refresh balances
+        toast({
+          title: "Withdrawal Successful!",
+          description: response.data.message,
+        });
+      } else {
+        toast({
+          title: "Withdrawal Failed",
+          description: response.data.message || "Failed to process withdrawal",
+        });
       }
-    }));
-    
-    toast({
-      title: "Withdrawal Successful!",
-      description: `Withdrew ${amount} ${currency} from your ${walletType} wallet`,
-    });
+    } catch (error) {
+      console.error('Withdrawal error:', error);
+      if (error.response?.status === 400) {
+        toast({
+          title: "Insufficient Balance",
+          description: "Not enough funds for withdrawal",
+        });
+      } else {
+        toast({
+          title: "Withdrawal Error",
+          description: "Failed to process withdrawal request",
+        });
+      }
+    }
   };
 
-  const handleConversion = () => {
+  const handleConversion = async () => {
     const amount = parseFloat(convertAmount);
     if (!amount || amount <= 0) return;
     
@@ -200,24 +240,36 @@ const WalletManager = () => {
       return;
     }
     
-    const rate = conversionRates[`${convertFrom}_${convertTo}`];
-    const convertedAmount = amount * rate;
-    
-    setWallets(prev => ({
-      ...prev,
-      deposit: {
-        ...prev.deposit,
-        [convertFrom]: prev.deposit[convertFrom] - amount,
-        [convertTo]: prev.deposit[convertTo] + convertedAmount
+    try {
+      const testWallet = 'RealWallet9876543210XYZ'; // TODO: Replace with real wallet from auth
+      
+      const response = await axios.post(`${BACKEND_URL}/api/wallet/convert`, {
+        wallet_address: testWallet,
+        from_currency: convertFrom,
+        to_currency: convertTo,
+        amount: amount
+      });
+      
+      if (response.data.success) {
+        await fetchWalletBalances(); // Refresh balances
+        toast({
+          title: "Conversion Successful!",
+          description: response.data.message,
+        });
+        setConvertAmount('');
+      } else {
+        toast({
+          title: "Conversion Failed",  
+          description: response.data.message || "Failed to process conversion",
+        });
       }
-    }));
-    
-    toast({
-      title: "Conversion Successful!",
-      description: `Converted ${amount} ${convertFrom} to ${convertedAmount.toFixed(4)} ${convertTo}`,
-    });
-    
-    setConvertAmount('');
+    } catch (error) {
+      console.error('Conversion error:', error);
+      toast({
+        title: "Conversion Error",
+        description: "Failed to process conversion request",
+      });
+    }
   };
 
   const WalletCard = ({ title, wallet, type, icon: Icon, color }) => {
