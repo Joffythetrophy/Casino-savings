@@ -190,8 +190,6 @@ const CasinoLobby = () => {
                     title={game.title}
                     description={game.description}
                     icon={game.icon}
-                    players={game.players}
-                    jackpot={game.jackpot}
                     isHot={game.isHot}
                     onClick={() => handleGameSelect(game)}
                   />
