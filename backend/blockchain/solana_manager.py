@@ -115,7 +115,7 @@ class CRTTokenManager:
         self.solana = solana_manager
         self.spl = spl_manager
         self.crt_mint = os.getenv("CRT_TOKEN_MINT", "6kx78Yu19PmGjb9YbfP5nRUvFPY4kFcDKKmGpdSpump")
-        self.decimals = 9  # Standard SPL token decimals
+        self.decimals = 6  # CRT token uses 6 decimals
         self.price_cache = {"price": 0.15, "last_update": None}  # Mock price for now
         
     async def get_crt_balance(self, wallet_address: str) -> Dict[str, Any]:
