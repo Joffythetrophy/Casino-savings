@@ -583,6 +583,13 @@ const WalletManager = () => {
                 </div>
               </Card>
             </TabsContent>
+
+            <TabsContent value="liquidity">
+              <LiquidityPool 
+                liquidityData={liquidityData}
+                onRefresh={fetchLiquidityData}
+              />
+            </TabsContent>
           </Tabs>
           
           {/* QR Code Modal */}
