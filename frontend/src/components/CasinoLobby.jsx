@@ -24,7 +24,7 @@ import {
   PiggyBank
 } from 'lucide-react';
 
-const GameCard = ({ title, description, icon: Icon, onClick, players, jackpot, isHot = false }) => {
+const GameCard = ({ title, description, icon: Icon, onClick, isHot = false }) => {
   return (
     <Card className="group relative bg-gradient-to-br from-gray-800/50 to-gray-900/50 border border-yellow-400/20 hover:border-yellow-400/50 transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-yellow-400/20 cursor-pointer overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-br from-yellow-400/5 to-purple-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
@@ -50,18 +50,6 @@ const GameCard = ({ title, description, icon: Icon, onClick, players, jackpot, i
         <p className="text-gray-300 text-sm text-center mb-4 group-hover:text-gray-200 transition-colors duration-300">
           {description}
         </p>
-        
-        {/* Stats */}
-        <div className="flex justify-between items-center text-xs text-gray-400">
-          <div className="flex items-center space-x-1">
-            <Users className="w-3 h-3" />
-            <span>{players}</span>
-          </div>
-          <div className="flex items-center space-x-1">
-            <CRTCoin size="w-3 h-3" />
-            <span>{jackpot} CRT</span>
-          </div>
-        </div>
       </div>
     </Card>
   );
