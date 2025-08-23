@@ -48,18 +48,33 @@ export const WalletProvider = ({ children }) => {
   const fetchBalance = async () => {
     try {
       setLoading(true);
-      const testWallet = 'RealWallet9876543210XYZ'; // TODO: Replace with real wallet from auth
       
-      const response = await axios.get(`${BACKEND_URL}/api/wallet/${testWallet}`);
+      // Get authenticated user from localStorage
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      if (!user.wallet_address) {
+        console.error('No authenticated user found');
+        setBalance(0);
+        setIsConnected(false);
+        setLoading(false);
+        return;
+      }
+      
+      const response = await axios.get(`${BACKEND_URL}/api/wallet/${user.wallet_address}`);
       
       if (response.data.success && response.data.wallet) {
         // Use deposit wallet balance for gaming
         const depositBalance = response.data.wallet.deposit_balance?.CRT || 0;
         setBalance(depositBalance);
+        setIsConnected(true);
+      } else {
+        console.error('Failed to fetch wallet:', response.data.message);
+        setBalance(0);
+        setIsConnected(false);
       }
     } catch (error) {
       console.error('Error fetching balance:', error);
-      setBalance(0); // Set to 0 if can't fetch real balance
+      setBalance(0);
+      setIsConnected(false);
     } finally {
       setLoading(false);
     }
