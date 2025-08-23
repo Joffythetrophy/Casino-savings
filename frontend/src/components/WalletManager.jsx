@@ -64,6 +64,8 @@ const WalletManager = () => {
         return <div className="w-6 h-6 bg-yellow-500 rounded-full flex items-center justify-center text-sm">🐕</div>;
       case 'TRX':
         return <div className="w-6 h-6 bg-red-500 rounded-full flex items-center justify-center text-sm font-bold text-white">T</div>;
+      case 'USDC':
+        return <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center text-xs font-bold text-white">$</div>;
       default:
         return <Wallet className="w-6 h-6" />;
     }
