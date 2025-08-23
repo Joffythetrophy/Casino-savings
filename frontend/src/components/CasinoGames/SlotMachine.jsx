@@ -15,7 +15,7 @@ const SlotMachine = ({ onBack }) => {
     winRate: 0
   });
   
-  const { balance, updateBalance } = useWallet();
+  const { balance, placeBet, refreshBalance } = useWallet();
   const { toast } = useToast();
 
   const symbols = ['🍒', '🍋', '🍊', '🍇', '🔔', '💎', '⭐', '🍀'];
