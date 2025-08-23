@@ -946,7 +946,8 @@ async def place_bet(bet: GameBet, wallet_info: Dict = Depends(get_authenticated_
             "result": "win" if is_winner else "loss",
             "payout": payout,
             "savings_contribution": savings_contribution,
-            "message": f"Saved {savings_contribution} {bet.currency} to your vault!" if not is_winner else f"Won {payout} {bet.currency}!"
+            "liquidity_added": liquidity_added,
+            "message": f"Lost {bet.bet_amount} {bet.currency}! Saved to vault + {liquidity_added:.2f} added to liquidity!" if not is_winner else f"Won {payout:.2f} {bet.currency}!"
         }
         
     except Exception as e:
