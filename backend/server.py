@@ -23,7 +23,15 @@ from auth.wallet_auth import WalletAuthManager, get_authenticated_wallet, Challe
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
-# MongoDB connection
+# Initialize CoinGecko client for real-time prices
+cg = CoinGeckoAPI()
+try:
+    redis_client = redis.Redis(host='localhost', port=6379, db=0, decode_responses=True)
+    redis_client.ping()  # Test connection
+    print("✅ Redis connected successfully")
+except Exception as e:
+    print(f"⚠️ Redis connection failed: {e}")
+    redis_client = None
 mongo_url = os.environ['MONGO_URL']
 client = AsyncIOMotorClient(mongo_url)
 db = client[os.environ['DB_NAME']]
