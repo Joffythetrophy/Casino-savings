@@ -463,6 +463,71 @@ const WalletManager = () => {
               </Card>
             </TabsContent>
           </Tabs>
+          
+          {/* QR Code Modal */}
+          {showQRCode && (
+            <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
+              <Card className="p-6 bg-gradient-to-br from-gray-800 to-gray-900 border border-yellow-400/50 max-w-md w-full">
+                <div className="text-center space-y-4">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-xl font-bold text-yellow-400">Deposit {qrCurrency}</h3>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setShowQRCode(false)}
+                      className="text-gray-400 hover:text-white"
+                    >
+                      ✕
+                    </Button>
+                  </div>
+                  
+                  {/* QR Code */}
+                  <div className="bg-white p-4 rounded-lg inline-block">
+                    <img 
+                      src={generateQRCodeURL(qrCurrency, walletAddresses[qrCurrency])}
+                      alt={`${qrCurrency} Wallet QR Code`}
+                      className="w-48 h-48"
+                    />
+                  </div>
+                  
+                  {/* Wallet Address */}
+                  <div className="space-y-2">
+                    <p className="text-gray-300 text-sm">Wallet Address:</p>
+                    <div className="bg-black/30 p-3 rounded border border-gray-600 flex items-center space-x-2">
+                      <code className="text-sm text-yellow-400 flex-1 break-all">
+                        {walletAddresses[qrCurrency]}
+                      </code>
+                      <Button
+                        size="sm"
+                        onClick={() => copyToClipboard(walletAddresses[qrCurrency])}
+                        className="bg-blue-600 hover:bg-blue-500 shrink-0"
+                      >
+                        <Copy className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
+                  
+                  {/* Instructions */}
+                  <div className="text-left bg-yellow-400/10 p-4 rounded border border-yellow-400/20">
+                    <p className="text-yellow-400 font-bold text-sm mb-2">📱 How to deposit:</p>
+                    <ol className="text-gray-300 text-xs space-y-1">
+                      <li>1. Scan the QR code with your {qrCurrency} wallet</li>
+                      <li>2. Or copy the address and send {qrCurrency} to it</li>
+                      <li>3. Funds will appear in your deposit wallet</li>
+                      <li>4. Start playing casino games!</li>
+                    </ol>
+                  </div>
+                  
+                  <Button
+                    onClick={() => setShowQRCode(false)}
+                    className="w-full bg-yellow-600 hover:bg-yellow-500 text-black font-bold"
+                  >
+                    Close
+                  </Button>
+                </div>
+              </Card>
+            </div>
+          )}
         </div>
       </main>
     </div>
