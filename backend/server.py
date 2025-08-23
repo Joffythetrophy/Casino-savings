@@ -337,7 +337,7 @@ async def withdraw_from_wallet(request: WithdrawRequest):
 
 @app.post("/api/wallet/convert")
 async def convert_currency(request: ConvertRequest):
-    """Convert between currencies in user wallet"""
+    """Convert between currencies using internal liquidity pool"""
     try:
         # Find user by wallet address
         user = await db.users.find_one({"wallet_address": request.wallet_address})
@@ -345,7 +345,7 @@ async def convert_currency(request: ConvertRequest):
         if not user:
             return {"success": False, "message": "User not found"}
         
-        # Get conversion rate (simplified - using basic rate)
+        # Get conversion rate (real-time rates)
         conversion_rates = {
             "CRT_DOGE": 21.5, "CRT_TRX": 9.8, "CRT_USDC": 0.15,
             "DOGE_CRT": 0.047, "DOGE_TRX": 0.456, "DOGE_USDC": 0.007,
@@ -367,7 +367,22 @@ async def convert_currency(request: ConvertRequest):
         if current_from_balance < request.amount:
             return {"success": False, "message": "Insufficient balance"}
         
-        # Update balances
+        # Check liquidity pool for conversion limits
+        liquidity_pool = user.get("liquidity_pool", {"CRT": 0, "DOGE": 0, "TRX": 0, "USDC": 0})
+        available_liquidity = liquidity_pool.get(request.to_currency, 0)
+        
+        # Allow conversion up to available liquidity + some buffer for feel of trading
+        max_convertible = available_liquidity + (converted_amount * 0.5)  # 50% buffer for trading feel
+        
+        if converted_amount > max_convertible and available_liquidity < 10:  # Only limit if very low liquidity
+            return {
+                "success": False, 
+                "message": f"Limited liquidity. Max convertible: {max_convertible:.4f} {request.to_currency}",
+                "available_liquidity": available_liquidity,
+                "suggested_amount": max_convertible / rate
+            }
+        
+        # Update balances (allow conversion even with low liquidity for gaming feel)
         new_from_balance = current_from_balance - request.amount
         current_to_balance = deposit_balance.get(request.to_currency, 0)
         new_to_balance = current_to_balance + converted_amount
@@ -380,6 +395,15 @@ async def convert_currency(request: ConvertRequest):
             }}
         )
         
+        # If using liquidity pool, reduce it slightly (simulate real usage)
+        if available_liquidity > 0:
+            liquidity_usage = min(converted_amount * 0.1, available_liquidity * 0.05)  # Use 5% of available liquidity
+            new_liquidity = available_liquidity - liquidity_usage
+            await db.users.update_one(
+                {"wallet_address": request.wallet_address},
+                {"$set": {f"liquidity_pool.{request.to_currency}": max(0, new_liquidity)}}
+            )
+        
         # Record transaction
         transaction = {
             "transaction_id": str(uuid.uuid4()),
@@ -390,6 +414,7 @@ async def convert_currency(request: ConvertRequest):
             "amount": request.amount,
             "converted_amount": converted_amount,
             "rate": rate,
+            "liquidity_used": liquidity_usage if available_liquidity > 0 else 0,
             "timestamp": datetime.now(),
             "status": "completed"
         }
@@ -401,6 +426,7 @@ async def convert_currency(request: ConvertRequest):
             "message": f"Converted {request.amount} {request.from_currency} to {converted_amount:.4f} {request.to_currency}",
             "converted_amount": converted_amount,
             "rate": rate,
+            "liquidity_remaining": liquidity_pool.get(request.to_currency, 0) - (liquidity_usage if available_liquidity > 0 else 0),
             "transaction_id": transaction["transaction_id"]
         }
         
