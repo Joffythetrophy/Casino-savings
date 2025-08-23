@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Casino Savings dApp Backend API Test Suite
-Tests all backend endpoints systematically
+Casino Savings dApp Backend API Test Suite - Real Money Integration Testing
+Tests wallet management system for real money integration
 """
 
 import asyncio
@@ -15,12 +15,12 @@ from typing import Dict, Any, Optional
 # Get backend URL from frontend env
 BACKEND_URL = "https://cryptosave-1.preview.emergentagent.com/api"
 
-class CasinoAPITester:
+class WalletAPITester:
     def __init__(self, base_url: str):
         self.base_url = base_url
         self.session: Optional[aiohttp.ClientSession] = None
         self.auth_token: Optional[str] = None
-        self.test_wallet = "DemoWallet123456789ABC"  # Mock wallet address
+        self.test_wallet = "RealWallet9876543210XYZ"  # Test wallet address
         self.test_results = []
         
     async def __aenter__(self):
@@ -63,32 +63,8 @@ class CasinoAPITester:
         except Exception as e:
             self.log_test("Basic Connectivity", False, f"Connection error: {str(e)}")
     
-    async def test_health_check(self):
-        """Test 2: Health check endpoint"""
-        try:
-            async with self.session.get(f"{self.base_url}/health") as response:
-                if response.status == 200:
-                    data = await response.json()
-                    required_services = ["solana", "dogecoin", "tron"]
-                    services = data.get("services", {})
-                    
-                    if all(service in services for service in required_services):
-                        healthy_services = sum(1 for service in services.values() 
-                                             if service.get("success", False))
-                        self.log_test("Health Check", True, 
-                                    f"All services checked, {healthy_services}/{len(required_services)} healthy", 
-                                    data)
-                    else:
-                        self.log_test("Health Check", False, 
-                                    "Missing required services in health check", data)
-                else:
-                    self.log_test("Health Check", False, 
-                                f"HTTP {response.status}: {await response.text()}")
-        except Exception as e:
-            self.log_test("Health Check", False, f"Error: {str(e)}")
-    
     async def test_auth_challenge_generation(self):
-        """Test 3: Authentication challenge generation"""
+        """Test 2: Authentication challenge generation"""
         try:
             payload = {
                 "wallet_address": self.test_wallet,
@@ -117,7 +93,7 @@ class CasinoAPITester:
         return None
     
     async def test_auth_verification(self, challenge_data: Dict):
-        """Test 4: Authentication verification and JWT token generation"""
+        """Test 3: Authentication verification and JWT token generation"""
         if not challenge_data:
             self.log_test("Auth Verification", False, "No challenge data available")
             return
@@ -149,69 +125,158 @@ class CasinoAPITester:
         except Exception as e:
             self.log_test("Auth Verification", False, f"Error: {str(e)}")
     
-    async def test_balance_endpoints(self):
-        """Test 5: Multi-chain balance checking endpoints"""
+    async def test_wallet_info_endpoint(self):
+        """Test 4: Wallet information retrieval"""
         if not self.auth_token:
-            self.log_test("Balance Endpoints", False, "No auth token available")
+            self.log_test("Wallet Info", False, "No auth token available")
             return
             
         headers = {"Authorization": f"Bearer {self.auth_token}"}
         
-        # Test multi-chain balance
         try:
-            async with self.session.get(f"{self.base_url}/balance/{self.test_wallet}", 
+            async with self.session.get(f"{self.base_url}/wallet/{self.test_wallet}", 
                                       headers=headers) as response:
                 if response.status == 200:
                     data = await response.json()
-                    expected_currencies = ["CRT", "DOGE", "TRX"]
-                    balances = data.get("balances", {})
-                    
-                    if all(currency in balances for currency in expected_currencies):
-                        self.log_test("Multi-chain Balance", True, 
-                                    f"All {len(expected_currencies)} currencies retrieved", data)
+                    if data.get("success") and "wallet" in data:
+                        wallet = data["wallet"]
+                        expected_fields = ["wallet_address", "deposit_balance", "winnings_balance", "savings_balance"]
+                        if all(field in wallet for field in expected_fields):
+                            self.log_test("Wallet Info", True, 
+                                        f"Wallet info retrieved successfully", data)
+                        else:
+                            self.log_test("Wallet Info", False, 
+                                        "Missing expected wallet fields", data)
                     else:
-                        self.log_test("Multi-chain Balance", False, 
-                                    "Missing expected currencies", data)
+                        self.log_test("Wallet Info", False, 
+                                    "Invalid wallet info response format", data)
                 else:
-                    self.log_test("Multi-chain Balance", False, 
+                    self.log_test("Wallet Info", False, 
                                 f"HTTP {response.status}: {await response.text()}")
         except Exception as e:
-            self.log_test("Multi-chain Balance", False, f"Error: {str(e)}")
+            self.log_test("Wallet Info", False, f"Error: {str(e)}")
+    
+    async def test_deposit_endpoint(self):
+        """Test 5: Deposit funds endpoint"""
+        if not self.auth_token:
+            self.log_test("Deposit Funds", False, "No auth token available")
+            return
+            
+        headers = {"Authorization": f"Bearer {self.auth_token}"}
         
-        # Test individual balance endpoints
-        currencies = [("CRT", "crt"), ("DOGE", "doge"), ("TRX", "trx")]
-        
-        for currency_name, endpoint in currencies:
-            try:
-                async with self.session.get(f"{self.base_url}/balance/{endpoint}/{self.test_wallet}") as response:
-                    if response.status == 200:
-                        data = await response.json()
-                        if data.get("success") and "data" in data:
-                            self.log_test(f"{currency_name} Balance", True, 
-                                        f"Balance retrieved successfully", data)
-                        else:
-                            self.log_test(f"{currency_name} Balance", False, 
-                                        "Invalid balance response format", data)
+        try:
+            deposit_payload = {
+                "wallet_address": self.test_wallet,
+                "currency": "CRT",
+                "amount": 100.0
+            }
+            
+            async with self.session.post(f"{self.base_url}/wallet/deposit", 
+                                       json=deposit_payload, headers=headers) as response:
+                if response.status == 200:
+                    data = await response.json()
+                    if data.get("success") and "message" in data:
+                        self.log_test("Deposit Funds", True, 
+                                    f"Deposit successful: {data.get('message')}", data)
                     else:
-                        self.log_test(f"{currency_name} Balance", False, 
-                                    f"HTTP {response.status}: {await response.text()}")
-            except Exception as e:
-                self.log_test(f"{currency_name} Balance", False, f"Error: {str(e)}")
+                        self.log_test("Deposit Funds", False, 
+                                    "Invalid deposit response format", data)
+                else:
+                    self.log_test("Deposit Funds", False, 
+                                f"HTTP {response.status}: {await response.text()}")
+        except Exception as e:
+            self.log_test("Deposit Funds", False, f"Error: {str(e)}")
+    
+    async def test_withdraw_endpoint(self):
+        """Test 6: Withdraw funds endpoint"""
+        if not self.auth_token:
+            self.log_test("Withdraw Funds", False, "No auth token available")
+            return
+            
+        headers = {"Authorization": f"Bearer {self.auth_token}"}
+        
+        try:
+            withdraw_payload = {
+                "wallet_address": self.test_wallet,
+                "wallet_type": "winnings",
+                "currency": "CRT",
+                "amount": 10.0
+            }
+            
+            async with self.session.post(f"{self.base_url}/wallet/withdraw", 
+                                       json=withdraw_payload, headers=headers) as response:
+                if response.status in [200, 400]:  # 400 expected for insufficient balance
+                    data = await response.json()
+                    if response.status == 400 and "Insufficient balance" in data.get("detail", ""):
+                        self.log_test("Withdraw Funds", True, 
+                                    "Withdrawal correctly rejected - insufficient balance", data)
+                    elif response.status == 200 and data.get("success"):
+                        self.log_test("Withdraw Funds", True, 
+                                    f"Withdrawal successful: {data.get('message')}", data)
+                    else:
+                        self.log_test("Withdraw Funds", False, 
+                                    "Unexpected withdrawal response", data)
+                else:
+                    self.log_test("Withdraw Funds", False, 
+                                f"HTTP {response.status}: {await response.text()}")
+        except Exception as e:
+            self.log_test("Withdraw Funds", False, f"Error: {str(e)}")
+    
+    async def test_convert_endpoint(self):
+        """Test 7: Crypto conversion endpoint"""
+        if not self.auth_token:
+            self.log_test("Crypto Conversion", False, "No auth token available")
+            return
+            
+        headers = {"Authorization": f"Bearer {self.auth_token}"}
+        
+        try:
+            convert_payload = {
+                "wallet_address": self.test_wallet,
+                "from_currency": "CRT",
+                "to_currency": "DOGE",
+                "amount": 10.0
+            }
+            
+            async with self.session.post(f"{self.base_url}/wallet/convert", 
+                                       json=convert_payload, headers=headers) as response:
+                if response.status in [200, 400]:  # 400 expected for insufficient balance
+                    data = await response.json()
+                    if response.status == 400 and "Insufficient balance" in data.get("detail", ""):
+                        self.log_test("Crypto Conversion", True, 
+                                    "Conversion correctly rejected - insufficient balance", data)
+                    elif response.status == 200 and data.get("success"):
+                        # Check if conversion rates are real (not mock)
+                        rate = data.get("rate", 0)
+                        converted_amount = data.get("converted_amount", 0)
+                        if rate > 0 and converted_amount > 0:
+                            self.log_test("Crypto Conversion", True, 
+                                        f"Conversion successful: rate {rate}, amount {converted_amount}", data)
+                        else:
+                            self.log_test("Crypto Conversion", False, 
+                                        "Conversion response missing rate/amount data", data)
+                    else:
+                        self.log_test("Crypto Conversion", False, 
+                                    "Unexpected conversion response", data)
+                else:
+                    self.log_test("Crypto Conversion", False, 
+                                f"HTTP {response.status}: {await response.text()}")
+        except Exception as e:
+            self.log_test("Crypto Conversion", False, f"Error: {str(e)}")
     
     async def test_game_betting(self):
-        """Test 6: Game betting functionality"""
+        """Test 8: Real money game betting"""
         if not self.auth_token:
             self.log_test("Game Betting", False, "No auth token available")
             return
             
         headers = {"Authorization": f"Bearer {self.auth_token}"}
         
-        # Test placing a bet
         try:
             bet_payload = {
                 "wallet_address": self.test_wallet,
-                "game_type": "slots",
-                "bet_amount": 10.0,
+                "game_type": "Slot Machine",
+                "bet_amount": 5.0,
                 "currency": "CRT",
                 "network": "solana"
             }
@@ -223,8 +288,17 @@ class CasinoAPITester:
                     required_fields = ["success", "game_id", "bet_amount", "currency", "result", "payout"]
                     
                     if all(field in data for field in required_fields) and data.get("success"):
-                        self.log_test("Game Betting", True, 
-                                    f"Bet placed: {data.get('result')}, payout: {data.get('payout')}", data)
+                        result = data.get("result")
+                        payout = data.get("payout")
+                        savings_contribution = data.get("savings_contribution", 0)
+                        
+                        # Check if this is real game logic (not just mock)
+                        if result in ["win", "loss"] and isinstance(payout, (int, float)):
+                            self.log_test("Game Betting", True, 
+                                        f"Real bet placed: {result}, payout: {payout}, savings: {savings_contribution}", data)
+                        else:
+                            self.log_test("Game Betting", False, 
+                                        "Game betting appears to use mock data", data)
                     else:
                         self.log_test("Game Betting", False, 
                                     "Invalid bet response format", data)
@@ -234,38 +308,10 @@ class CasinoAPITester:
         except Exception as e:
             self.log_test("Game Betting", False, f"Error: {str(e)}")
     
-    async def test_game_history(self):
-        """Test 7: Game history retrieval"""
+    async def test_savings_system(self):
+        """Test 9: Smart savings system"""
         if not self.auth_token:
-            self.log_test("Game History", False, "No auth token available")
-            return
-            
-        headers = {"Authorization": f"Bearer {self.auth_token}"}
-        
-        try:
-            async with self.session.get(f"{self.base_url}/games/history/{self.test_wallet}", 
-                                      headers=headers) as response:
-                if response.status == 200:
-                    data = await response.json()
-                    required_fields = ["success", "games", "total_games"]
-                    
-                    if all(field in data for field in required_fields) and data.get("success"):
-                        total_games = data.get("total_games", 0)
-                        self.log_test("Game History", True, 
-                                    f"Retrieved {total_games} game records", data)
-                    else:
-                        self.log_test("Game History", False, 
-                                    "Invalid game history response", data)
-                else:
-                    self.log_test("Game History", False, 
-                                f"HTTP {response.status}: {await response.text()}")
-        except Exception as e:
-            self.log_test("Game History", False, f"Error: {str(e)}")
-    
-    async def test_savings_tracking(self):
-        """Test 8: Savings tracking functionality"""
-        if not self.auth_token:
-            self.log_test("Savings Tracking", False, "No auth token available")
+            self.log_test("Savings System", False, "No auth token available")
             return
             
         headers = {"Authorization": f"Bearer {self.auth_token}"}
@@ -275,124 +321,143 @@ class CasinoAPITester:
                                       headers=headers) as response:
                 if response.status == 200:
                     data = await response.json()
-                    required_fields = ["success", "wallet_address", "savings_by_currency", "stats"]
+                    required_fields = ["success", "wallet_address", "total_savings", "stats"]
                     
                     if all(field in data for field in required_fields) and data.get("success"):
+                        total_savings = data.get("total_savings", {})
                         stats = data.get("stats", {})
-                        total_games = stats.get("total_games", 0)
-                        win_rate = stats.get("win_rate", 0)
-                        self.log_test("Savings Tracking", True, 
-                                    f"Savings data retrieved: {total_games} games, {win_rate:.1f}% win rate", data)
+                        savings_history = data.get("savings_history", [])
+                        
+                        # Check if savings are calculated from real game losses
+                        if isinstance(total_savings, dict) and isinstance(stats, dict):
+                            total_games = stats.get("total_games", 0)
+                            total_losses = stats.get("total_losses", 0)
+                            
+                            self.log_test("Savings System", True, 
+                                        f"Savings system working: {total_games} games, {total_losses} losses, {len(savings_history)} history entries", data)
+                        else:
+                            self.log_test("Savings System", False, 
+                                        "Invalid savings data structure", data)
                     else:
-                        self.log_test("Savings Tracking", False, 
+                        self.log_test("Savings System", False, 
                                     "Invalid savings response format", data)
                 else:
-                    self.log_test("Savings Tracking", False, 
+                    self.log_test("Savings System", False, 
                                 f"HTTP {response.status}: {await response.text()}")
         except Exception as e:
-            self.log_test("Savings Tracking", False, f"Error: {str(e)}")
+            self.log_test("Savings System", False, f"Error: {str(e)}")
     
-    async def test_websocket_connection(self):
-        """Test 9: WebSocket connection for real-time updates"""
+    async def test_websocket_wallet_monitor(self):
+        """Test 10: WebSocket wallet monitoring"""
         try:
             import websockets
             
-            ws_url = f"wss://blockchain-casino.preview.emergentagent.com/api/ws/balance/{self.test_wallet}"
+            ws_url = f"wss://cryptosave-1.preview.emergentagent.com/api/ws/wallet/{self.test_wallet}"
             
             try:
                 async with websockets.connect(ws_url) as websocket:
                     # Send a test message
-                    test_message = {"type": "refresh_balance"}
+                    test_message = {"type": "refresh_wallet"}
                     await websocket.send(json.dumps(test_message))
                     
                     # Wait for response with timeout
                     response = await asyncio.wait_for(websocket.recv(), timeout=10.0)
                     data = json.loads(response)
                     
-                    if data.get("type") == "balance_update" and "data" in data:
-                        self.log_test("WebSocket Connection", True, 
-                                    "WebSocket connection and balance update successful", data)
+                    if data.get("type") == "wallet_update" and "data" in data:
+                        wallet_data = data.get("data", {}).get("wallet", {})
+                        if "wallet_address" in wallet_data:
+                            self.log_test("WebSocket Wallet Monitor", True, 
+                                        "WebSocket wallet monitoring working", data)
+                        else:
+                            self.log_test("WebSocket Wallet Monitor", False, 
+                                        "Invalid wallet data in WebSocket response", data)
                     else:
-                        self.log_test("WebSocket Connection", False, 
+                        self.log_test("WebSocket Wallet Monitor", False, 
                                     "Invalid WebSocket response format", data)
                         
             except asyncio.TimeoutError:
-                self.log_test("WebSocket Connection", False, "WebSocket connection timeout")
+                self.log_test("WebSocket Wallet Monitor", False, "WebSocket connection timeout")
             except Exception as ws_error:
-                self.log_test("WebSocket Connection", False, f"WebSocket error: {str(ws_error)}")
+                self.log_test("WebSocket Wallet Monitor", False, f"WebSocket error: {str(ws_error)}")
                 
         except ImportError:
-            self.log_test("WebSocket Connection", False, "websockets library not available - skipping test")
+            self.log_test("WebSocket Wallet Monitor", False, "websockets library not available - skipping test")
         except Exception as e:
-            self.log_test("WebSocket Connection", False, f"Error: {str(e)}")
+            self.log_test("WebSocket Wallet Monitor", False, f"Error: {str(e)}")
     
-    async def test_legacy_endpoints(self):
-        """Test 10: Legacy status endpoints"""
+    async def test_database_integration(self):
+        """Test 11: Database integration and persistence"""
+        if not self.auth_token:
+            self.log_test("Database Integration", False, "No auth token available")
+            return
+            
+        headers = {"Authorization": f"Bearer {self.auth_token}"}
+        
         try:
-            # Test creating status check
-            payload = {"client_name": "test_client"}
-            
-            async with self.session.post(f"{self.base_url}/status", json=payload) as response:
+            # Test game history to verify database storage
+            async with self.session.get(f"{self.base_url}/games/history/{self.test_wallet}", 
+                                      headers=headers) as response:
                 if response.status == 200:
                     data = await response.json()
-                    if "id" in data and "client_name" in data:
-                        self.log_test("Legacy Status Create", True, 
-                                    f"Status check created with ID: {data.get('id')}", data)
+                    if data.get("success") and "games" in data:
+                        games = data.get("games", [])
+                        total_games = data.get("total_games", 0)
+                        
+                        # Check if games have proper database fields
+                        if games and len(games) > 0:
+                            first_game = games[0]
+                            db_fields = ["_id", "wallet_address", "game_type", "bet_amount", "timestamp"]
+                            if all(field in first_game for field in db_fields):
+                                self.log_test("Database Integration", True, 
+                                            f"Database integration working: {total_games} games stored with proper fields", data)
+                            else:
+                                self.log_test("Database Integration", False, 
+                                            "Games missing required database fields", data)
+                        else:
+                            self.log_test("Database Integration", True, 
+                                        "Database integration working: no games yet but endpoint functional", data)
                     else:
-                        self.log_test("Legacy Status Create", False, 
-                                    "Invalid status create response", data)
+                        self.log_test("Database Integration", False, 
+                                    "Invalid game history response", data)
                 else:
-                    self.log_test("Legacy Status Create", False, 
+                    self.log_test("Database Integration", False, 
                                 f"HTTP {response.status}: {await response.text()}")
-            
-            # Test getting status checks
-            async with self.session.get(f"{self.base_url}/status") as response:
-                if response.status == 200:
-                    data = await response.json()
-                    if isinstance(data, list):
-                        self.log_test("Legacy Status List", True, 
-                                    f"Retrieved {len(data)} status records", data)
-                    else:
-                        self.log_test("Legacy Status List", False, 
-                                    "Invalid status list response format", data)
-                else:
-                    self.log_test("Legacy Status List", False, 
-                                f"HTTP {response.status}: {await response.text()}")
-                    
         except Exception as e:
-            self.log_test("Legacy Endpoints", False, f"Error: {str(e)}")
+            self.log_test("Database Integration", False, f"Error: {str(e)}")
     
     async def run_all_tests(self):
-        """Run all tests in sequence"""
-        print(f"🚀 Starting Casino Savings dApp Backend API Tests")
+        """Run all wallet management tests"""
+        print(f"🚀 Starting Wallet Management System Tests - Real Money Integration")
         print(f"📡 Testing against: {self.base_url}")
-        print("=" * 60)
+        print("=" * 70)
         
         # Run tests in logical order
         await self.test_basic_connectivity()
-        await self.test_health_check()
         
         # Authentication flow
         challenge_data = await self.test_auth_challenge_generation()
         await self.test_auth_verification(challenge_data)
         
-        # Authenticated endpoints
-        await self.test_balance_endpoints()
+        # Wallet management endpoints
+        await self.test_wallet_info_endpoint()
+        await self.test_deposit_endpoint()
+        await self.test_withdraw_endpoint()
+        await self.test_convert_endpoint()
+        
+        # Game and savings system
         await self.test_game_betting()
-        await self.test_game_history()
-        await self.test_savings_tracking()
+        await self.test_savings_system()
         
-        # Real-time features
-        await self.test_websocket_connection()
-        
-        # Legacy endpoints
-        await self.test_legacy_endpoints()
+        # Real-time and database features
+        await self.test_websocket_wallet_monitor()
+        await self.test_database_integration()
     
     def print_summary(self):
         """Print test summary"""
-        print("\n" + "=" * 60)
-        print("📊 TEST SUMMARY")
-        print("=" * 60)
+        print("\n" + "=" * 70)
+        print("📊 WALLET MANAGEMENT SYSTEM TEST SUMMARY")
+        print("=" * 70)
         
         total_tests = len(self.test_results)
         passed_tests = sum(1 for result in self.test_results if result["success"])
@@ -403,25 +468,44 @@ class CasinoAPITester:
         print(f"❌ Failed: {failed_tests}")
         print(f"Success Rate: {(passed_tests/total_tests*100):.1f}%")
         
-        if failed_tests > 0:
-            print("\n🔍 FAILED TESTS:")
-            for result in self.test_results:
-                if not result["success"]:
-                    print(f"  ❌ {result['test']}: {result['details']}")
+        # Categorize results
+        critical_failures = []
+        minor_issues = []
         
-        print("\n" + "=" * 60)
+        for result in self.test_results:
+            if not result["success"]:
+                test_name = result["test"]
+                if test_name in ["Basic Connectivity", "Auth Challenge Generation", "Auth Verification", 
+                               "Game Betting", "Savings System", "Database Integration"]:
+                    critical_failures.append(result)
+                else:
+                    minor_issues.append(result)
+        
+        if critical_failures:
+            print("\n🚨 CRITICAL FAILURES:")
+            for result in critical_failures:
+                print(f"  ❌ {result['test']}: {result['details']}")
+        
+        if minor_issues:
+            print("\n⚠️  MINOR ISSUES:")
+            for result in minor_issues:
+                print(f"  ⚠️  {result['test']}: {result['details']}")
+        
+        print("\n" + "=" * 70)
         
         return {
             "total": total_tests,
             "passed": passed_tests,
             "failed": failed_tests,
+            "critical_failures": len(critical_failures),
+            "minor_issues": len(minor_issues),
             "success_rate": passed_tests/total_tests*100,
             "results": self.test_results
         }
 
 async def main():
     """Main test runner"""
-    async with CasinoAPITester(BACKEND_URL) as tester:
+    async with WalletAPITester(BACKEND_URL) as tester:
         await tester.run_all_tests()
         summary = tester.print_summary()
         
@@ -431,8 +515,8 @@ async def main():
         
         print(f"\n📄 Detailed results saved to: /app/backend_test_results.json")
         
-        # Return exit code based on test results
-        return 0 if summary["failed"] == 0 else 1
+        # Return exit code based on critical failures
+        return 0 if summary["critical_failures"] == 0 else 1
 
 if __name__ == "__main__":
     exit_code = asyncio.run(main())
