@@ -1,14 +1,16 @@
 {
-  "total": 14,
-  "passed": 14,
-  "failed": 0,
-  "success_rate": 100.0,
+  "total": 11,
+  "passed": 9,
+  "failed": 2,
+  "critical_failures": 0,
+  "minor_issues": 2,
+  "success_rate": 81.81818181818183,
   "results": [
     {
       "test": "Basic Connectivity",
       "success": true,
       "details": "API accessible, version: 1.0.0",
-      "timestamp": "2025-08-21T23:20:47.569161",
+      "timestamp": "2025-08-23T00:39:39.435678",
       "response_data": {
         "message": "Casino Savings dApp API",
         "version": "1.0.0",
@@ -26,40 +28,14 @@
       }
     },
     {
-      "test": "Health Check",
-      "success": true,
-      "details": "All services checked, 2/3 healthy",
-      "timestamp": "2025-08-21T23:20:47.580517",
-      "response_data": {
-        "status": "degraded",
-        "services": {
-          "solana": {
-            "success": false,
-            "error": "'NewType' object has no attribute 'Confirmed'"
-          },
-          "dogecoin": {
-            "success": true,
-            "version": "1.14.6",
-            "blocks": 4500000,
-            "network": "mainnet"
-          },
-          "tron": {
-            "success": true,
-            "network": "mainnet"
-          }
-        },
-        "timestamp": "2025-08-21T23:20:47.577112"
-      }
-    },
-    {
       "test": "Auth Challenge Generation",
       "success": true,
       "details": "Challenge generated successfully",
-      "timestamp": "2025-08-21T23:20:47.630392",
+      "timestamp": "2025-08-23T00:39:39.446764",
       "response_data": {
         "success": true,
-        "challenge": "Hello, please sign this message to authenticate with Casino dApp!\n\nChain: Multi-Chain Casino\nAddress: DemoWallet123456789ABC\nApp: CasinoSavings\nTime: 2025-08-21T23:20:47.586700\nNonce: 8c64d3a67e6fa8e4be349119fba94ff1\n\nThis signature will be used to verify your wallet ownership.",
-        "challenge_hash": "ae1d932ef4d1143fed8ea61698588a71931607e71b0b0de939acef9a053f2c43",
+        "challenge": "Hello, please sign this message to authenticate with Casino dApp!\n\nChain: Multi-Chain Casino\nAddress: RealWallet9876543210XYZ\nApp: CasinoSavings\nTime: 2025-08-23T00:39:39.444192\nNonce: ec4f23c1b8334a16ccdb37f63a2942ae\n\nThis signature will be used to verify your wallet ownership.",
+        "challenge_hash": "15128dcf22940f5d7b6fd9f6e6f06c1104aecd7001549258e82a45ebcd79f1fe",
         "network": "solana"
       }
     },
@@ -67,144 +43,121 @@
       "test": "Auth Verification",
       "success": true,
       "details": "JWT token generated, expires in 86400s",
-      "timestamp": "2025-08-21T23:20:47.642414",
+      "timestamp": "2025-08-23T00:39:39.494546",
       "response_data": {
         "success": true,
-        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ3YWxsZXRfYWRkcmVzcyI6IkRlbW9XYWxsZXQxMjM0NTY3ODlBQkMiLCJuZXR3b3JrIjoic29sYW5hIiwiZXhwIjoxNzU1OTA0ODQ3LCJpYXQiOjE3NTU4MTg0NDcsInR5cGUiOiJ3YWxsZXRfYXV0aCJ9._PFiZTubrMNqIQjdMV1znTfpPTiUfRV84ZeUHXsRh34",
-        "wallet_address": "DemoWallet123456789ABC",
+        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ3YWxsZXRfYWRkcmVzcyI6IlJlYWxXYWxsZXQ5ODc2NTQzMjEwWFlaIiwibmV0d29yayI6InNvbGFuYSIsImV4cCI6MTc1NTk5NTk3OSwiaWF0IjoxNzU1OTA5NTc5LCJ0eXBlIjoid2FsbGV0X2F1dGgifQ.JQck6UK4537Vr_jprcVYZNpzZwbYinziaEqaphTLakE",
+        "wallet_address": "RealWallet9876543210XYZ",
         "network": "solana",
         "expires_in": 86400
       }
     },
     {
-      "test": "Multi-chain Balance",
+      "test": "Wallet Info",
       "success": true,
-      "details": "All 3 currencies retrieved",
-      "timestamp": "2025-08-21T23:20:47.717337",
+      "details": "Wallet info retrieved successfully",
+      "timestamp": "2025-08-23T00:39:39.573095",
       "response_data": {
-        "wallet_address": "DemoWallet123456789ABC",
-        "balances": {
-          "CRT": {
-            "crt_balance": 0.0,
-            "raw_balance": 0,
-            "usd_value": 0.0,
-            "price_per_token": 0.005045,
-            "last_updated": "2025-08-21T23:20:47.673046"
+        "success": true,
+        "wallet": {
+          "wallet_address": "RealWallet9876543210XYZ",
+          "deposit_balance": {
+            "CRT": 0.0,
+            "DOGE": 0.0,
+            "TRX": 0.0
           },
-          "DOGE": {
-            "success": true,
-            "balance": 100.0,
-            "unconfirmed": 0.0,
-            "total": 100.0,
-            "address": "DemoWallet123456789ABC"
+          "winnings_balance": {
+            "CRT": 0.0,
+            "DOGE": 0.0,
+            "TRX": 0.0
           },
-          "TRX": {
-            "success": true,
-            "balance": 0.0,
-            "address": "DemoWallet123456789ABC"
-          }
-        },
-        "last_updated": "2025-08-21T23:20:47.673073"
-      }
-    },
-    {
-      "test": "CRT Balance",
-      "success": true,
-      "details": "Balance retrieved successfully",
-      "timestamp": "2025-08-21T23:20:47.726340",
-      "response_data": {
-        "success": true,
-        "data": {
-          "crt_balance": 0.0,
-          "raw_balance": 0,
-          "usd_value": 0.0,
-          "price_per_token": 0.005045,
-          "last_updated": "2025-08-21T23:20:47.723129"
+          "savings_balance": {
+            "CRT": 0.0,
+            "DOGE": 0.0,
+            "TRX": 0.0
+          },
+          "session_start_balance": {
+            "CRT": 0.0,
+            "DOGE": 0.0,
+            "TRX": 0.0
+          },
+          "session_peak_balance": {
+            "CRT": 0.0,
+            "DOGE": 0.0,
+            "TRX": 0.0
+          },
+          "last_updated": "2025-08-23T00:39:39.516991"
         }
       }
     },
     {
-      "test": "DOGE Balance",
+      "test": "Deposit Funds",
       "success": true,
-      "details": "Balance retrieved successfully",
-      "timestamp": "2025-08-21T23:20:47.734350",
+      "details": "Deposit successful: Deposited 100.0 CRT",
+      "timestamp": "2025-08-23T00:39:39.597465",
       "response_data": {
         "success": true,
-        "data": {
-          "success": true,
-          "balance": 100.0,
-          "unconfirmed": 0.0,
-          "total": 100.0,
-          "address": "DemoWallet123456789ABC"
-        }
+        "message": "Deposited 100.0 CRT",
+        "transaction_id": "68a90dcbfc57e8553ad73fde"
       }
     },
     {
-      "test": "TRX Balance",
+      "test": "Withdraw Funds",
+      "success": false,
+      "details": "HTTP 500: {\"detail\":\"400: Insufficient balance\"}",
+      "timestamp": "2025-08-23T00:39:39.646802",
+      "response_data": null
+    },
+    {
+      "test": "Crypto Conversion",
       "success": true,
-      "details": "Balance retrieved successfully",
-      "timestamp": "2025-08-21T23:20:47.783549",
+      "details": "Conversion successful: rate 21.5, amount 215.0",
+      "timestamp": "2025-08-23T00:39:39.657164",
       "response_data": {
         "success": true,
-        "data": {
-          "success": true,
-          "balance": 0.0,
-          "address": "DemoWallet123456789ABC"
-        }
+        "message": "Converted 10.0 CRT to 215.0000 DOGE",
+        "converted_amount": 215.0,
+        "rate": 21.5
       }
     },
     {
       "test": "Game Betting",
       "success": true,
-      "details": "Bet placed: loss, payout: 0",
-      "timestamp": "2025-08-21T23:20:47.814611",
+      "details": "Real bet placed: loss, payout: 0, savings: 5.0",
+      "timestamp": "2025-08-23T00:39:39.712971",
       "response_data": {
         "success": true,
-        "game_id": "game_eb0e2573",
-        "bet_amount": 10.0,
+        "game_id": "game_b5baab98",
+        "bet_amount": 5.0,
         "currency": "CRT",
         "result": "loss",
         "payout": 0,
-        "savings_contribution": 10.0
+        "savings_contribution": 5.0,
+        "message": "Saved 5.0 CRT to your vault!"
       }
     },
     {
-      "test": "Game History",
+      "test": "Savings System",
       "success": true,
-      "details": "Retrieved 1 game records",
-      "timestamp": "2025-08-21T23:20:47.866002",
+      "details": "Savings system working: 1 games, 1 losses, 1 history entries",
+      "timestamp": "2025-08-23T00:39:39.725877",
       "response_data": {
         "success": true,
-        "games": [
+        "wallet_address": "RealWallet9876543210XYZ",
+        "total_savings": {
+          "CRT": 5.0
+        },
+        "total_usd": 25.099999999999998,
+        "savings_history": [
           {
-            "_id": "68a7a9cfeb7e49dc09c7793b",
-            "wallet_address": "DemoWallet123456789ABC",
-            "game_type": "slots",
-            "bet_amount": 10.0,
+            "_id": "68a90dcbfc57e8553ad73fe0",
+            "date": "2025-08-23 00:39",
+            "game": "Slot Machine",
             "currency": "CRT",
-            "network": "solana",
-            "timestamp": "2025-08-21T23:20:47.792000",
-            "game_id": "game_eb0e2573",
-            "result": "loss",
-            "payout": 0,
-            "status": "completed"
-          }
-        ],
-        "total_games": 1
-      }
-    },
-    {
-      "test": "Savings Tracking",
-      "success": true,
-      "details": "Savings data retrieved: 1 games, 0.0% win rate",
-      "timestamp": "2025-08-21T23:20:47.878940",
-      "response_data": {
-        "success": true,
-        "wallet_address": "DemoWallet123456789ABC",
-        "savings_by_currency": [
-          {
-            "_id": "CRT",
-            "total_saved": 10.0
+            "amount": 5.0,
+            "game_result": "Loss",
+            "running_total": 5.0,
+            "game_id": "game_b5baab98"
           }
         ],
         "stats": {
@@ -216,63 +169,36 @@
       }
     },
     {
-      "test": "WebSocket Connection",
-      "success": true,
-      "details": "WebSocket connection and balance update successful",
-      "timestamp": "2025-08-21T23:20:47.966289",
-      "response_data": {
-        "type": "balance_update",
-        "wallet": "DemoWallet123456789ABC",
-        "data": {
-          "wallet_address": "DemoWallet123456789ABC",
-          "balances": {
-            "CRT": {
-              "crt_balance": 0.0,
-              "raw_balance": 0,
-              "usd_value": 0.0,
-              "price_per_token": 0.005045,
-              "last_updated": "2025-08-21T23:20:47.962077"
-            },
-            "DOGE": {
-              "success": true,
-              "balance": 100.0,
-              "unconfirmed": 0.0,
-              "total": 100.0,
-              "address": "DemoWallet123456789ABC"
-            },
-            "TRX": {
-              "success": true,
-              "balance": 0.0,
-              "address": "DemoWallet123456789ABC"
-            }
-          },
-          "last_updated": "2025-08-21T23:20:47.962104"
-        }
-      }
+      "test": "WebSocket Wallet Monitor",
+      "success": false,
+      "details": "WebSocket connection timeout",
+      "timestamp": "2025-08-23T00:39:49.832272",
+      "response_data": null
     },
     {
-      "test": "Legacy Status Create",
+      "test": "Database Integration",
       "success": true,
-      "details": "Status check created with ID: 7cad1fbd-f510-4952-9ff6-2fe009e045c5",
-      "timestamp": "2025-08-21T23:20:47.994970",
+      "details": "Database integration working: 1 games stored with proper fields",
+      "timestamp": "2025-08-23T00:39:49.841639",
       "response_data": {
-        "id": "7cad1fbd-f510-4952-9ff6-2fe009e045c5",
-        "client_name": "test_client",
-        "timestamp": "2025-08-21T23:20:47.976903"
+        "success": true,
+        "games": [
+          {
+            "_id": "68a90dcbfc57e8553ad73fe0",
+            "wallet_address": "RealWallet9876543210XYZ",
+            "game_type": "Slot Machine",
+            "bet_amount": 5.0,
+            "currency": "CRT",
+            "network": "solana",
+            "timestamp": "2025-08-23T00:39:39.662000",
+            "game_id": "game_b5baab98",
+            "result": "loss",
+            "payout": 0,
+            "status": "completed"
+          }
+        ],
+        "total_games": 1
       }
-    },
-    {
-      "test": "Legacy Status List",
-      "success": true,
-      "details": "Retrieved 1 status records",
-      "timestamp": "2025-08-21T23:20:48.009504",
-      "response_data": [
-        {
-          "id": "7cad1fbd-f510-4952-9ff6-2fe009e045c5",
-          "client_name": "test_client",
-          "timestamp": "2025-08-21T23:20:47.976000"
-        }
-      ]
     }
   ]
 }
