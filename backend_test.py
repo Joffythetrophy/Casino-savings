@@ -601,8 +601,304 @@ class WalletAPITester:
         except Exception as e:
             self.log_test("Redis Caching", False, f"Error: {str(e)}")
 
+    async def test_real_blockchain_balance_doge(self):
+        """Test 17: Real DOGE blockchain balance endpoint"""
+        try:
+            # Test with valid DOGE address
+            valid_doge_address = "DH5yaieqoZN36fDVciNyRueRGvGLR3mr7L"
+            
+            async with self.session.get(f"{self.base_url}/wallet/balance/DOGE?wallet_address={valid_doge_address}") as response:
+                if response.status == 200:
+                    data = await response.json()
+                    required_fields = ["success", "balance", "currency", "address", "source"]
+                    
+                    if all(field in data for field in required_fields):
+                        if data.get("success") and data.get("source") == "blockcypher":
+                            balance = data.get("balance", 0)
+                            self.log_test("Real DOGE Balance", True, 
+                                        f"Real DOGE balance retrieved: {balance} DOGE from BlockCypher API", data)
+                        else:
+                            self.log_test("Real DOGE Balance", False, 
+                                        f"DOGE balance not from real blockchain API: source={data.get('source')}", data)
+                    else:
+                        self.log_test("Real DOGE Balance", False, 
+                                    "Missing required fields in DOGE balance response", data)
+                else:
+                    self.log_test("Real DOGE Balance", False, 
+                                f"HTTP {response.status}: {await response.text()}")
+                    
+            # Test with invalid DOGE address
+            invalid_address = "invalid_doge_address"
+            async with self.session.get(f"{self.base_url}/wallet/balance/DOGE?wallet_address={invalid_address}") as response:
+                if response.status in [400, 500]:
+                    data = await response.json()
+                    if "error" in data:
+                        self.log_test("DOGE Invalid Address Handling", True, 
+                                    "Invalid DOGE address correctly rejected", data)
+                    else:
+                        self.log_test("DOGE Invalid Address Handling", False, 
+                                    "Invalid address not properly handled", data)
+                else:
+                    self.log_test("DOGE Invalid Address Handling", False, 
+                                f"Expected error for invalid address, got HTTP {response.status}")
+                    
+        except Exception as e:
+            self.log_test("Real DOGE Balance", False, f"Error: {str(e)}")
+
+    async def test_real_blockchain_balance_trx(self):
+        """Test 18: Real TRX blockchain balance endpoint"""
+        try:
+            # Test with valid TRX address
+            valid_trx_address = "TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t"
+            
+            async with self.session.get(f"{self.base_url}/wallet/balance/TRX?wallet_address={valid_trx_address}") as response:
+                if response.status == 200:
+                    data = await response.json()
+                    required_fields = ["success", "balance", "currency", "address", "source"]
+                    
+                    if all(field in data for field in required_fields):
+                        if data.get("success") and data.get("source") == "trongrid":
+                            balance = data.get("balance", 0)
+                            self.log_test("Real TRX Balance", True, 
+                                        f"Real TRX balance retrieved: {balance} TRX from TronGrid API", data)
+                        else:
+                            self.log_test("Real TRX Balance", False, 
+                                        f"TRX balance not from real blockchain API: source={data.get('source')}", data)
+                    else:
+                        self.log_test("Real TRX Balance", False, 
+                                    "Missing required fields in TRX balance response", data)
+                else:
+                    self.log_test("Real TRX Balance", False, 
+                                f"HTTP {response.status}: {await response.text()}")
+                    
+            # Test with invalid TRX address
+            invalid_address = "invalid_trx_address"
+            async with self.session.get(f"{self.base_url}/wallet/balance/TRX?wallet_address={invalid_address}") as response:
+                if response.status in [400, 500]:
+                    data = await response.json()
+                    if "error" in data:
+                        self.log_test("TRX Invalid Address Handling", True, 
+                                    "Invalid TRX address correctly rejected", data)
+                    else:
+                        self.log_test("TRX Invalid Address Handling", False, 
+                                    "Invalid address not properly handled", data)
+                else:
+                    self.log_test("TRX Invalid Address Handling", False, 
+                                f"Expected error for invalid address, got HTTP {response.status}")
+                    
+        except Exception as e:
+            self.log_test("Real TRX Balance", False, f"Error: {str(e)}")
+
+    async def test_real_blockchain_balance_crt(self):
+        """Test 19: Real CRT blockchain balance endpoint"""
+        try:
+            # Test with valid Solana address
+            valid_solana_address = "DFvHX8ZdqNqbCLJKnwe4h7qqj3hj4dw3pYvQRzweWnP7"
+            
+            async with self.session.get(f"{self.base_url}/wallet/balance/CRT?wallet_address={valid_solana_address}") as response:
+                if response.status == 200:
+                    data = await response.json()
+                    required_fields = ["success", "balance", "currency", "address", "source"]
+                    
+                    if all(field in data for field in required_fields):
+                        if data.get("success") and data.get("source") == "solana_rpc":
+                            balance = data.get("balance", 0)
+                            mint_address = data.get("mint_address")
+                            self.log_test("Real CRT Balance", True, 
+                                        f"Real CRT balance retrieved: {balance} CRT from Solana RPC, mint: {mint_address}", data)
+                        else:
+                            self.log_test("Real CRT Balance", False, 
+                                        f"CRT balance not from real blockchain API: source={data.get('source')}", data)
+                    else:
+                        self.log_test("Real CRT Balance", False, 
+                                    "Missing required fields in CRT balance response", data)
+                else:
+                    self.log_test("Real CRT Balance", False, 
+                                f"HTTP {response.status}: {await response.text()}")
+                    
+            # Test with invalid Solana address
+            invalid_address = "invalid_solana_address"
+            async with self.session.get(f"{self.base_url}/wallet/balance/CRT?wallet_address={invalid_address}") as response:
+                if response.status in [400, 500]:
+                    data = await response.json()
+                    if "error" in data:
+                        self.log_test("CRT Invalid Address Handling", True, 
+                                    "Invalid Solana address correctly rejected", data)
+                    else:
+                        self.log_test("CRT Invalid Address Handling", False, 
+                                    "Invalid address not properly handled", data)
+                else:
+                    self.log_test("CRT Invalid Address Handling", False, 
+                                f"Expected error for invalid address, got HTTP {response.status}")
+                    
+        except Exception as e:
+            self.log_test("Real CRT Balance", False, f"Error: {str(e)}")
+
+    async def test_real_blockchain_balance_sol(self):
+        """Test 20: Real SOL blockchain balance endpoint"""
+        try:
+            # Test with valid Solana address
+            valid_solana_address = "DFvHX8ZdqNqbCLJKnwe4h7qqj3hj4dw3pYvQRzweWnP7"
+            
+            async with self.session.get(f"{self.base_url}/wallet/balance/SOL?wallet_address={valid_solana_address}") as response:
+                if response.status == 200:
+                    data = await response.json()
+                    required_fields = ["success", "balance", "currency", "address", "source"]
+                    
+                    if all(field in data for field in required_fields):
+                        if data.get("success") and data.get("source") == "solana_rpc":
+                            balance = data.get("balance", 0)
+                            lamports = data.get("lamports", 0)
+                            self.log_test("Real SOL Balance", True, 
+                                        f"Real SOL balance retrieved: {balance} SOL ({lamports} lamports) from Solana RPC", data)
+                        else:
+                            self.log_test("Real SOL Balance", False, 
+                                        f"SOL balance not from real blockchain API: source={data.get('source')}", data)
+                    else:
+                        self.log_test("Real SOL Balance", False, 
+                                    "Missing required fields in SOL balance response", data)
+                else:
+                    self.log_test("Real SOL Balance", False, 
+                                f"HTTP {response.status}: {await response.text()}")
+                    
+        except Exception as e:
+            self.log_test("Real SOL Balance", False, f"Error: {str(e)}")
+
+    async def test_all_blockchain_balances(self):
+        """Test 21: Get all real blockchain balances endpoint"""
+        try:
+            # Test with valid Solana address (works for all chains)
+            valid_address = "DFvHX8ZdqNqbCLJKnwe4h7qqj3hj4dw3pYvQRzweWnP7"
+            
+            async with self.session.get(f"{self.base_url}/blockchain/balances?wallet_address={valid_address}") as response:
+                if response.status == 200:
+                    data = await response.json()
+                    required_fields = ["success", "wallet_address", "balances", "last_updated"]
+                    
+                    if all(field in data for field in required_fields) and data.get("success"):
+                        balances = data.get("balances", {})
+                        errors = data.get("errors", {})
+                        
+                        # Check if we have balances for expected currencies
+                        expected_currencies = ["DOGE", "TRX", "CRT", "SOL"]
+                        found_currencies = []
+                        real_sources = []
+                        
+                        for currency in expected_currencies:
+                            if currency in balances:
+                                found_currencies.append(currency)
+                                source = balances[currency].get("source", "unknown")
+                                real_sources.append(f"{currency}:{source}")
+                        
+                        if len(found_currencies) >= 3:  # At least 3 currencies should work
+                            self.log_test("All Blockchain Balances", True, 
+                                        f"Multi-chain balance retrieval working: {found_currencies}, sources: {real_sources}", data)
+                        else:
+                            self.log_test("All Blockchain Balances", False, 
+                                        f"Insufficient blockchain integrations working: only {found_currencies}", data)
+                    else:
+                        self.log_test("All Blockchain Balances", False, 
+                                    "Invalid multi-chain balance response format", data)
+                else:
+                    self.log_test("All Blockchain Balances", False, 
+                                f"HTTP {response.status}: {await response.text()}")
+                    
+        except Exception as e:
+            self.log_test("All Blockchain Balances", False, f"Error: {str(e)}")
+
+    async def test_crt_token_info(self):
+        """Test 22: CRT token information endpoint"""
+        try:
+            async with self.session.get(f"{self.base_url}/crt/info") as response:
+                if response.status == 200:
+                    data = await response.json()
+                    required_fields = ["success", "token_info", "current_price", "mint_address", "decimals"]
+                    
+                    if all(field in data for field in required_fields) and data.get("success"):
+                        token_info = data.get("token_info", {})
+                        mint_address = data.get("mint_address")
+                        decimals = data.get("decimals")
+                        current_price = data.get("current_price")
+                        
+                        # Check if this is real CRT token info
+                        expected_mint = "6kx78Yu19PmGjb9YbfP5nRUvFPY4kFcDKKmGpdSpump"
+                        if mint_address == expected_mint and decimals == 6:
+                            # Check token info structure
+                            if isinstance(token_info, dict) and "supply" in token_info:
+                                supply = token_info.get("supply", 0)
+                                if supply > 900000000:  # ~1B supply expected
+                                    self.log_test("CRT Token Info", True, 
+                                                f"Real CRT token info: supply={supply}, decimals={decimals}, price=${current_price}", data)
+                                else:
+                                    self.log_test("CRT Token Info", False, 
+                                                f"CRT token supply seems incorrect: {supply}", data)
+                            else:
+                                self.log_test("CRT Token Info", False, 
+                                            "CRT token info missing supply data", data)
+                        else:
+                            self.log_test("CRT Token Info", False, 
+                                        f"CRT token mint/decimals incorrect: mint={mint_address}, decimals={decimals}", data)
+                    else:
+                        self.log_test("CRT Token Info", False, 
+                                    "Invalid CRT token info response format", data)
+                else:
+                    self.log_test("CRT Token Info", False, 
+                                f"HTTP {response.status}: {await response.text()}")
+                    
+        except Exception as e:
+            self.log_test("CRT Token Info", False, f"Error: {str(e)}")
+
+    async def test_crt_simulate_deposit(self):
+        """Test 23: CRT simulate deposit endpoint"""
+        try:
+            # Test CRT deposit simulation
+            valid_solana_address = "DFvHX8ZdqNqbCLJKnwe4h7qqj3hj4dw3pYvQRzweWnP7"
+            
+            payload = {
+                "wallet_address": valid_solana_address,
+                "amount": 1000000.0  # 1M CRT
+            }
+            
+            async with self.session.post(f"{self.base_url}/crt/simulate-deposit", json=payload) as response:
+                if response.status == 200:
+                    data = await response.json()
+                    required_fields = ["success"]
+                    
+                    if data.get("success"):
+                        # Check if simulation provides meaningful data
+                        if "transaction_id" in data or "simulated_balance" in data or "message" in data:
+                            self.log_test("CRT Simulate Deposit", True, 
+                                        f"CRT deposit simulation working: {data.get('message', 'Simulation successful')}", data)
+                        else:
+                            self.log_test("CRT Simulate Deposit", True, 
+                                        "CRT deposit simulation endpoint functional", data)
+                    else:
+                        self.log_test("CRT Simulate Deposit", False, 
+                                    "CRT deposit simulation failed", data)
+                else:
+                    self.log_test("CRT Simulate Deposit", False, 
+                                f"HTTP {response.status}: {await response.text()}")
+                    
+            # Test with missing wallet address
+            invalid_payload = {"amount": 1000000.0}
+            async with self.session.post(f"{self.base_url}/crt/simulate-deposit", json=invalid_payload) as response:
+                if response.status == 400:
+                    data = await response.json()
+                    if "wallet_address is required" in data.get("detail", ""):
+                        self.log_test("CRT Deposit Validation", True, 
+                                    "CRT deposit validation working - missing wallet address rejected", data)
+                    else:
+                        self.log_test("CRT Deposit Validation", False, 
+                                    "CRT deposit validation not working properly", data)
+                else:
+                    self.log_test("CRT Deposit Validation", False, 
+                                f"Expected 400 for invalid payload, got HTTP {response.status}")
+                    
+        except Exception as e:
+            self.log_test("CRT Simulate Deposit", False, f"Error: {str(e)}")
+
     async def test_integration_flow(self):
-        """Test 17: Complete integration flow - registration → login → wallet → conversion rates"""
+        """Test 24: Complete integration flow - registration → login → wallet → conversion rates"""
         try:
             # Step 1: Register new user
             flow_wallet = f"FlowTest{datetime.utcnow().strftime('%Y%m%d%H%M%S')}"
