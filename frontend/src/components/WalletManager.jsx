@@ -437,6 +437,9 @@ const WalletManager = () => {
               <TabsTrigger value="convert" className="data-[state=active]:bg-yellow-400 data-[state=active]:text-black">
                 🔄 Convert Crypto
               </TabsTrigger>
+              <TabsTrigger value="liquidity" className="data-[state=active]:bg-yellow-400 data-[state=active]:text-black">
+                💧 Liquidity Pool
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="deposit">
