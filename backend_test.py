@@ -703,14 +703,22 @@ class WalletAPITester:
     
     async def run_all_tests(self):
         """Run all wallet management tests"""
-        print(f"🚀 Starting Wallet Management System Tests - Real Money Integration")
+        print(f"🚀 Starting Real Money Integration Tests - New Authentication & Crypto Price Endpoints")
         print(f"📡 Testing against: {self.base_url}")
         print("=" * 70)
         
         # Run tests in logical order
         await self.test_basic_connectivity()
         
-        # Authentication flow
+        # NEW: Real-money integration endpoints
+        await self.test_user_registration()
+        await self.test_user_login()
+        await self.test_real_crypto_conversion_rates()
+        await self.test_individual_crypto_prices()
+        await self.test_redis_caching()
+        await self.test_integration_flow()
+        
+        # Original authentication flow
         challenge_data = await self.test_auth_challenge_generation()
         await self.test_auth_verification(challenge_data)
         
