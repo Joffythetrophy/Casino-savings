@@ -122,18 +122,20 @@ const WalletManager = () => {
     return `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(qrData)}`;
   };
 
-  const copyToClipboard = async (text) => {
+  const fetchLiquidityData = async () => {
     try {
-      await navigator.clipboard.writeText(text);
-      toast({
-        title: "Copied!",
-        description: "Address copied to clipboard",
-      });
-    } catch (err) {
-      toast({
-        title: "Failed to copy",
-        description: "Please copy the address manually",
-      });
+      const savedUser = localStorage.getItem('casino_user');
+      if (!savedUser) return;
+      
+      const user = JSON.parse(savedUser);
+      const response = await axios.get(`${BACKEND_URL}/api/liquidity-pool/${user.wallet_address}`);
+      
+      if (response.data.success) {
+        setLiquidityData(response.data);
+        console.log('✅ Liquidity pool data loaded');
+      }
+    } catch (error) {
+      console.error('Error fetching liquidity data:', error);
     }
   };
 
