@@ -461,7 +461,6 @@ test_plan:
   current_focus:
     - "Real blockchain balance integration (CRT, DOGE, TRX)"
     - "Missing wallet balance endpoints (GET /api/wallet/balance/{currency}, GET /api/wallet/balances)"
-    - "Real crypto conversion rates integration"
     - "Roulette Game"
     - "Dice Game" 
     - "Plinko Game"
@@ -470,7 +469,6 @@ test_plan:
   stuck_tasks:
     - "Real blockchain balance integration (CRT, DOGE, TRX)"
     - "Missing wallet balance endpoints (GET /api/wallet/balance/{currency}, GET /api/wallet/balances)"
-    - "Real crypto conversion rates integration"
   test_all: false
   test_priority: "high_first"
 
