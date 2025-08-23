@@ -494,6 +494,14 @@ const WalletManager = () => {
                   <RefreshCw className="w-8 h-8 text-orange-400" />
                   <h3 className="text-2xl font-bold text-orange-400">Crypto Converter</h3>
                 </div>
+                <p className="text-gray-300 text-sm mb-6">
+                  Convert between different cryptocurrencies using real-time rates
+                  {liquidityData && (
+                    <span className="block mt-1 text-blue-400">
+                      • Conversion limits based on your liquidity pool
+                    </span>
+                  )}
+                </p>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                   <div className="space-y-4">
