@@ -537,11 +537,10 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Roulette Game"
-    - "Dice Game" 
-    - "Plinko Game"
-    - "Keno Game"
-    - "Mines Game"
+    - "End-to-End Authentication Flow Testing"
+    - "Real Blockchain Integration Testing"
+    - "Wallet Manager Full Integration Testing"
+    - "Savings Page Real Data Testing"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
