@@ -352,6 +352,42 @@ backend:
           agent: "testing"
           comment: "✅ Legacy status create and list endpoints working correctly. Status records created with UUIDs and stored in MongoDB."
 
+  - task: "Real blockchain balance integration (CRT, DOGE, TRX)"
+    implemented: false
+    working: false
+    file: "backend/blockchain/"
+    stuck_count: 1
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: false
+          agent: "testing"
+          comment: "❌ CRITICAL: Blockchain managers return mock data instead of real balances. DOGE returns hardcoded 100.0, CRT returns 0.0, TRX uses mock functionality. Need real API integration to fetch actual wallet balances from blockchain networks."
+
+  - task: "Missing wallet balance endpoints (GET /api/wallet/balance/{currency}, GET /api/wallet/balances)"
+    implemented: false
+    working: false
+    file: "backend/server.py"
+    stuck_count: 1
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: false
+          agent: "testing"
+          comment: "❌ CRITICAL: Required endpoints GET /api/wallet/balance/{currency} and GET /api/wallet/balances don't exist. These are needed for frontend to display real wallet balances. Currently returns 404 Not Found."
+
+  - task: "Real crypto conversion rates integration"
+    implemented: false
+    working: false
+    file: "backend/server.py"
+    stuck_count: 1
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: false
+          agent: "testing"
+          comment: "❌ CRITICAL: Conversion rates are hardcoded mock values (CRT_DOGE: 21.5, etc.) instead of fetching real-time rates from crypto APIs. Need integration with real price feeds for accurate conversions."
+
 metadata:
   created_by: "testing_agent"
   version: "1.0"
