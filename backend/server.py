@@ -324,78 +324,77 @@ async def withdraw_from_wallet(request: WithdrawRequest):
         print(f"Error in withdraw_from_wallet: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-@api_router.post("/wallet/convert")
-async def convert_crypto(request: Dict[str, Any], wallet_info: Dict = Depends(get_authenticated_wallet)):
-    """Convert cryptocurrency within deposit wallet"""
+@app.post("/api/wallet/convert")
+async def convert_currency(request: ConvertRequest):
+    """Convert between currencies in user wallet"""
     try:
-        wallet_address = request.get("wallet_address")
-        from_currency = request.get("from_currency")
-        to_currency = request.get("to_currency")
-        amount = float(request.get("amount", 0))
+        # Find user by wallet address
+        user = await db.users.find_one({"wallet_address": request.wallet_address})
         
-        if wallet_address != wallet_info["wallet_address"]:
-            raise HTTPException(status_code=403, detail="Unauthorized")
+        if not user:
+            return {"success": False, "message": "User not found"}
         
-        if amount <= 0:
-            raise HTTPException(status_code=400, detail="Invalid amount")
-        
-        # Mock conversion rates - in production these would be live rates
+        # Get conversion rate (simplified - using basic rate)
         conversion_rates = {
-            "CRT_DOGE": 21.5, "CRT_TRX": 9.8,
-            "DOGE_CRT": 0.047, "DOGE_TRX": 0.456,
-            "TRX_CRT": 0.102, "TRX_DOGE": 2.19
+            "CRT_DOGE": 21.5, "CRT_TRX": 9.8, "CRT_USDC": 0.15,
+            "DOGE_CRT": 0.047, "DOGE_TRX": 0.456, "DOGE_USDC": 0.007,
+            "TRX_CRT": 0.102, "TRX_DOGE": 2.19, "TRX_USDC": 0.015,
+            "USDC_CRT": 6.67, "USDC_DOGE": 142.86, "USDC_TRX": 66.67
         }
         
-        rate_key = f"{from_currency}_{to_currency}"
+        rate_key = f"{request.from_currency}_{request.to_currency}"
         if rate_key not in conversion_rates:
-            raise HTTPException(status_code=400, detail="Conversion not supported")
+            return {"success": False, "message": "Conversion not supported"}
         
-        converted_amount = amount * conversion_rates[rate_key]
+        rate = conversion_rates[rate_key]
+        converted_amount = request.amount * rate
         
-        # Get current wallet
-        wallet_record = await db.user_wallets.find_one({"wallet_address": wallet_address})
-        if not wallet_record:
-            raise HTTPException(status_code=404, detail="Wallet not found")
+        # Check deposit wallet balance for from_currency
+        deposit_balance = user.get("deposit_balance", {})
+        current_from_balance = deposit_balance.get(request.from_currency, 0)
         
-        # Check balance
-        current_balance = wallet_record.get("deposit_balance", {}).get(from_currency, 0)
-        if current_balance < amount:
-            raise HTTPException(status_code=400, detail="Insufficient balance")
+        if current_from_balance < request.amount:
+            return {"success": False, "message": "Insufficient balance"}
         
-        # Update wallet record
-        await db.user_wallets.update_one(
-            {"wallet_address": wallet_address},
-            {
-                "$inc": {
-                    f"deposit_balance.{from_currency}": -amount,
-                    f"deposit_balance.{to_currency}": converted_amount
-                },
-                "$set": {"last_updated": datetime.utcnow()}
-            }
+        # Update balances
+        new_from_balance = current_from_balance - request.amount
+        current_to_balance = deposit_balance.get(request.to_currency, 0)
+        new_to_balance = current_to_balance + converted_amount
+        
+        await db.users.update_one(
+            {"wallet_address": request.wallet_address},
+            {"$set": {
+                f"deposit_balance.{request.from_currency}": new_from_balance,
+                f"deposit_balance.{request.to_currency}": new_to_balance
+            }}
         )
         
         # Record transaction
-        transaction_record = {
-            "wallet_address": wallet_address,
+        transaction = {
+            "transaction_id": str(uuid.uuid4()),
+            "wallet_address": request.wallet_address,
             "type": "conversion",
-            "from_currency": from_currency,
-            "to_currency": to_currency,
-            "from_amount": amount,
-            "to_amount": converted_amount,
-            "rate": conversion_rates[rate_key],
-            "timestamp": datetime.utcnow(),
+            "from_currency": request.from_currency,
+            "to_currency": request.to_currency,
+            "amount": request.amount,
+            "converted_amount": converted_amount,
+            "rate": rate,
+            "timestamp": datetime.now(),
             "status": "completed"
         }
-        await db.wallet_transactions.insert_one(transaction_record)
+        
+        await db.transactions.insert_one(transaction)
         
         return {
             "success": True,
-            "message": f"Converted {amount} {from_currency} to {converted_amount:.4f} {to_currency}",
+            "message": f"Converted {request.amount} {request.from_currency} to {converted_amount:.4f} {request.to_currency}",
             "converted_amount": converted_amount,
-            "rate": conversion_rates[rate_key]
+            "rate": rate,
+            "transaction_id": transaction["transaction_id"]
         }
         
     except Exception as e:
+        print(f"Error in convert_currency: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @api_router.post("/session/start")
