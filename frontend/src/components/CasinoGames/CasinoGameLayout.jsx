@@ -33,15 +33,54 @@ export const useWallet = () => {
 };
 
 export const WalletProvider = ({ children }) => {
-  const [balance, setBalance] = useState(1000); // Demo balance
-  const [isConnected, setIsConnected] = useState(true); // Demo connected state
+  const [balance, setBalance] = useState(0);
+  const [isConnected, setIsConnected] = useState(true);
+  const [loading, setLoading] = useState(true);
   
-  const updateBalance = (amount) => {
+  const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+
+  useEffect(() => {
+    fetchBalance();
+  }, []);
+
+  const fetchBalance = async () => {
+    try {
+      setLoading(true);
+      const testWallet = 'RealWallet9876543210XYZ'; // TODO: Replace with real wallet from auth
+      
+      const response = await axios.get(`${BACKEND_URL}/api/wallet/${testWallet}`);
+      
+      if (response.data.success && response.data.wallet) {
+        // Use deposit wallet balance for gaming
+        const depositBalance = response.data.wallet.deposit_balance?.CRT || 0;
+        setBalance(depositBalance);
+      }
+    } catch (error) {
+      console.error('Error fetching balance:', error);
+      setBalance(0); // Set to 0 if can't fetch real balance
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  const updateBalance = async (amount) => {
+    // Optimistically update balance
     setBalance(prev => Math.max(0, prev + amount));
+    
+    // Refresh from backend to ensure accuracy
+    setTimeout(() => {
+      fetchBalance();
+    }, 1000);
   };
 
   return (
-    <WalletContext.Provider value={{ balance, updateBalance, isConnected }}>
+    <WalletContext.Provider value={{ 
+      balance, 
+      updateBalance, 
+      isConnected, 
+      loading,
+      refreshBalance: fetchBalance 
+    }}>
       {children}
     </WalletContext.Provider>
   );
