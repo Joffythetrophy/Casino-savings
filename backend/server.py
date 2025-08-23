@@ -121,6 +121,17 @@ class ConvertRequest(BaseModel):
     to_currency: str
     amount: float
 
+class LiquidityPoolRequest(BaseModel):
+    wallet_address: str
+    action: str  # "add" or "check"
+    currency: Optional[str] = None
+    amount: Optional[float] = None
+
+class SessionEndRequest(BaseModel):
+    wallet_address: str
+    session_duration: int  # in minutes
+    games_played: int
+
 # Basic routes
 @api_router.get("/")
 async def root():
