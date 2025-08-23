@@ -50,7 +50,7 @@ export const WalletProvider = ({ children }) => {
       setLoading(true);
       
       // Get authenticated user from localStorage
-      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      const user = JSON.parse(localStorage.getItem('casino_user') || '{}');
       if (!user.wallet_address) {
         console.error('No authenticated user found');
         setBalance(0);
