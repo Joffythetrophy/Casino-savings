@@ -67,10 +67,14 @@ const WalletManager = () => {
   const fetchWalletBalances = async () => {
     try {
       setLoading(true);
-      // TODO: Replace with real wallet address from authentication
-      const testWallet = 'RealWallet9876543210XYZ';
+      // Get user from localStorage
+      const savedUser = localStorage.getItem('casino_user');
+      if (!savedUser) {
+        throw new Error('No user logged in');
+      }
       
-      const response = await axios.get(`${BACKEND_URL}/api/wallet/${testWallet}`);
+      const user = JSON.parse(savedUser);
+      const response = await axios.get(`${BACKEND_URL}/api/wallet/${user.wallet_address}`);
       
       if (response.data.success && response.data.wallet) {
         const wallet = response.data.wallet;
@@ -84,7 +88,7 @@ const WalletManager = () => {
       console.error('Error fetching wallet balances:', error);
       toast({
         title: "Error",
-        description: "Failed to fetch wallet balances",
+        description: error.message || "Failed to fetch wallet balances",
       });
     } finally {
       setLoading(false);
