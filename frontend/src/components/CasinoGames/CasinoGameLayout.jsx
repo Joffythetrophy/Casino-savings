@@ -131,6 +131,7 @@ export const WalletProvider = ({ children }) => {
     <WalletContext.Provider value={{ 
       balance, 
       updateBalance, 
+      placeBet,
       isConnected, 
       loading,
       refreshBalance: fetchBalance 
