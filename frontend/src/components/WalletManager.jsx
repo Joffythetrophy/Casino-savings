@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '../hooks/use-toast';
+import axios from 'axios';
 import LiquidityPool from './LiquidityPool';
 
 const CRTCoin = ({ size = 'w-5 h-5' }) => (
