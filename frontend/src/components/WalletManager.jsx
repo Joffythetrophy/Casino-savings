@@ -60,6 +60,35 @@ const WalletManager = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  // Mock wallet addresses - in production these would be unique per user
+  const walletAddresses = {
+    CRT: 'CRT1x9f8k3m2q7w6e5r4t3y2u1i0p9o8i7u6y5t4r3e2w1q',
+    DOGE: 'DBXTSy8BQQnBMxBGYo3VVSm4iXbRh7tWgE',
+    TRX: 'TR7NHqjeKQxGTCi8q8ZY4pL3kiSRtwjAYB',
+    USDC: '0x742d35Cc6634C0532925a3b8D4C31Ebe7F8C9E4B'
+  };
+
+  const generateQRCodeURL = (currency, address) => {
+    // Generate QR code URL using a free service
+    const qrData = `${currency}:${address}`;
+    return `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(qrData)}`;
+  };
+
+  const copyToClipboard = async (text) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      toast({
+        title: "Copied!",
+        description: "Address copied to clipboard",
+      });
+    } catch (err) {
+      toast({
+        title: "Failed to copy",
+        description: "Please copy the address manually",
+      });
+    }
+  };
+
   const getCurrencyIcon = (currency) => {
     switch(currency) {
       case 'CRT':
