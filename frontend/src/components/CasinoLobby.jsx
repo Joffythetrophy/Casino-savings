@@ -19,7 +19,9 @@ import {
   TrendingUp,
   Users,
   Trophy,
-  Clock
+  Clock,
+  Coins,
+  PiggyBank
 } from 'lucide-react';
 
 const GameCard = ({ title, description, icon: Icon, onClick, players, jackpot, isHot = false }) => {
