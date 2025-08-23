@@ -24,9 +24,11 @@ export const useWallet = () => {
   const context = useContext(WalletContext);
   if (!context) {
     return {
-      balance: 1000, // Default balance for demo
+      balance: 0,
       updateBalance: () => {},
-      isConnected: false
+      isConnected: false,
+      loading: true,
+      refreshBalance: () => {}
     };
   }
   return context;
