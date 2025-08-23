@@ -50,7 +50,7 @@ const SavingsPage = () => {
         }
 
         // Fetch real savings data from backend
-        const backendUrl = import.meta.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
+        const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
         console.log('Backend URL:', backendUrl);
         console.log('Fetching wallet data for:', user.wallet_address);
         
