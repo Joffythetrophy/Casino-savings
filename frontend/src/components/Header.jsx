@@ -5,6 +5,7 @@ import { useAuth } from './UserAuth';
 
 const Header = ({ isWalletConnected }) => {
   const location = useLocation();
+  const { user, logout, isAuthenticated } = useAuth();
 
   const isActive = (path) => location.pathname === path;
 
