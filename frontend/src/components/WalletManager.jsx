@@ -139,6 +139,21 @@ const WalletManager = () => {
     }
   };
 
+  const copyToClipboard = async (text) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      toast({
+        title: "Copied!",
+        description: "Address copied to clipboard",
+      });
+    } catch (err) {
+      toast({
+        title: "Failed to copy",
+        description: "Please copy the address manually",
+      });
+    }
+  };
+
   const getCurrencyIcon = (currency) => {
     switch(currency) {
       case 'CRT':
