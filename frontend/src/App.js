@@ -25,7 +25,9 @@ function AppContent() {
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
-        <Header />
+        <Router>
+          <Header />
+        </Router>
         <div className="flex items-center justify-center min-h-[80vh]">
           <div className="text-center">
             <h1 className="text-4xl font-bold text-white mb-4">Welcome to Casino Savings</h1>
