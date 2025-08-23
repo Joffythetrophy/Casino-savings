@@ -882,7 +882,115 @@ async def login_user(request: LoginRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-# Real-time crypto conversion endpoints
+# Liquidity Pool Management System
+@app.get("/api/liquidity-pool/{wallet_address}")
+async def get_liquidity_pool(wallet_address: str):
+    """Get user's liquidity pool status"""
+    try:
+        # Find user
+        user = await db.users.find_one({"wallet_address": wallet_address})
+        if not user:
+            return {"success": False, "message": "User not found"}
+        
+        # Get or create liquidity pool
+        liquidity_pool = user.get("liquidity_pool", {
+            "CRT": 0, "DOGE": 0, "TRX": 0, "USDC": 0,
+            "total_contributed": 0,
+            "created_at": datetime.now().isoformat()
+        })
+        
+        # Calculate total liquidity value in USD (mock prices for demo)
+        mock_prices = {"CRT": 0.15, "DOGE": 0.08, "TRX": 0.12, "USDC": 1.0}
+        total_liquidity_usd = sum(
+            liquidity_pool.get(currency, 0) * mock_prices[currency] 
+            for currency in mock_prices
+        )
+        
+        return {
+            "success": True,
+            "liquidity_pool": liquidity_pool,
+            "total_liquidity_usd": round(total_liquidity_usd, 2),
+            "withdrawal_limits": {
+                currency: min(balance * 0.1, liquidity_pool.get(currency, 0)) 
+                for currency, balance in liquidity_pool.items() 
+                if currency in mock_prices
+            }
+        }
+        
+    except Exception as e:
+        print(f"Error in get_liquidity_pool: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/liquidity-pool/contribute")
+async def contribute_to_liquidity_pool(request: SessionEndRequest):
+    """Automatically contribute 10% of savings to liquidity pool after session"""
+    try:
+        # Find user
+        user = await db.users.find_one({"wallet_address": request.wallet_address})
+        if not user:
+            return {"success": False, "message": "User not found"}
+        
+        # Get current savings balance
+        savings_balance = user.get("savings_balance", {"CRT": 0, "DOGE": 0, "TRX": 0, "USDC": 0})
+        
+        # Calculate 10% contribution from each currency
+        contributions = {}
+        total_contributed = 0
+        
+        for currency, balance in savings_balance.items():
+            if balance > 0:
+                contribution = balance * 0.1  # 10% of savings
+                contributions[currency] = contribution
+                total_contributed += contribution
+        
+        if total_contributed == 0:
+            return {"success": False, "message": "No savings to contribute"}
+        
+        # Get current liquidity pool
+        current_pool = user.get("liquidity_pool", {"CRT": 0, "DOGE": 0, "TRX": 0, "USDC": 0})
+        
+        # Update liquidity pool and reduce savings
+        updates = {}
+        for currency, contribution in contributions.items():
+            # Add to liquidity pool
+            updates[f"liquidity_pool.{currency}"] = current_pool.get(currency, 0) + contribution
+            # Reduce from savings (90% remains)
+            updates[f"savings_balance.{currency}"] = savings_balance[currency] - contribution
+        
+        # Update total contributed tracking
+        updates["liquidity_pool.total_contributed"] = current_pool.get("total_contributed", 0) + total_contributed
+        updates["liquidity_pool.last_contribution"] = datetime.now().isoformat()
+        
+        await db.users.update_one(
+            {"wallet_address": request.wallet_address},
+            {"$set": updates}
+        )
+        
+        # Record the contribution transaction
+        transaction = {
+            "transaction_id": str(uuid.uuid4()),
+            "wallet_address": request.wallet_address,
+            "type": "liquidity_contribution",
+            "contributions": contributions,
+            "session_duration": request.session_duration,
+            "games_played": request.games_played,
+            "timestamp": datetime.now(),
+            "status": "completed"
+        }
+        
+        await db.transactions.insert_one(transaction)
+        
+        return {
+            "success": True,
+            "message": f"Contributed to liquidity pool",
+            "contributions": contributions,
+            "total_contributed": round(total_contributed, 4),
+            "transaction_id": transaction["transaction_id"]
+        }
+        
+    except Exception as e:
+        print(f"Error in contribute_to_liquidity_pool: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 @app.get("/api/conversion/rates")
 async def get_conversion_rates():
     """Get real-time conversion rates for supported cryptocurrencies"""
