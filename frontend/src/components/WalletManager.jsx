@@ -208,6 +208,7 @@ const WalletManager = () => {
                 <option value="CRT">CRT</option>
                 <option value="DOGE">DOGE</option>
                 <option value="TRX">TRX</option>
+                <option value="USDC">USDC</option>
               </select>
               <Input
                 type="number"
