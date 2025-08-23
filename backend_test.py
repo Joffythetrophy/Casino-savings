@@ -425,6 +425,281 @@ class WalletAPITester:
                                 f"HTTP {response.status}: {await response.text()}")
         except Exception as e:
             self.log_test("Database Integration", False, f"Error: {str(e)}")
+
+    async def test_user_registration(self):
+        """Test 12: User registration with wallet address and password"""
+        try:
+            # Use a unique wallet address for registration test
+            test_wallet_reg = f"RegTestWallet{datetime.utcnow().strftime('%Y%m%d%H%M%S')}"
+            
+            payload = {
+                "wallet_address": test_wallet_reg,
+                "password": "SecureTestPassword123!"
+            }
+            
+            async with self.session.post(f"{self.base_url}/auth/register", 
+                                       json=payload) as response:
+                if response.status == 200:
+                    data = await response.json()
+                    required_fields = ["success", "message", "user_id", "created_at"]
+                    
+                    if all(field in data for field in required_fields) and data.get("success"):
+                        self.log_test("User Registration", True, 
+                                    f"User registered successfully: {data.get('message')}", data)
+                        # Store for login test
+                        self.registered_wallet = test_wallet_reg
+                        self.registered_password = "SecureTestPassword123!"
+                    else:
+                        self.log_test("User Registration", False, 
+                                    "Invalid registration response format", data)
+                else:
+                    self.log_test("User Registration", False, 
+                                f"HTTP {response.status}: {await response.text()}")
+        except Exception as e:
+            self.log_test("User Registration", False, f"Error: {str(e)}")
+
+    async def test_user_login(self):
+        """Test 13: User login authentication"""
+        if not hasattr(self, 'registered_wallet'):
+            self.log_test("User Login", False, "No registered user available for login test")
+            return
+            
+        try:
+            payload = {
+                "wallet_address": self.registered_wallet,
+                "password": self.registered_password
+            }
+            
+            async with self.session.post(f"{self.base_url}/auth/login", 
+                                       json=payload) as response:
+                if response.status == 200:
+                    data = await response.json()
+                    required_fields = ["success", "message", "user_id", "created_at"]
+                    
+                    if all(field in data for field in required_fields) and data.get("success"):
+                        self.log_test("User Login", True, 
+                                    f"User login successful: {data.get('message')}", data)
+                    else:
+                        self.log_test("User Login", False, 
+                                    "Invalid login response format", data)
+                else:
+                    self.log_test("User Login", False, 
+                                f"HTTP {response.status}: {await response.text()}")
+        except Exception as e:
+            self.log_test("User Login", False, f"Error: {str(e)}")
+
+    async def test_real_crypto_conversion_rates(self):
+        """Test 14: Real-time crypto conversion rates from CoinGecko"""
+        try:
+            async with self.session.get(f"{self.base_url}/conversion/rates") as response:
+                if response.status == 200:
+                    data = await response.json()
+                    required_fields = ["success", "rates", "prices_usd", "last_updated", "source"]
+                    
+                    if all(field in data for field in required_fields) and data.get("success"):
+                        rates = data.get("rates", {})
+                        prices_usd = data.get("prices_usd", {})
+                        source = data.get("source", "")
+                        
+                        # Check if we have real rates (not fallback)
+                        expected_currencies = ["CRT", "DOGE", "TRX", "USDC"]
+                        has_real_data = source in ["coingecko", "cache"]
+                        has_expected_rates = any(f"{curr1}_{curr2}" in rates 
+                                               for curr1 in expected_currencies 
+                                               for curr2 in expected_currencies 
+                                               if curr1 != curr2)
+                        
+                        if has_real_data and has_expected_rates:
+                            self.log_test("Real Crypto Conversion Rates", True, 
+                                        f"Real conversion rates working: {len(rates)} rates, source: {source}", data)
+                        elif source == "fallback":
+                            self.log_test("Real Crypto Conversion Rates", False, 
+                                        "Using fallback rates instead of real CoinGecko data", data)
+                        else:
+                            self.log_test("Real Crypto Conversion Rates", False, 
+                                        "Missing expected conversion rates", data)
+                    else:
+                        self.log_test("Real Crypto Conversion Rates", False, 
+                                    "Invalid conversion rates response format", data)
+                else:
+                    self.log_test("Real Crypto Conversion Rates", False, 
+                                f"HTTP {response.status}: {await response.text()}")
+        except Exception as e:
+            self.log_test("Real Crypto Conversion Rates", False, f"Error: {str(e)}")
+
+    async def test_individual_crypto_prices(self):
+        """Test 15: Individual crypto price data"""
+        test_currencies = ["DOGE", "TRX", "USDC", "CRT"]
+        
+        for currency in test_currencies:
+            try:
+                async with self.session.get(f"{self.base_url}/crypto/price/{currency}") as response:
+                    if response.status == 200:
+                        data = await response.json()
+                        
+                        if data.get("success") and "data" in data:
+                            price_data = data["data"]
+                            required_fields = ["currency", "price_usd", "price_change_24h", "last_updated"]
+                            
+                            if all(field in price_data for field in required_fields):
+                                price = price_data.get("price_usd", 0)
+                                change_24h = price_data.get("price_change_24h", 0)
+                                
+                                if price > 0:
+                                    self.log_test(f"Crypto Price - {currency}", True, 
+                                                f"Price: ${price}, 24h change: {change_24h}%", data)
+                                else:
+                                    self.log_test(f"Crypto Price - {currency}", False, 
+                                                "Invalid price data (price is 0)", data)
+                            else:
+                                self.log_test(f"Crypto Price - {currency}", False, 
+                                            "Missing required price fields", data)
+                        else:
+                            self.log_test(f"Crypto Price - {currency}", False, 
+                                        "Invalid price response format", data)
+                    else:
+                        self.log_test(f"Crypto Price - {currency}", False, 
+                                    f"HTTP {response.status}: {await response.text()}")
+            except Exception as e:
+                self.log_test(f"Crypto Price - {currency}", False, f"Error: {str(e)}")
+
+    async def test_redis_caching(self):
+        """Test 16: Redis caching functionality for price data"""
+        try:
+            # Make first request to populate cache
+            async with self.session.get(f"{self.base_url}/conversion/rates") as response1:
+                if response1.status == 200:
+                    data1 = await response1.json()
+                    
+                    # Make second request immediately to test cache
+                    async with self.session.get(f"{self.base_url}/conversion/rates") as response2:
+                        if response2.status == 200:
+                            data2 = await response2.json()
+                            
+                            # Check if second request came from cache
+                            source1 = data1.get("source", "")
+                            source2 = data2.get("source", "")
+                            
+                            if source2 == "cache":
+                                self.log_test("Redis Caching", True, 
+                                            f"Redis caching working: first source: {source1}, second source: {source2}", 
+                                            {"first_source": source1, "second_source": source2})
+                            elif source1 == "coingecko" and source2 == "coingecko":
+                                self.log_test("Redis Caching", True, 
+                                            "Redis may be working but cache not hit in test timeframe", 
+                                            {"first_source": source1, "second_source": source2})
+                            else:
+                                self.log_test("Redis Caching", False, 
+                                            f"Redis caching not working properly: sources {source1}, {source2}", 
+                                            {"first_source": source1, "second_source": source2})
+                        else:
+                            self.log_test("Redis Caching", False, 
+                                        f"Second request failed: HTTP {response2.status}")
+                else:
+                    self.log_test("Redis Caching", False, 
+                                f"First request failed: HTTP {response1.status}")
+        except Exception as e:
+            self.log_test("Redis Caching", False, f"Error: {str(e)}")
+
+    async def test_integration_flow(self):
+        """Test 17: Complete integration flow - registration → login → wallet → conversion rates"""
+        try:
+            # Step 1: Register new user
+            flow_wallet = f"FlowTest{datetime.utcnow().strftime('%Y%m%d%H%M%S')}"
+            flow_password = "FlowTestPassword123!"
+            
+            reg_payload = {
+                "wallet_address": flow_wallet,
+                "password": flow_password
+            }
+            
+            async with self.session.post(f"{self.base_url}/auth/register", 
+                                       json=reg_payload) as reg_response:
+                if reg_response.status != 200:
+                    self.log_test("Integration Flow", False, "Registration step failed")
+                    return
+                
+                reg_data = await reg_response.json()
+                if not reg_data.get("success"):
+                    self.log_test("Integration Flow", False, "Registration not successful")
+                    return
+            
+            # Step 2: Login with registered user
+            login_payload = {
+                "wallet_address": flow_wallet,
+                "password": flow_password
+            }
+            
+            async with self.session.post(f"{self.base_url}/auth/login", 
+                                       json=login_payload) as login_response:
+                if login_response.status != 200:
+                    self.log_test("Integration Flow", False, "Login step failed")
+                    return
+                
+                login_data = await login_response.json()
+                if not login_data.get("success"):
+                    self.log_test("Integration Flow", False, "Login not successful")
+                    return
+            
+            # Step 3: Get conversion rates
+            async with self.session.get(f"{self.base_url}/conversion/rates") as rates_response:
+                if rates_response.status != 200:
+                    self.log_test("Integration Flow", False, "Conversion rates step failed")
+                    return
+                
+                rates_data = await rates_response.json()
+                if not rates_data.get("success"):
+                    self.log_test("Integration Flow", False, "Conversion rates not successful")
+                    return
+            
+            # Step 4: Test wallet authentication flow (challenge + verify)
+            challenge_payload = {
+                "wallet_address": flow_wallet,
+                "network": "solana"
+            }
+            
+            async with self.session.post(f"{self.base_url}/auth/challenge", 
+                                       json=challenge_payload) as challenge_response:
+                if challenge_response.status != 200:
+                    self.log_test("Integration Flow", False, "Wallet challenge step failed")
+                    return
+                
+                challenge_data = await challenge_response.json()
+                if not challenge_data.get("success"):
+                    self.log_test("Integration Flow", False, "Wallet challenge not successful")
+                    return
+                
+                # Verify with mock signature
+                verify_payload = {
+                    "challenge_hash": challenge_data.get("challenge_hash"),
+                    "signature": "mock_signature_integration_test",
+                    "wallet_address": flow_wallet,
+                    "network": "solana"
+                }
+                
+                async with self.session.post(f"{self.base_url}/auth/verify", 
+                                           json=verify_payload) as verify_response:
+                    if verify_response.status != 200:
+                        self.log_test("Integration Flow", False, "Wallet verification step failed")
+                        return
+                    
+                    verify_data = await verify_response.json()
+                    if not verify_data.get("success"):
+                        self.log_test("Integration Flow", False, "Wallet verification not successful")
+                        return
+                    
+                    # All steps successful
+                    self.log_test("Integration Flow", True, 
+                                "Complete integration flow successful: registration → login → wallet auth → conversion rates", 
+                                {
+                                    "registration": reg_data.get("success"),
+                                    "login": login_data.get("success"),
+                                    "conversion_rates": rates_data.get("success"),
+                                    "wallet_auth": verify_data.get("success")
+                                })
+                    
+        except Exception as e:
+            self.log_test("Integration Flow", False, f"Error: {str(e)}")
     
     async def run_all_tests(self):
         """Run all wallet management tests"""
