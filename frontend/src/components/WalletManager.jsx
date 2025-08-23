@@ -557,6 +557,11 @@ const WalletManager = () => {
                           {(parseFloat(convertAmount) * (conversionRates[`${convertFrom}_${convertTo}`] || 0)).toFixed(4)}
                         </span> {convertTo}
                       </div>
+                      {liquidityData?.liquidity_pool?.[convertTo] !== undefined && (
+                        <div className="text-xs text-yellow-400 mt-2">
+                          Liquidity available: {liquidityData.liquidity_pool[convertTo].toFixed(4)} {convertTo}
+                        </div>
+                      )}
                     </div>
                   )}
                   
