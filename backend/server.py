@@ -267,58 +267,55 @@ async def deposit_to_wallet(request: DepositRequest):
         print(f"Error in deposit_to_wallet: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-@api_router.post("/wallet/withdraw")
-async def withdraw_funds(request: Dict[str, Any], wallet_info: Dict = Depends(get_authenticated_wallet)):
-    """Withdraw funds from winnings or savings wallet"""
+@app.post("/api/wallet/withdraw")  
+async def withdraw_from_wallet(request: WithdrawRequest):
+    """Withdraw funds from user wallet"""
     try:
-        wallet_address = request.get("wallet_address")
-        wallet_type = request.get("wallet_type")  # "winnings" or "savings"
-        currency = request.get("currency")
-        amount = float(request.get("amount", 0))
+        # Find user by wallet address
+        user = await db.users.find_one({"wallet_address": request.wallet_address})
         
-        if wallet_address != wallet_info["wallet_address"]:
-            raise HTTPException(status_code=403, detail="Unauthorized")
+        if not user:
+            return {"success": False, "message": "User not found"}
         
-        if amount <= 0:
-            raise HTTPException(status_code=400, detail="Invalid amount")
+        # Get current balance for the specified wallet type
+        wallet_balances = user.get(f"{request.wallet_type}_balance", {})
+        current_balance = wallet_balances.get(request.currency, 0)
         
-        # Get current wallet
-        wallet_record = await db.user_wallets.find_one({"wallet_address": wallet_address})
-        if not wallet_record:
-            raise HTTPException(status_code=404, detail="Wallet not found")
+        if current_balance < request.amount:
+            return {"success": False, "message": "Insufficient balance"}
         
-        # Check balance
-        current_balance = wallet_record.get(f"{wallet_type}_balance", {}).get(currency, 0)
-        if current_balance < amount:
-            raise HTTPException(status_code=400, detail="Insufficient balance")
+        # Update balance
+        new_balance = current_balance - request.amount
+        update_field = f"{request.wallet_type}_balance.{request.currency}"
         
-        # Update wallet record
-        await db.user_wallets.update_one(
-            {"wallet_address": wallet_address},
-            {
-                "$inc": {f"{wallet_type}_balance.{currency}": -amount},
-                "$set": {"last_updated": datetime.utcnow()}
-            }
+        await db.users.update_one(
+            {"wallet_address": request.wallet_address},
+            {"$set": {update_field: new_balance}}
         )
         
         # Record transaction
-        transaction_record = {
-            "wallet_address": wallet_address,
-            "type": f"withdraw_{wallet_type}",
-            "currency": currency,
-            "amount": amount,
-            "timestamp": datetime.utcnow(),
+        transaction = {
+            "transaction_id": str(uuid.uuid4()),
+            "wallet_address": request.wallet_address,
+            "type": "withdrawal",
+            "wallet_type": request.wallet_type,
+            "currency": request.currency,
+            "amount": request.amount,
+            "timestamp": datetime.now(),
             "status": "completed"
         }
-        await db.wallet_transactions.insert_one(transaction_record)
+        
+        await db.transactions.insert_one(transaction)
         
         return {
             "success": True,
-            "message": f"Withdrew {amount} {currency} from {wallet_type}",
-            "transaction_id": str(transaction_record["_id"]) if "_id" in transaction_record else None
+            "message": f"Withdrew {request.amount} {request.currency}",
+            "new_balance": new_balance,
+            "transaction_id": transaction["transaction_id"]
         }
         
     except Exception as e:
+        print(f"Error in withdraw_from_wallet: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @api_router.post("/wallet/convert")
