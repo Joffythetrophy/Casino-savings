@@ -287,7 +287,7 @@ async def get_real_balance(currency: str, wallet_address: str):
         print(f"Error in get_real_balance: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-@api_router.get("/wallet/balances")
+@api_router.get("/blockchain/balances")
 async def get_all_real_balances(wallet_address: str):
     """Get all real blockchain balances for a wallet address"""
     try:
