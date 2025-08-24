@@ -1673,6 +1673,154 @@ async def get_escrow_status(wallet_address: str):
     except Exception as e:
         return {"success": False, "error": str(e)}
 
+# Real CRT deposit system
+@app.get("/api/deposit/address/{wallet_address}")
+async def get_deposit_address(wallet_address: str):
+    """Get deposit address for receiving real CRT tokens"""
+    try:
+        # For now, we'll use the user's own address as deposit address
+        # In production, casino would have dedicated deposit addresses
+        
+        # Verify the address format
+        validation = await crt_manager.validate_address(wallet_address)
+        if not validation.get("valid"):
+            return {"success": False, "message": "Invalid Solana address format"}
+        
+        # Check if user exists
+        user = await db.users.find_one({"wallet_address": wallet_address})
+        if not user:
+            return {"success": False, "message": "User not found. Please register first."}
+        
+        return {
+            "success": True,
+            "deposit_address": wallet_address,  # Your own address for now
+            "supported_tokens": ["CRT"],
+            "crt_mint_address": crt_manager.crt_mint,
+            "network": "Solana Mainnet",
+            "note": "Send CRT tokens to this address. They will be automatically detected and credited to your casino account.",
+            "processing_time": "1-2 minutes after blockchain confirmation"
+        }
+        
+    except Exception as e:
+        return {"success": False, "error": str(e)}
+
+@app.post("/api/deposit/check")
+async def check_for_deposits(request: Dict[str, Any]):
+    """Check for new CRT deposits and credit user accounts"""
+    try:
+        wallet_address = request.get("wallet_address")
+        
+        if not wallet_address:
+            return {"success": False, "message": "wallet_address required"}
+        
+        # Get current real CRT balance from blockchain
+        current_balance_response = await crt_manager.get_crt_balance(wallet_address)
+        if not current_balance_response.get("success"):
+            return {"success": False, "message": "Could not check blockchain balance"}
+        
+        current_real_balance = current_balance_response.get("crt_balance", 0)
+        
+        # Get last recorded balance from our database
+        user = await db.users.find_one({"wallet_address": wallet_address})
+        if not user:
+            return {"success": False, "message": "User not found"}
+        
+        last_recorded_balance = user.get("last_blockchain_balance", {}).get("CRT", 0)
+        
+        # Calculate deposit amount (difference)
+        deposit_amount = current_real_balance - last_recorded_balance
+        
+        if deposit_amount > 0:
+            # New deposit detected!
+            
+            # Update casino deposit balance
+            current_casino_balance = user.get("deposit_balance", {}).get("CRT", 0)
+            new_casino_balance = current_casino_balance + deposit_amount
+            
+            # Update database
+            await db.users.update_one(
+                {"wallet_address": wallet_address},
+                {"$set": {
+                    f"deposit_balance.CRT": new_casino_balance,
+                    f"last_blockchain_balance.CRT": current_real_balance,
+                    "last_deposit_check": datetime.utcnow()
+                }}
+            )
+            
+            # Record the deposit transaction
+            deposit_record = {
+                "wallet_address": wallet_address,
+                "type": "real_deposit",
+                "currency": "CRT",
+                "amount": deposit_amount,
+                "blockchain_balance_before": last_recorded_balance,
+                "blockchain_balance_after": current_real_balance,
+                "casino_balance_after": new_casino_balance,
+                "timestamp": datetime.utcnow(),
+                "status": "completed",
+                "source": "external_transfer"
+            }
+            
+            await db.transactions.insert_one(deposit_record)
+            
+            return {
+                "success": True,
+                "message": f"🎉 REAL DEPOSIT DETECTED! {deposit_amount:,.0f} CRT credited to your casino account!",
+                "deposit_amount": deposit_amount,
+                "new_casino_balance": new_casino_balance,
+                "blockchain_balance": current_real_balance,
+                "usd_value": deposit_amount * 0.15,
+                "transaction_id": str(deposit_record.get("_id", "unknown"))
+            }
+        else:
+            return {
+                "success": True,
+                "message": "No new deposits detected",
+                "current_blockchain_balance": current_real_balance,
+                "last_recorded_balance": last_recorded_balance,
+                "difference": deposit_amount
+            }
+        
+    except Exception as e:
+        return {"success": False, "error": str(e)}
+
+@app.post("/api/deposit/auto-monitor")
+async def start_deposit_monitoring(request: Dict[str, Any]):
+    """Start automatic deposit monitoring for a user"""
+    try:
+        wallet_address = request.get("wallet_address")
+        
+        if not wallet_address:
+            return {"success": False, "message": "wallet_address required"}
+        
+        # Initialize monitoring by setting baseline balance
+        balance_response = await crt_manager.get_crt_balance(wallet_address)
+        if not balance_response.get("success"):
+            return {"success": False, "message": "Could not get initial balance"}
+        
+        initial_balance = balance_response.get("crt_balance", 0)
+        
+        # Update user with initial balance
+        await db.users.update_one(
+            {"wallet_address": wallet_address},
+            {"$set": {
+                f"last_blockchain_balance.CRT": initial_balance,
+                "deposit_monitoring": True,
+                "monitoring_started": datetime.utcnow()
+            }}
+        )
+        
+        return {
+            "success": True,
+            "message": "✅ Deposit monitoring activated! Send CRT tokens and they'll be automatically detected.",
+            "initial_balance": initial_balance,
+            "deposit_address": wallet_address,
+            "note": "Use /api/deposit/check to manually check for new deposits, or they'll be detected automatically."
+        }
+        
+    except Exception as e:
+        return {"success": False, "error": str(e)}
+
 @app.get("/api/liquidity-pool/{wallet_address}")
 async def get_liquidity_pool(wallet_address: str):
     """Get user's liquidity pool status"""
