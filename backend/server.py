@@ -136,6 +136,13 @@ class SessionEndRequest(BaseModel):
     session_duration: int  # in minutes
     games_played: int
 
+class BetRequest(BaseModel):
+    wallet_address: str
+    game_type: str
+    bet_amount: float
+    currency: str
+    network: str
+
 # Basic routes
 @api_router.get("/")
 async def root():
