@@ -1577,6 +1577,102 @@ async def _update_session_stats(session_id, bet_result):
     except Exception as e:
         print(f"Error updating session stats: {e}")
 
+# Simulate real escrow for demonstration
+@app.post("/api/test/simulate-escrow")
+async def simulate_escrow(request: Dict[str, Any]):
+    """Simulate putting real tokens in escrow (SIMULATION ONLY)"""
+    try:
+        wallet_address = request.get("wallet_address")
+        escrow_amount = float(request.get("escrow_amount", 5000000))
+        currency = request.get("currency", "CRT")
+        
+        if not wallet_address:
+            return {"success": False, "message": "wallet_address required"}
+        
+        # Check if user has enough real tokens (from blockchain)
+        if currency == "CRT":
+            real_balance_response = await crt_manager.get_crt_balance(wallet_address)
+            real_balance = real_balance_response.get("crt_balance", 0)
+            
+            if real_balance < escrow_amount:
+                return {
+                    "success": False, 
+                    "message": f"Insufficient real {currency} balance. You have {real_balance}, trying to escrow {escrow_amount}",
+                    "real_balance": real_balance
+                }
+        
+        # Simulate escrow by updating casino balances to represent real holdings
+        user = await db.users.find_one({"wallet_address": wallet_address})
+        if not user:
+            return {"success": False, "message": "User not found"}
+        
+        # Clear previous balances and set real escrow amounts
+        escrow_balances = {
+            "deposit_balance": {currency: escrow_amount},
+            "escrow_balance": {currency: escrow_amount},  # Track what's in escrow
+            "escrow_status": "simulated",
+            "escrow_timestamp": datetime.utcnow(),
+            "real_token_backing": True
+        }
+        
+        # Update user with escrow simulation
+        await db.users.update_one(
+            {"wallet_address": wallet_address},
+            {"$set": escrow_balances}
+        )
+        
+        return {
+            "success": True,
+            "message": f"SIMULATED: {escrow_amount:,.0f} {currency} in escrow",
+            "escrow_amount": escrow_amount,
+            "currency": currency,
+            "usd_value": escrow_amount * 0.15,  # CRT price
+            "note": "⚠️ SIMULATION ONLY - No real tokens were moved. This represents what real escrow would look like.",
+            "real_balance_verified": real_balance if currency == "CRT" else "N/A"
+        }
+        
+    except Exception as e:
+        return {"success": False, "error": str(e)}
+
+@app.get("/api/escrow/status/{wallet_address}")
+async def get_escrow_status(wallet_address: str):
+    """Get escrow status and breakdown"""
+    try:
+        user = await db.users.find_one({"wallet_address": wallet_address})
+        if not user:
+            return {"success": False, "message": "User not found"}
+        
+        escrow_balance = user.get("escrow_balance", {})
+        real_backing = user.get("real_token_backing", False)
+        escrow_status = user.get("escrow_status", "none")
+        
+        total_escrow_usd = 0
+        escrow_breakdown = {}
+        
+        prices = {"CRT": 0.15, "DOGE": 0.08, "TRX": 0.015, "USDC": 1.0}
+        
+        for currency, amount in escrow_balance.items():
+            if amount > 0:
+                usd_value = amount * prices.get(currency, 0)
+                total_escrow_usd += usd_value
+                escrow_breakdown[currency] = {
+                    "amount": amount,
+                    "usd_value": usd_value
+                }
+        
+        return {
+            "success": True,
+            "wallet_address": wallet_address,
+            "escrow_status": escrow_status,
+            "real_token_backing": real_backing,
+            "total_escrow_usd": total_escrow_usd,
+            "escrow_breakdown": escrow_breakdown,
+            "note": "SIMULATION" if escrow_status == "simulated" else "REAL ESCROW"
+        }
+        
+    except Exception as e:
+        return {"success": False, "error": str(e)}
+
 @app.get("/api/liquidity-pool/{wallet_address}")
 async def get_liquidity_pool(wallet_address: str):
     """Get user's liquidity pool status"""
