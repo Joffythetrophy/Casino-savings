@@ -1673,6 +1673,118 @@ async def get_escrow_status(wallet_address: str):
     except Exception as e:
         return {"success": False, "error": str(e)}
 
+# Generate unique casino deposit address for user
+@app.post("/api/deposit/create-address")
+async def create_casino_deposit_address(request: Dict[str, Any]):
+    """Create a unique casino deposit address separate from user's main wallet"""
+    try:
+        wallet_address = request.get("wallet_address")
+        
+        if not wallet_address:
+            return {"success": False, "message": "wallet_address required"}
+        
+        # Generate a unique deposit address for this user
+        # In production, this would be a derived address or managed wallet
+        # For now, we'll create a unique identifier
+        import hashlib
+        deposit_suffix = hashlib.md5(f"{wallet_address}_casino_deposit".encode()).hexdigest()[:8]
+        casino_deposit_address = f"CASINO_{deposit_suffix}_{wallet_address[:8]}"
+        
+        # Store the mapping
+        user = await db.users.find_one({"wallet_address": wallet_address})
+        if not user:
+            return {"success": False, "message": "User not found"}
+        
+        await db.users.update_one(
+            {"wallet_address": wallet_address},
+            {"$set": {
+                "casino_deposit_address": casino_deposit_address,
+                "deposit_address_created": datetime.utcnow(),
+                "separate_deposit_mode": True
+            }}
+        )
+        
+        return {
+            "success": True,
+            "casino_deposit_address": casino_deposit_address,
+            "main_wallet": wallet_address,
+            "note": "⚠️ DEMO: In production, this would be a real Solana address. For now, use the manual credit system.",
+            "instructions": [
+                "1. Send CRT to your main wallet as normal",
+                "2. Use /api/deposit/manual-credit to credit specific amounts to casino",
+                "3. This prevents accidental crediting of all deposits"
+            ]
+        }
+        
+    except Exception as e:
+        return {"success": False, "error": str(e)}
+
+@app.post("/api/deposit/manual-credit")
+async def manual_credit_deposit(request: Dict[str, Any]):
+    """Manually credit a specific amount as casino deposit (user controlled)"""
+    try:
+        wallet_address = request.get("wallet_address")
+        amount = float(request.get("amount", 0))
+        currency = request.get("currency", "CRT")
+        
+        if not wallet_address or amount <= 0:
+            return {"success": False, "message": "wallet_address and positive amount required"}
+        
+        # Verify user has this amount in their real balance
+        if currency == "CRT":
+            real_balance_response = await crt_manager.get_crt_balance(wallet_address)
+            if not real_balance_response.get("success"):
+                return {"success": False, "message": "Could not verify real balance"}
+            
+            real_balance = real_balance_response.get("crt_balance", 0)
+            if real_balance < amount:
+                return {
+                    "success": False,
+                    "message": f"Insufficient real {currency} balance. You have {real_balance:,.0f}, trying to credit {amount:,.0f}",
+                    "real_balance": real_balance
+                }
+        
+        # Credit to casino account
+        user = await db.users.find_one({"wallet_address": wallet_address})
+        if not user:
+            return {"success": False, "message": "User not found"}
+        
+        current_casino_balance = user.get("deposit_balance", {}).get(currency, 0)
+        new_casino_balance = current_casino_balance + amount
+        
+        await db.users.update_one(
+            {"wallet_address": wallet_address},
+            {"$set": {f"deposit_balance.{currency}": new_casino_balance}}
+        )
+        
+        # Record transaction
+        credit_record = {
+            "wallet_address": wallet_address,
+            "type": "manual_credit",
+            "currency": currency,
+            "amount": amount,
+            "casino_balance_before": current_casino_balance,
+            "casino_balance_after": new_casino_balance,
+            "timestamp": datetime.utcnow(),
+            "status": "completed",
+            "source": "user_controlled"
+        }
+        
+        await db.transactions.insert_one(credit_record)
+        
+        return {
+            "success": True,
+            "message": f"✅ {amount:,.0f} {currency} credited to casino account!",
+            "amount_credited": amount,
+            "new_casino_balance": new_casino_balance,
+            "usd_value": amount * 0.15 if currency == "CRT" else 0,
+            "note": "This amount is now available for gaming. Your main wallet balance remains unchanged.",
+            "transaction_id": str(credit_record.get("_id", "unknown"))
+        }
+        
+    except Exception as e:
+        return {"success": False, "error": str(e)}
+
 # Real CRT deposit system
 @app.get("/api/deposit/address/{wallet_address}")
 async def get_deposit_address(wallet_address: str):
