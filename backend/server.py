@@ -1338,6 +1338,245 @@ async def add_liquidity_from_savings(request: Dict[str, Any]):
     except Exception as e:
         return {"success": False, "error": str(e)}
 
+# Auto-play system for AI betting
+@app.post("/api/autoplay/start")
+async def start_autoplay(request: Dict[str, Any]):
+    """Start AI auto-play betting system"""
+    try:
+        wallet_address = request.get("wallet_address")
+        settings = request.get("settings", {})
+        
+        if not wallet_address:
+            return {"success": False, "message": "wallet_address required"}
+        
+        # Default auto-play settings
+        autoplay_settings = {
+            "wallet_address": wallet_address,
+            "games": settings.get("games", ["Slot Machine", "Dice", "Roulette"]),
+            "bet_amounts": {
+                "CRT": settings.get("crt_bet", 100),
+                "DOGE": settings.get("doge_bet", 10),
+                "TRX": settings.get("trx_bet", 50)
+            },
+            "currency": settings.get("currency", "CRT"),
+            "max_loss": settings.get("max_loss", 10000),  # Stop after losing this much
+            "max_duration": settings.get("max_duration", 8),  # Hours
+            "bet_frequency": settings.get("bet_frequency", 5),  # Seconds between bets
+            "status": "active",
+            "started_at": datetime.utcnow(),
+            "total_bets": 0,
+            "total_winnings": 0,
+            "total_losses": 0,
+            "last_bet_at": None
+        }
+        
+        # Store autoplay session
+        await db.autoplay_sessions.insert_one(autoplay_settings)
+        
+        return {
+            "success": True,
+            "message": "Auto-play started! AI will bet for you automatically.",
+            "settings": autoplay_settings,
+            "session_id": str(autoplay_settings["_id"]) if "_id" in autoplay_settings else "new"
+        }
+        
+    except Exception as e:
+        return {"success": False, "error": str(e)}
+
+@app.post("/api/autoplay/stop")
+async def stop_autoplay(request: Dict[str, Any]):
+    """Stop AI auto-play betting system"""
+    try:
+        wallet_address = request.get("wallet_address")
+        
+        if not wallet_address:
+            return {"success": False, "message": "wallet_address required"}
+        
+        # Update all active sessions to stopped
+        result = await db.autoplay_sessions.update_many(
+            {"wallet_address": wallet_address, "status": "active"},
+            {"$set": {"status": "stopped", "stopped_at": datetime.utcnow()}}
+        )
+        
+        return {
+            "success": True,
+            "message": "Auto-play stopped",
+            "sessions_stopped": result.modified_count
+        }
+        
+    except Exception as e:
+        return {"success": False, "error": str(e)}
+
+@app.get("/api/autoplay/status/{wallet_address}")
+async def get_autoplay_status(wallet_address: str):
+    """Get current auto-play status"""
+    try:
+        # Get active sessions
+        active_sessions = await db.autoplay_sessions.find(
+            {"wallet_address": wallet_address, "status": "active"}
+        ).to_list(10)
+        
+        return {
+            "success": True,
+            "active_sessions": len(active_sessions),
+            "sessions": active_sessions
+        }
+        
+    except Exception as e:
+        return {"success": False, "error": str(e)}
+
+@app.post("/api/autoplay/process-bets")
+async def process_autoplay_bets():
+    """Process auto-play bets for all active sessions (called by scheduler)"""
+    try:
+        # Get all active autoplay sessions
+        active_sessions = await db.autoplay_sessions.find({"status": "active"}).to_list(100)
+        
+        processed_count = 0
+        
+        for session in active_sessions:
+            try:
+                # Check if session should continue
+                if not await _should_continue_autoplay(session):
+                    await db.autoplay_sessions.update_one(
+                        {"_id": session["_id"]},
+                        {"$set": {"status": "completed", "stopped_at": datetime.utcnow()}}
+                    )
+                    continue
+                
+                # Check if it's time for next bet
+                if await _is_time_for_next_bet(session):
+                    # Place an AI bet
+                    bet_result = await _place_ai_bet(session)
+                    if bet_result["success"]:
+                        # Update session stats
+                        await _update_session_stats(session["_id"], bet_result)
+                        processed_count += 1
+            
+            except Exception as e:
+                print(f"Error processing autoplay session {session['_id']}: {e}")
+                continue
+        
+        return {
+            "success": True,
+            "processed_bets": processed_count,
+            "message": f"Processed {processed_count} auto-play bets"
+        }
+        
+    except Exception as e:
+        return {"success": False, "error": str(e)}
+
+async def _should_continue_autoplay(session):
+    """Check if autoplay session should continue"""
+    try:
+        # Check time limit
+        started_at = session["started_at"]
+        max_duration_hours = session["max_duration"]
+        elapsed_hours = (datetime.utcnow() - started_at).total_seconds() / 3600
+        
+        if elapsed_hours >= max_duration_hours:
+            return False
+        
+        # Check loss limit
+        max_loss = session["max_loss"]
+        total_losses = session.get("total_losses", 0)
+        
+        if total_losses >= max_loss:
+            return False
+        
+        # Check if user has sufficient balance
+        user = await db.users.find_one({"wallet_address": session["wallet_address"]})
+        if not user:
+            return False
+        
+        currency = session["currency"]
+        bet_amount = session["bet_amounts"][currency]
+        current_balance = user.get("deposit_balance", {}).get(currency, 0)
+        
+        if current_balance < bet_amount:
+            return False
+        
+        return True
+        
+    except Exception as e:
+        print(f"Error checking autoplay continuation: {e}")
+        return False
+
+async def _is_time_for_next_bet(session):
+    """Check if it's time for the next bet"""
+    try:
+        last_bet_at = session.get("last_bet_at")
+        bet_frequency = session["bet_frequency"]  # seconds
+        
+        if not last_bet_at:
+            return True  # First bet
+        
+        elapsed_seconds = (datetime.utcnow() - last_bet_at).total_seconds()
+        return elapsed_seconds >= bet_frequency
+        
+    except Exception as e:
+        return True
+
+async def _place_ai_bet(session):
+    """Place an AI bet for autoplay session"""
+    try:
+        import random
+        
+        # Randomly select game
+        games = session["games"]
+        selected_game = random.choice(games)
+        
+        # Get bet settings
+        currency = session["currency"]
+        bet_amount = session["bet_amounts"][currency]
+        wallet_address = session["wallet_address"]
+        
+        # Place the bet using existing betting system
+        bet_data = BetRequest(
+            wallet_address=wallet_address,
+            game_type=selected_game,
+            bet_amount=bet_amount,
+            currency=currency,
+            network="autoplay"
+        )
+        
+        # Use existing place_bet function
+        result = await place_bet(bet_data)
+        
+        return {
+            "success": result.get("success", False),
+            "game": selected_game,
+            "amount": bet_amount,
+            "currency": currency,
+            "result": result.get("result", "unknown"),
+            "payout": result.get("payout", 0),
+            "message": result.get("message", "")
+        }
+        
+    except Exception as e:
+        return {"success": False, "error": str(e)}
+
+async def _update_session_stats(session_id, bet_result):
+    """Update autoplay session statistics"""
+    try:
+        update_data = {
+            "last_bet_at": datetime.utcnow(),
+            "$inc": {"total_bets": 1}
+        }
+        
+        if bet_result["result"] == "win":
+            update_data["$inc"]["total_winnings"] = bet_result["payout"]
+        else:
+            update_data["$inc"]["total_losses"] = bet_result["amount"]
+        
+        await db.autoplay_sessions.update_one(
+            {"_id": session_id},
+            update_data
+        )
+        
+    except Exception as e:
+        print(f"Error updating session stats: {e}")
+
 @app.get("/api/liquidity-pool/{wallet_address}")
 async def get_liquidity_pool(wallet_address: str):
     """Get user's liquidity pool status"""
