@@ -1240,6 +1240,85 @@ async def simulate_bet_loss(request: Dict[str, Any]):
     except Exception as e:
         return {"success": False, "error": str(e)}
 
+@app.post("/api/test/reset-password")
+async def reset_password(request: Dict[str, Any]):
+    """Reset password for a wallet address (test endpoint)"""
+    try:
+        wallet_address = request.get("wallet_address")
+        new_password = request.get("new_password")
+        
+        if not wallet_address or not new_password:
+            return {"success": False, "message": "wallet_address and new_password required"}
+        
+        # Hash the new password
+        hashed_password = pwd_context.hash(new_password)
+        
+        # Update the password in database
+        result = await db.users.update_one(
+            {"wallet_address": wallet_address},
+            {"$set": {"password": hashed_password}}
+        )
+        
+        if result.modified_count > 0:
+            return {
+                "success": True,
+                "message": f"Password updated for {wallet_address}",
+                "new_password": new_password
+            }
+        else:
+            return {"success": False, "message": "User not found or password not changed"}
+            
+    except Exception as e:
+        return {"success": False, "error": str(e)}
+
+# Add 50% of savings to liquidity pool as requested
+@app.post("/api/test/add-liquidity-from-savings")
+async def add_liquidity_from_savings(request: Dict[str, Any]):
+    """Add 50% of savings to liquidity pool as requested by user"""
+    try:
+        wallet_address = request.get("wallet_address")
+        percentage = float(request.get("percentage", 50))  # Default 50%
+        
+        if not wallet_address:
+            return {"success": False, "message": "wallet_address required"}
+        
+        # Get user's current savings
+        user = await db.users.find_one({"wallet_address": wallet_address})
+        if not user:
+            return {"success": False, "message": "User not found"}
+        
+        savings = user.get("savings_balance", {})
+        current_liquidity = user.get("liquidity_pool", {})
+        
+        # Calculate liquidity to add (50% of savings)
+        liquidity_to_add = {}
+        for currency, amount in savings.items():
+            if amount > 0:
+                liquidity_contribution = amount * (percentage / 100)
+                current_currency_liquidity = current_liquidity.get(currency, 0)
+                liquidity_to_add[currency] = current_currency_liquidity + liquidity_contribution
+        
+        # Update liquidity pool
+        update_dict = {}
+        for currency, new_amount in liquidity_to_add.items():
+            update_dict[f"liquidity_pool.{currency}"] = new_amount
+        
+        if update_dict:
+            await db.users.update_one(
+                {"wallet_address": wallet_address},
+                {"$set": update_dict}
+            )
+        
+        return {
+            "success": True,
+            "message": f"Added {percentage}% of savings to liquidity pool",
+            "liquidity_added": liquidity_to_add,
+            "original_savings": savings
+        }
+        
+    except Exception as e:
+        return {"success": False, "error": str(e)}
+
 @app.get("/api/liquidity-pool/{wallet_address}")
 async def get_liquidity_pool(wallet_address: str):
     """Get user's liquidity pool status"""
