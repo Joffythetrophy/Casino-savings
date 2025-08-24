@@ -37,6 +37,9 @@ mongo_url = os.environ['MONGO_URL']
 client = AsyncIOMotorClient(mongo_url)
 db = client[os.environ['DB_NAME']]
 
+# Initialize password context
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
 # Create the main app
 app = FastAPI(title="Casino Savings dApp API", version="1.0.0")
 
