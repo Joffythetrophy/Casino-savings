@@ -13,6 +13,7 @@ import asyncio
 import json
 from pycoingecko import CoinGeckoAPI
 import redis
+from passlib.context import CryptContext
 
 # Import blockchain managers
 from blockchain.solana_manager import SolanaManager, SPLTokenManager, CRTTokenManager
