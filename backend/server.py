@@ -1149,11 +1149,23 @@ async def login_user(request: LoginRequest):
         if not user:
             return {"success": False, "message": "Wallet address not found"}
         
-        # Verify password (basic implementation)
-        import hashlib
-        password_hash = hashlib.sha256(request.password.encode()).hexdigest()
+        # Verify password using bcrypt (consistent with reset function)
+        stored_password = user.get("password") or user.get("password_hash", "")
         
-        if user["password_hash"] != password_hash:
+        # If it's old SHA256 format, still check it
+        import hashlib
+        sha256_hash = hashlib.sha256(request.password.encode()).hexdigest()
+        
+        # Try bcrypt first (new format), then fallback to SHA256 (old format)
+        password_valid = False
+        if stored_password:
+            try:
+                password_valid = pwd_context.verify(request.password, stored_password)
+            except:
+                # Fallback to SHA256 check for backwards compatibility
+                password_valid = (stored_password == sha256_hash)
+        
+        if not password_valid:
             return {"success": False, "message": "Invalid password"}
         
         return {
