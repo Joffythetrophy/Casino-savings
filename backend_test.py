@@ -2551,7 +2551,7 @@ async def main():
     """Main test runner"""
     async with WalletAPITester(BACKEND_URL) as tester:
         await tester.run_all_tests()
-        summary = tester.print_summary()
+        summary = tester.print_test_summary()
         
         # Save detailed results
         with open("/app/backend_test_results.json", "w") as f:
