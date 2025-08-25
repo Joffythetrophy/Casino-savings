@@ -301,13 +301,6 @@ const CasinoGameLayout = ({ children, title, onBack, stats }) => {
           </div>
           <div className="space-y-4">
             <GameStats stats={stats} />
-            <AutoPlayPanel
-              onBet={handleSpin}
-              gameType="Slot Machine"
-              disabled={spinning}
-              minBet={1}
-              maxBet={100}
-            />
           </div>
         </div>
       </div>
