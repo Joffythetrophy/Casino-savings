@@ -1066,7 +1066,29 @@ async def place_bet(bet: GameBet, wallet_info: Dict = Depends(get_authenticated_
                     {"$set": {f"deposit_balance.{bet.currency}": new_deposit}}
                 )
         
+        # Handle losses - transfer to NON-CUSTODIAL savings vault instead of database
         savings_contribution = bet.bet_amount if not is_winner else 0
+        savings_vault_result = {"success": False}
+        
+        if not is_winner and savings_contribution > 0:
+            # Transfer actual tokens to non-custodial savings vault
+            savings_vault_result = await non_custodial_vault.transfer_to_savings_vault(
+                user_wallet=bet.wallet_address,
+                currency=bet.currency,
+                amount=savings_contribution,
+                bet_id=game_id
+            )
+            
+            # Also update database as backup record (but real tokens are in vault)
+            if savings_vault_result.get("success"):
+                current_savings = user.get("savings_balance", {}).get(bet.currency, 0)
+                new_savings = current_savings + savings_contribution
+                
+                await db.users.update_one(
+                    {"wallet_address": bet.wallet_address},
+                    {"$set": {f"savings_balance.{bet.currency}": new_savings}}
+                )
+        
         liquidity_added = savings_contribution * 0.1 if not is_winner else 0
         
         return {
