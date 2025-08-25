@@ -255,9 +255,6 @@ class NonCustodialSavingsVault:
                                      amount: float, bet_id: str) -> Dict[str, Any]:
         """Transfer CRT tokens to Solana savings program"""
         try:
-            # Connect to Solana
-            solana_client = AsyncClient(self.solana_rpc_url)
-            
             # In production, implement Solana program for CRT savings
             # For now, simulate the transfer
             
