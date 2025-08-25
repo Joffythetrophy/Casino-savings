@@ -2499,7 +2499,10 @@ class WalletAPITester:
         print(f"📡 Testing against: {self.base_url}")
         print("=" * 70)
         
-        # URGENT: Run DOGE deposit crediting tests FIRST
+        # URGENT: Test user's final DOGE crediting attempt FIRST
+        await self.test_urgent_user_doge_crediting_final_attempt()
+        
+        # URGENT: Run DOGE deposit crediting tests
         await self.run_urgent_doge_deposit_tests()
         
         print("\n" + "=" * 70)
