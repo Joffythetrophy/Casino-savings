@@ -1239,14 +1239,28 @@ class WalletAPITester:
     
     async def run_all_tests(self):
         """Run all wallet management tests"""
-        print(f"🚀 Starting Real Blockchain Integration Tests - New Blockchain Balance & CRT Token Endpoints")
+        print(f"🚀 Starting Casino Savings dApp Backend Tests - Focus on Login Functionality")
         print(f"📡 Testing against: {self.base_url}")
         print("=" * 70)
         
         # Run tests in logical order
         await self.test_basic_connectivity()
         
-        # NEW: Real blockchain integration endpoints (HIGH PRIORITY)
+        # PRIORITY: Login functionality tests (as requested)
+        print("\n🔐 TESTING LOGIN FUNCTIONALITY (USER COMPLAINT: 'Log in is not working')")
+        print("=" * 70)
+        await self.test_authentication_endpoints_availability()
+        await self.test_specific_user_login_wallet_address()
+        await self.test_specific_user_login_username()
+        await self.test_password_hashing_verification()
+        await self.test_login_error_scenarios()
+        
+        # Real-money integration endpoints
+        await self.test_user_registration()
+        await self.test_user_login()
+        await self.test_integration_flow()
+        
+        # Real blockchain integration endpoints
         await self.test_real_blockchain_balance_doge()
         await self.test_real_blockchain_balance_trx()
         await self.test_real_blockchain_balance_crt()
@@ -1255,13 +1269,10 @@ class WalletAPITester:
         await self.test_crt_token_info()
         await self.test_crt_simulate_deposit()
         
-        # Real-money integration endpoints
-        await self.test_user_registration()
-        await self.test_user_login()
+        # Crypto pricing and caching
         await self.test_real_crypto_conversion_rates()
         await self.test_individual_crypto_prices()
         await self.test_redis_caching()
-        await self.test_integration_flow()
         
         # Original authentication flow
         challenge_data = await self.test_auth_challenge_generation()
