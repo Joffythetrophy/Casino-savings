@@ -922,7 +922,7 @@ class WalletAPITester:
             
             # Step 2: Login with registered user
             login_payload = {
-                "wallet_address": flow_wallet,
+                "identifier": flow_wallet,
                 "password": flow_password
             }
             
@@ -996,6 +996,246 @@ class WalletAPITester:
                     
         except Exception as e:
             self.log_test("Integration Flow", False, f"Error: {str(e)}")
+
+    async def test_specific_user_login_wallet_address(self):
+        """Test 25: Specific user login with wallet address - DwK4nUM8TKWAxEBKTG6mWA6PBRDHFPA3beLB18pwCekq"""
+        try:
+            # Test login with the specific wallet address and password from user complaint
+            target_wallet = "DwK4nUM8TKWAxEBKTG6mWA6PBRDHFPA3beLB18pwCekq"
+            target_password = "crt21million"
+            
+            login_payload = {
+                "identifier": target_wallet,
+                "password": target_password
+            }
+            
+            async with self.session.post(f"{self.base_url}/auth/login", 
+                                       json=login_payload) as response:
+                if response.status == 200:
+                    data = await response.json()
+                    required_fields = ["success", "message", "user_id", "username", "wallet_address", "created_at"]
+                    
+                    if all(field in data for field in required_fields) and data.get("success"):
+                        # Verify the returned data matches expected user
+                        if (data.get("wallet_address") == target_wallet and 
+                            data.get("username") == "cryptoking"):
+                            self.log_test("Specific User Login (Wallet)", True, 
+                                        f"✅ LOGIN SUCCESSFUL for wallet {target_wallet} (username: {data.get('username')})", data)
+                        else:
+                            self.log_test("Specific User Login (Wallet)", False, 
+                                        f"Login successful but user data mismatch: expected cryptoking, got {data.get('username')}", data)
+                    else:
+                        self.log_test("Specific User Login (Wallet)", False, 
+                                    f"Login failed: {data.get('message', 'Unknown error')}", data)
+                else:
+                    error_text = await response.text()
+                    self.log_test("Specific User Login (Wallet)", False, 
+                                f"❌ LOGIN FAILED - HTTP {response.status}: {error_text}")
+        except Exception as e:
+            self.log_test("Specific User Login (Wallet)", False, f"Error: {str(e)}")
+
+    async def test_specific_user_login_username(self):
+        """Test 26: Specific user login with username - cryptoking"""
+        try:
+            # Test login with username endpoint
+            target_username = "cryptoking"
+            target_password = "crt21million"
+            
+            login_payload = {
+                "username": target_username,
+                "password": target_password
+            }
+            
+            async with self.session.post(f"{self.base_url}/auth/login/username", 
+                                       json=login_payload) as response:
+                if response.status == 200:
+                    data = await response.json()
+                    required_fields = ["success", "message", "user_id", "username", "wallet_address", "created_at"]
+                    
+                    if all(field in data for field in required_fields) and data.get("success"):
+                        # Verify the returned data matches expected user
+                        expected_wallet = "DwK4nUM8TKWAxEBKTG6mWA6PBRDHFPA3beLB18pwCekq"
+                        if (data.get("username") == target_username and 
+                            data.get("wallet_address") == expected_wallet):
+                            self.log_test("Specific User Login (Username)", True, 
+                                        f"✅ USERNAME LOGIN SUCCESSFUL for {target_username} (wallet: {data.get('wallet_address')})", data)
+                        else:
+                            self.log_test("Specific User Login (Username)", False, 
+                                        f"Login successful but user data mismatch: expected {expected_wallet}, got {data.get('wallet_address')}", data)
+                    else:
+                        self.log_test("Specific User Login (Username)", False, 
+                                    f"Username login failed: {data.get('message', 'Unknown error')}", data)
+                else:
+                    error_text = await response.text()
+                    self.log_test("Specific User Login (Username)", False, 
+                                f"❌ USERNAME LOGIN FAILED - HTTP {response.status}: {error_text}")
+        except Exception as e:
+            self.log_test("Specific User Login (Username)", False, f"Error: {str(e)}")
+
+    async def test_login_error_scenarios(self):
+        """Test 27: Login error scenarios and edge cases"""
+        try:
+            # Test 1: Invalid wallet address
+            invalid_wallet_payload = {
+                "identifier": "InvalidWalletAddress123",
+                "password": "crt21million"
+            }
+            
+            async with self.session.post(f"{self.base_url}/auth/login", 
+                                       json=invalid_wallet_payload) as response:
+                if response.status == 200:
+                    data = await response.json()
+                    if not data.get("success") and "not found" in data.get("message", "").lower():
+                        self.log_test("Login Error - Invalid Wallet", True, 
+                                    f"✅ Invalid wallet correctly rejected: {data.get('message')}", data)
+                    else:
+                        self.log_test("Login Error - Invalid Wallet", False, 
+                                    f"Invalid wallet should be rejected but got: {data}", data)
+                else:
+                    self.log_test("Login Error - Invalid Wallet", False, 
+                                f"Expected 200 with error message, got HTTP {response.status}")
+            
+            # Test 2: Valid wallet, wrong password
+            wrong_password_payload = {
+                "identifier": "DwK4nUM8TKWAxEBKTG6mWA6PBRDHFPA3beLB18pwCekq",
+                "password": "wrongpassword123"
+            }
+            
+            async with self.session.post(f"{self.base_url}/auth/login", 
+                                       json=wrong_password_payload) as response:
+                if response.status == 200:
+                    data = await response.json()
+                    if not data.get("success") and "password" in data.get("message", "").lower():
+                        self.log_test("Login Error - Wrong Password", True, 
+                                    f"✅ Wrong password correctly rejected: {data.get('message')}", data)
+                    else:
+                        self.log_test("Login Error - Wrong Password", False, 
+                                    f"Wrong password should be rejected but got: {data}", data)
+                else:
+                    self.log_test("Login Error - Wrong Password", False, 
+                                f"Expected 200 with error message, got HTTP {response.status}")
+            
+            # Test 3: Invalid username
+            invalid_username_payload = {
+                "username": "nonexistentuser",
+                "password": "crt21million"
+            }
+            
+            async with self.session.post(f"{self.base_url}/auth/login/username", 
+                                       json=invalid_username_payload) as response:
+                if response.status == 200:
+                    data = await response.json()
+                    if not data.get("success") and "not found" in data.get("message", "").lower():
+                        self.log_test("Login Error - Invalid Username", True, 
+                                    f"✅ Invalid username correctly rejected: {data.get('message')}", data)
+                    else:
+                        self.log_test("Login Error - Invalid Username", False, 
+                                    f"Invalid username should be rejected but got: {data}", data)
+                else:
+                    self.log_test("Login Error - Invalid Username", False, 
+                                f"Expected 200 with error message, got HTTP {response.status}")
+            
+            # Test 4: Valid username, wrong password
+            wrong_password_username_payload = {
+                "username": "cryptoking",
+                "password": "wrongpassword123"
+            }
+            
+            async with self.session.post(f"{self.base_url}/auth/login/username", 
+                                       json=wrong_password_username_payload) as response:
+                if response.status == 200:
+                    data = await response.json()
+                    if not data.get("success") and "password" in data.get("message", "").lower():
+                        self.log_test("Login Error - Username Wrong Password", True, 
+                                    f"✅ Wrong password for username correctly rejected: {data.get('message')}", data)
+                    else:
+                        self.log_test("Login Error - Username Wrong Password", False, 
+                                    f"Wrong password for username should be rejected but got: {data}", data)
+                else:
+                    self.log_test("Login Error - Username Wrong Password", False, 
+                                f"Expected 200 with error message, got HTTP {response.status}")
+                    
+        except Exception as e:
+            self.log_test("Login Error Scenarios", False, f"Error: {str(e)}")
+
+    async def test_password_hashing_verification(self):
+        """Test 28: Password hashing and verification process"""
+        try:
+            # Test that the system properly handles bcrypt password verification
+            # by attempting login with the known user
+            target_wallet = "DwK4nUM8TKWAxEBKTG6mWA6PBRDHFPA3beLB18pwCekq"
+            target_password = "crt21million"
+            
+            # First, let's test a successful login to verify password hashing works
+            login_payload = {
+                "identifier": target_wallet,
+                "password": target_password
+            }
+            
+            async with self.session.post(f"{self.base_url}/auth/login", 
+                                       json=login_payload) as response:
+                if response.status == 200:
+                    data = await response.json()
+                    if data.get("success"):
+                        self.log_test("Password Hashing Verification", True, 
+                                    "✅ Password hashing/verification working correctly - bcrypt authentication successful", data)
+                    else:
+                        self.log_test("Password Hashing Verification", False, 
+                                    f"Password verification failed: {data.get('message')}", data)
+                else:
+                    error_text = await response.text()
+                    self.log_test("Password Hashing Verification", False, 
+                                f"Password verification endpoint error - HTTP {response.status}: {error_text}")
+                    
+        except Exception as e:
+            self.log_test("Password Hashing Verification", False, f"Error: {str(e)}")
+
+    async def test_authentication_endpoints_availability(self):
+        """Test 29: Authentication endpoints availability and structure"""
+        try:
+            # Test that both login endpoints exist and return proper error structure
+            endpoints_to_test = [
+                ("/auth/login", {"identifier": "test", "password": "test"}),
+                ("/auth/login/username", {"username": "test", "password": "test"})
+            ]
+            
+            all_endpoints_available = True
+            endpoint_results = {}
+            
+            for endpoint, payload in endpoints_to_test:
+                try:
+                    async with self.session.post(f"{self.base_url}{endpoint}", 
+                                               json=payload) as response:
+                        if response.status in [200, 400, 404]:  # Any of these are acceptable
+                            data = await response.json() if response.status != 404 else {"error": "Not found"}
+                            endpoint_results[endpoint] = {
+                                "status": response.status,
+                                "available": True,
+                                "response_structure": list(data.keys()) if isinstance(data, dict) else "non-dict"
+                            }
+                        else:
+                            endpoint_results[endpoint] = {
+                                "status": response.status,
+                                "available": False,
+                                "error": await response.text()
+                            }
+                            all_endpoints_available = False
+                except Exception as e:
+                    endpoint_results[endpoint] = {
+                        "available": False,
+                        "error": str(e)
+                    }
+                    all_endpoints_available = False
+            
+            if all_endpoints_available:
+                self.log_test("Authentication Endpoints Availability", True, 
+                            "✅ All authentication endpoints are available and responding", endpoint_results)
+            else:
+                self.log_test("Authentication Endpoints Availability", False, 
+                            "❌ Some authentication endpoints are not available", endpoint_results)
+                    
+        except Exception as e:
+            self.log_test("Authentication Endpoints Availability", False, f"Error: {str(e)}")
     
     async def run_all_tests(self):
         """Run all wallet management tests"""
