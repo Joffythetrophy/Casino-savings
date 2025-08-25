@@ -196,8 +196,8 @@ const Dice = ({ onBack }) => {
           <h3 className="text-lg font-bold text-yellow-400 mb-2">How to Play</h3>
           <ul className="text-sm text-gray-300 space-y-1">
             <li>• Set your prediction number (1-99)</li>
-            <li>• Choose "Roll Over" to win if result > prediction</li>
-            <li>• Choose "Roll Under" to win if result < prediction</li>
+            <li>• Choose "Roll Over" to win if result {">"} prediction</li>
+            <li>• Choose "Roll Under" to win if result {"<"} prediction</li>
             <li>• Lower win chance = higher multiplier</li>
             <li>• House edge: 1%</li>
           </ul>
