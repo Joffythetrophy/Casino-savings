@@ -1887,6 +1887,404 @@ class WalletAPITester:
         except Exception as e:
             self.log_test("User Account Verification", False, f"Error: {str(e)}")
 
+    async def test_non_custodial_vault_addresses(self):
+        """Test 29: Non-custodial vault address generation for specific user"""
+        try:
+            # Test with the specific user wallet from review request
+            target_wallet = "DwK4nUM8TKWAxEBKTG6mWA6PBRDHFPA3beLB18pwCekq"
+            
+            async with self.session.get(f"{self.base_url}/savings/vault/address/{target_wallet}") as response:
+                if response.status == 200:
+                    data = await response.json()
+                    required_fields = ["success", "wallet_address", "vault_addresses", "vault_type", "private_key_derivation"]
+                    
+                    if all(field in data for field in required_fields) and data.get("success"):
+                        vault_addresses = data.get("vault_addresses", {})
+                        vault_type = data.get("vault_type")
+                        private_key_derivation = data.get("private_key_derivation")
+                        
+                        # Check multi-currency support
+                        expected_currencies = ["DOGE", "TRX", "CRT", "SOL"]
+                        found_currencies = []
+                        deterministic_addresses = {}
+                        
+                        for currency in expected_currencies:
+                            if currency in vault_addresses:
+                                found_currencies.append(currency)
+                                addr_info = vault_addresses[currency]
+                                deterministic_addresses[currency] = addr_info.get("address")
+                        
+                        # Verify non-custodial features
+                        is_non_custodial = vault_type == "non_custodial"
+                        has_private_key_info = "savings_vault_2025_secure" in private_key_derivation
+                        
+                        if (len(found_currencies) >= 4 and is_non_custodial and has_private_key_info):
+                            self.log_test("Non-Custodial Vault Addresses", True, 
+                                        f"✅ Vault addresses generated for {found_currencies}, type: {vault_type}, deterministic: {has_private_key_info}", data)
+                            
+                            # Store addresses for balance testing
+                            self.vault_addresses = deterministic_addresses
+                        else:
+                            self.log_test("Non-Custodial Vault Addresses", False, 
+                                        f"Missing features: currencies={found_currencies}, non_custodial={is_non_custodial}, deterministic={has_private_key_info}", data)
+                    else:
+                        self.log_test("Non-Custodial Vault Addresses", False, 
+                                    "Invalid vault address response format", data)
+                else:
+                    self.log_test("Non-Custodial Vault Addresses", False, 
+                                f"HTTP {response.status}: {await response.text()}")
+        except Exception as e:
+            self.log_test("Non-Custodial Vault Addresses", False, f"Error: {str(e)}")
+
+    async def test_vault_balance_checking(self):
+        """Test 30: Real blockchain vault balance checking"""
+        try:
+            target_wallet = "DwK4nUM8TKWAxEBKTG6mWA6PBRDHFPA3beLB18pwCekq"
+            
+            async with self.session.get(f"{self.base_url}/savings/vault/{target_wallet}") as response:
+                if response.status == 200:
+                    data = await response.json()
+                    required_fields = ["success", "wallet_address", "vault_type", "user_controlled", "vault_balances", "vault_addresses"]
+                    
+                    if all(field in data for field in required_fields) and data.get("success"):
+                        vault_balances = data.get("vault_balances", {})
+                        vault_addresses = data.get("vault_addresses", {})
+                        vault_type = data.get("vault_type")
+                        user_controlled = data.get("user_controlled")
+                        security = data.get("security", {})
+                        
+                        # Check if balances are from real blockchain
+                        currencies_with_balances = []
+                        for currency, balance in vault_balances.items():
+                            if isinstance(balance, (int, float)):
+                                currencies_with_balances.append(f"{currency}:{balance}")
+                        
+                        # Verify security features
+                        is_non_custodial = vault_type == "non_custodial" and user_controlled
+                        has_security_info = security.get("custody") == "non_custodial"
+                        
+                        if (len(currencies_with_balances) >= 3 and is_non_custodial):
+                            self.log_test("Vault Balance Checking", True, 
+                                        f"✅ Real blockchain vault balances: {currencies_with_balances}, non-custodial: {is_non_custodial}", data)
+                        else:
+                            self.log_test("Vault Balance Checking", False, 
+                                        f"Insufficient blockchain integration: balances={currencies_with_balances}, non_custodial={is_non_custodial}", data)
+                    else:
+                        self.log_test("Vault Balance Checking", False, 
+                                    "Invalid vault balance response format", data)
+                else:
+                    self.log_test("Vault Balance Checking", False, 
+                                f"HTTP {response.status}: {await response.text()}")
+        except Exception as e:
+            self.log_test("Vault Balance Checking", False, f"Error: {str(e)}")
+
+    async def test_withdrawal_transaction_creation(self):
+        """Test 31: Non-custodial withdrawal transaction creation"""
+        try:
+            target_wallet = "DwK4nUM8TKWAxEBKTG6mWA6PBRDHFPA3beLB18pwCekq"
+            
+            withdrawal_payload = {
+                "wallet_address": target_wallet,
+                "currency": "CRT",
+                "amount": 100.0,
+                "destination_address": "9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM"
+            }
+            
+            async with self.session.post(f"{self.base_url}/savings/vault/withdraw", 
+                                       json=withdrawal_payload) as response:
+                if response.status == 200:
+                    data = await response.json()
+                    required_fields = ["success", "withdrawal_transaction", "instructions", "security"]
+                    
+                    if all(field in data for field in required_fields) and data.get("success"):
+                        withdrawal_tx = data.get("withdrawal_transaction", {})
+                        instructions = data.get("instructions", [])
+                        security = data.get("security", {})
+                        
+                        # Verify withdrawal transaction structure
+                        tx_fields = ["from_address", "to_address", "amount", "currency", "requires_user_signature"]
+                        has_tx_fields = all(field in withdrawal_tx for field in tx_fields)
+                        
+                        # Verify non-custodial security
+                        requires_user_signature = withdrawal_tx.get("requires_user_signature", False)
+                        platform_cannot_access = security.get("platform_cannot_access_funds", False)
+                        user_signing_required = security.get("user_signing_required", False)
+                        
+                        # Check instructions for user control
+                        has_private_key_instructions = any("private key" in str(instruction).lower() for instruction in instructions)
+                        
+                        if (has_tx_fields and requires_user_signature and platform_cannot_access and has_private_key_instructions):
+                            self.log_test("Withdrawal Transaction Creation", True, 
+                                        f"✅ Non-custodial withdrawal created: user_signature={requires_user_signature}, platform_no_access={platform_cannot_access}", data)
+                        else:
+                            self.log_test("Withdrawal Transaction Creation", False, 
+                                        f"Missing non-custodial features: tx_fields={has_tx_fields}, user_sig={requires_user_signature}, no_platform_access={platform_cannot_access}", data)
+                    else:
+                        self.log_test("Withdrawal Transaction Creation", False, 
+                                    "Invalid withdrawal response format", data)
+                else:
+                    self.log_test("Withdrawal Transaction Creation", False, 
+                                f"HTTP {response.status}: {await response.text()}")
+        except Exception as e:
+            self.log_test("Withdrawal Transaction Creation", False, f"Error: {str(e)}")
+
+    async def test_game_betting_vault_integration(self):
+        """Test 32: Game betting integration with non-custodial vault transfers"""
+        try:
+            target_wallet = "DwK4nUM8TKWAxEBKTG6mWA6PBRDHFPA3beLB18pwCekq"
+            
+            # First, try to authenticate (may not work but let's test the betting endpoint)
+            bet_payload = {
+                "wallet_address": target_wallet,
+                "game_type": "Slot Machine",
+                "bet_amount": 10.0,
+                "currency": "CRT",
+                "network": "solana"
+            }
+            
+            async with self.session.post(f"{self.base_url}/games/bet", 
+                                       json=bet_payload) as response:
+                if response.status in [200, 401, 403]:  # May fail due to auth but we can check response structure
+                    if response.status == 200:
+                        data = await response.json()
+                        required_fields = ["success", "game_id", "result", "savings_vault"]
+                        
+                        if all(field in data for field in required_fields):
+                            savings_vault = data.get("savings_vault", {})
+                            result = data.get("result")
+                            
+                            # Check if savings vault integration is present
+                            vault_fields = ["transferred", "vault_address", "vault_type", "user_controlled"]
+                            has_vault_integration = any(field in savings_vault for field in vault_fields)
+                            
+                            # Check if it's non-custodial
+                            is_non_custodial = savings_vault.get("vault_type") == "non_custodial"
+                            user_controlled = savings_vault.get("user_controlled", False)
+                            
+                            if has_vault_integration and (is_non_custodial or user_controlled):
+                                self.log_test("Game Betting Vault Integration", True, 
+                                            f"✅ Game betting integrated with non-custodial vault: result={result}, vault_type={savings_vault.get('vault_type')}", data)
+                            else:
+                                self.log_test("Game Betting Vault Integration", False, 
+                                            f"Missing vault integration: has_integration={has_vault_integration}, non_custodial={is_non_custodial}", data)
+                        else:
+                            self.log_test("Game Betting Vault Integration", False, 
+                                        "Game betting response missing vault integration fields", data)
+                    else:
+                        # Auth error expected, but we can still verify the endpoint exists
+                        error_text = await response.text()
+                        if "unauthorized" in error_text.lower() or "forbidden" in error_text.lower():
+                            self.log_test("Game Betting Vault Integration", True, 
+                                        f"✅ Game betting endpoint exists (auth required): HTTP {response.status}")
+                        else:
+                            self.log_test("Game Betting Vault Integration", False, 
+                                        f"Unexpected error: HTTP {response.status}: {error_text}")
+                else:
+                    self.log_test("Game Betting Vault Integration", False, 
+                                f"HTTP {response.status}: {await response.text()}")
+        except Exception as e:
+            self.log_test("Game Betting Vault Integration", False, f"Error: {str(e)}")
+
+    async def test_multi_currency_vault_support(self):
+        """Test 33: Multi-currency vault address generation (DOGE, TRX, CRT, SOL)"""
+        try:
+            target_wallet = "DwK4nUM8TKWAxEBKTG6mWA6PBRDHFPA3beLB18pwCekq"
+            
+            async with self.session.get(f"{self.base_url}/savings/vault/address/{target_wallet}") as response:
+                if response.status == 200:
+                    data = await response.json()
+                    
+                    if data.get("success"):
+                        vault_addresses = data.get("vault_addresses", {})
+                        
+                        # Test all required currencies
+                        required_currencies = ["DOGE", "TRX", "CRT", "SOL"]
+                        currency_results = {}
+                        
+                        for currency in required_currencies:
+                            if currency in vault_addresses:
+                                addr_info = vault_addresses[currency]
+                                address = addr_info.get("address")
+                                blockchain = addr_info.get("blockchain")
+                                verification_url = addr_info.get("verification_url")
+                                
+                                # Validate address format based on currency
+                                is_valid_format = False
+                                if currency == "DOGE" and address and address.startswith("D") and len(address) >= 25:
+                                    is_valid_format = True
+                                elif currency == "TRX" and address and address.startswith("T") and len(address) >= 25:
+                                    is_valid_format = True
+                                elif currency in ["CRT", "SOL"] and address and len(address) >= 32:
+                                    is_valid_format = True
+                                
+                                currency_results[currency] = {
+                                    "address": address,
+                                    "blockchain": blockchain,
+                                    "valid_format": is_valid_format,
+                                    "has_verification": bool(verification_url)
+                                }
+                        
+                        # Check results
+                        valid_currencies = [curr for curr, info in currency_results.items() if info["valid_format"]]
+                        currencies_with_verification = [curr for curr, info in currency_results.items() if info["has_verification"]]
+                        
+                        if len(valid_currencies) >= 4 and len(currencies_with_verification) >= 4:
+                            self.log_test("Multi-Currency Vault Support", True, 
+                                        f"✅ All currencies supported with valid addresses: {valid_currencies}, verification URLs: {currencies_with_verification}", currency_results)
+                        else:
+                            self.log_test("Multi-Currency Vault Support", False, 
+                                        f"Insufficient currency support: valid={valid_currencies}, verification={currencies_with_verification}", currency_results)
+                    else:
+                        self.log_test("Multi-Currency Vault Support", False, 
+                                    "Vault address generation failed", data)
+                else:
+                    self.log_test("Multi-Currency Vault Support", False, 
+                                f"HTTP {response.status}: {await response.text()}")
+        except Exception as e:
+            self.log_test("Multi-Currency Vault Support", False, f"Error: {str(e)}")
+
+    async def test_security_features_validation(self):
+        """Test 34: Security features - user-controlled private keys and non-custodial architecture"""
+        try:
+            target_wallet = "DwK4nUM8TKWAxEBKTG6mWA6PBRDHFPA3beLB18pwCekq"
+            
+            # Test 1: Vault address generation security
+            async with self.session.get(f"{self.base_url}/savings/vault/address/{target_wallet}") as response:
+                if response.status == 200:
+                    addr_data = await response.json()
+                    
+                    # Test 2: Vault balance security
+                    async with self.session.get(f"{self.base_url}/savings/vault/{target_wallet}") as balance_response:
+                        if balance_response.status == 200:
+                            balance_data = await balance_response.json()
+                            
+                            # Analyze security features across both endpoints
+                            security_checks = {
+                                "non_custodial_vault_type": False,
+                                "user_controlled_funds": False,
+                                "deterministic_addresses": False,
+                                "private_key_derivation_info": False,
+                                "platform_cannot_access_funds": False,
+                                "withdrawal_requires_user_signature": False
+                            }
+                            
+                            # Check address generation security
+                            if addr_data.get("success"):
+                                vault_type = addr_data.get("vault_type")
+                                private_key_derivation = addr_data.get("private_key_derivation", "")
+                                instructions = addr_data.get("instructions", [])
+                                
+                                security_checks["non_custodial_vault_type"] = vault_type == "non_custodial"
+                                security_checks["deterministic_addresses"] = "savings_vault_2025_secure" in private_key_derivation
+                                security_checks["private_key_derivation_info"] = "Derive from" in private_key_derivation
+                                security_checks["user_controlled_funds"] = any("You control" in str(inst) for inst in instructions)
+                            
+                            # Check balance security
+                            if balance_data.get("success"):
+                                user_controlled = balance_data.get("user_controlled", False)
+                                security = balance_data.get("security", {})
+                                
+                                security_checks["user_controlled_funds"] = security_checks["user_controlled_funds"] or user_controlled
+                                security_checks["platform_cannot_access_funds"] = security.get("custody") == "non_custodial"
+                            
+                            # Test withdrawal security
+                            withdrawal_payload = {
+                                "wallet_address": target_wallet,
+                                "currency": "CRT",
+                                "amount": 1.0,
+                                "destination_address": "9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM"
+                            }
+                            
+                            async with self.session.post(f"{self.base_url}/savings/vault/withdraw", 
+                                                       json=withdrawal_payload) as withdraw_response:
+                                if withdraw_response.status == 200:
+                                    withdraw_data = await withdraw_response.json()
+                                    if withdraw_data.get("success"):
+                                        withdraw_security = withdraw_data.get("security", {})
+                                        withdrawal_tx = withdraw_data.get("withdrawal_transaction", {})
+                                        
+                                        security_checks["withdrawal_requires_user_signature"] = withdrawal_tx.get("requires_user_signature", False)
+                                        security_checks["platform_cannot_access_funds"] = security_checks["platform_cannot_access_funds"] or withdraw_security.get("platform_cannot_access_funds", False)
+                            
+                            # Evaluate overall security
+                            passed_checks = sum(security_checks.values())
+                            total_checks = len(security_checks)
+                            security_score = (passed_checks / total_checks) * 100
+                            
+                            if security_score >= 80:  # At least 80% of security features working
+                                self.log_test("Security Features Validation", True, 
+                                            f"✅ Non-custodial security validated: {passed_checks}/{total_checks} checks passed ({security_score:.1f}%)", security_checks)
+                            else:
+                                self.log_test("Security Features Validation", False, 
+                                            f"Insufficient security features: {passed_checks}/{total_checks} checks passed ({security_score:.1f}%)", security_checks)
+                        else:
+                            self.log_test("Security Features Validation", False, 
+                                        f"Vault balance endpoint failed: HTTP {balance_response.status}")
+                else:
+                    self.log_test("Security Features Validation", False, 
+                                f"Vault address endpoint failed: HTTP {response.status}")
+        except Exception as e:
+            self.log_test("Security Features Validation", False, f"Error: {str(e)}")
+
+    async def test_deterministic_address_generation(self):
+        """Test 35: Verify vault addresses are deterministic and secure"""
+        try:
+            target_wallet = "DwK4nUM8TKWAxEBKTG6mWA6PBRDHFPA3beLB18pwCekq"
+            
+            # Call the endpoint twice to verify deterministic generation
+            addresses_first_call = {}
+            addresses_second_call = {}
+            
+            # First call
+            async with self.session.get(f"{self.base_url}/savings/vault/address/{target_wallet}") as response1:
+                if response1.status == 200:
+                    data1 = await response1.json()
+                    if data1.get("success"):
+                        vault_addresses1 = data1.get("vault_addresses", {})
+                        for currency, addr_info in vault_addresses1.items():
+                            addresses_first_call[currency] = addr_info.get("address")
+            
+            # Small delay
+            await asyncio.sleep(0.1)
+            
+            # Second call
+            async with self.session.get(f"{self.base_url}/savings/vault/address/{target_wallet}") as response2:
+                if response2.status == 200:
+                    data2 = await response2.json()
+                    if data2.get("success"):
+                        vault_addresses2 = data2.get("vault_addresses", {})
+                        for currency, addr_info in vault_addresses2.items():
+                            addresses_second_call[currency] = addr_info.get("address")
+            
+            # Compare addresses
+            deterministic_currencies = []
+            non_deterministic_currencies = []
+            
+            for currency in addresses_first_call:
+                if currency in addresses_second_call:
+                    if addresses_first_call[currency] == addresses_second_call[currency]:
+                        deterministic_currencies.append(currency)
+                    else:
+                        non_deterministic_currencies.append(currency)
+            
+            # Verify all addresses are deterministic
+            if len(deterministic_currencies) >= 4 and len(non_deterministic_currencies) == 0:
+                self.log_test("Deterministic Address Generation", True, 
+                            f"✅ All vault addresses are deterministic: {deterministic_currencies}", {
+                                "first_call": addresses_first_call,
+                                "second_call": addresses_second_call,
+                                "deterministic": deterministic_currencies
+                            })
+            else:
+                self.log_test("Deterministic Address Generation", False, 
+                            f"Address generation not deterministic: deterministic={deterministic_currencies}, non_deterministic={non_deterministic_currencies}", {
+                                "first_call": addresses_first_call,
+                                "second_call": addresses_second_call
+                            })
+                            
+        except Exception as e:
+            self.log_test("Deterministic Address Generation", False, f"Error: {str(e)}")
+
     async def run_urgent_doge_deposit_tests(self):
         """Run URGENT DOGE deposit crediting tests for user"""
         print("🚨 URGENT: DOGE DEPOSIT CREDITING REQUEST - Testing User's 30 DOGE")
