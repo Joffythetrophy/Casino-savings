@@ -122,9 +122,9 @@ class DogeAddressSystemTester:
                         self.generated_doge_address = doge_address
                         
                         # Additional validation
-                        instructions = data.get("instructions", {})
-                        min_deposit = instructions.get("min_deposit")
-                        processing_time = instructions.get("processing_time")
+                        instructions = data.get("instructions", [])
+                        min_deposit = data.get("min_deposit")
+                        processing_time = data.get("processing_time")
                         
                         if min_deposit and processing_time:
                             self.log_test("DOGE Address Instructions", True, 
