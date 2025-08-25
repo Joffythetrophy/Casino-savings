@@ -1483,7 +1483,7 @@ async def add_liquidity_from_savings(request: Dict[str, Any]):
         savings = user.get("savings_balance", {})
         current_liquidity = user.get("liquidity_pool", {})
         
-        # Calculate liquidity to add (50% of savings)
+        # Calculate liquidity to add (10% of savings - changed from 50%)
         liquidity_to_add = {}
         for currency, amount in savings.items():
             if amount > 0:
