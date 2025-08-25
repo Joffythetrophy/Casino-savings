@@ -114,7 +114,7 @@ class CRTTokenManager:
     def __init__(self, solana_manager: SolanaManager, spl_manager: SPLTokenManager):
         self.solana = solana_manager
         self.spl = spl_manager
-        self.crt_mint = os.getenv("CRT_TOKEN_MINT", "6kx78Yu19PmGjb9YbfP5nRUvFPY4kFcDKKmGpdSpump")
+        self.crt_mint = os.getenv("CRT_TOKEN_MINT", "9pjWtc6x88wrRMXTxkBcNB6YtcN7NNcyzDAfUMfRknty")
         self.decimals = 6  # CRT token uses 6 decimals
         self.price_cache = {"price": 0.15, "last_update": None}  # Mock price for now
         
