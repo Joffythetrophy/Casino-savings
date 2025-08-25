@@ -24,6 +24,7 @@ class AutoPlayTester:
         self.test_user = "cryptoking"
         self.test_password = "crt21million"
         self.test_wallet = "DwK4nUM8TKWAxEBKTG6mWA6PBRDHFPA3beLB18pwCekq"
+        self.auth_token = None
         
     async def __aenter__(self):
         self.session = aiohttp.ClientSession()
