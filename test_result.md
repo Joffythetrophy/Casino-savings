@@ -684,7 +684,7 @@ metadata:
 
 test_plan:
   current_focus:
-    - "URGENT: DOGE Deposit Verification COMPLETED - User's 30 DOGE Found!"
+    - "URGENT: DOGE Deposit Verification COMPLETED - User's 30 DOGE Ready for Crediting After Cooldown"
     - "Real Blockchain Integration Verified"
   stuck_tasks: []
   test_all: false
