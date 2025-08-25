@@ -1046,7 +1046,7 @@ class WalletAPITester:
                 "password": target_password
             }
             
-            async with self.session.post(f"{self.base_url}/auth/login/username", 
+            async with self.session.post(f"{self.base_url}/auth/login-username", 
                                        json=login_payload) as response:
                 if response.status == 200:
                     data = await response.json()
