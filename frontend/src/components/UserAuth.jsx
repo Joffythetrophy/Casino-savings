@@ -119,6 +119,8 @@ export const AuthProvider = ({ children }) => {
 
 const LoginForm = ({ onClose }) => {
   const [mode, setMode] = useState('login'); // 'login' or 'register'
+  const [loginType, setLoginType] = useState('username'); // 'username' or 'wallet'
+  const [username, setUsername] = useState('');
   const [walletAddress, setWalletAddress] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -129,25 +131,56 @@ const LoginForm = ({ onClose }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (!walletAddress || !password) {
-      toast({
-        title: "Missing Information",
-        description: "Please provide both wallet address and password",
-      });
-      return;
+    if (mode === 'login') {
+      // Login mode
+      if (loginType === 'username') {
+        if (!username || !password) {
+          toast({
+            title: "Missing Information",
+            description: "Please provide both username and password",
+          });
+          return;
+        }
+      } else {
+        if (!walletAddress || !password) {
+          toast({
+            title: "Missing Information", 
+            description: "Please provide both wallet address and password",
+          });
+          return;
+        }
+      }
+    } else {
+      // Register mode
+      if (!walletAddress || !password) {
+        toast({
+          title: "Missing Information",
+          description: "Please provide both wallet address and password",
+        });
+        return;
+      }
     }
 
     setLoading(true);
     
     try {
-      const result = mode === 'login' 
-        ? await login(walletAddress, password)
-        : await register(walletAddress, password);
+      let result;
+      
+      if (mode === 'login' && loginType === 'username') {
+        // Username login
+        result = await loginWithUsername(username, password);
+      } else if (mode === 'login') {
+        // Wallet address login
+        result = await login(walletAddress, password);
+      } else {
+        // Registration
+        result = await register(walletAddress, password, username);
+      }
 
       if (result.success) {
         toast({
           title: mode === 'login' ? "Login Successful!" : "Registration Successful!",
-          description: `Welcome to Casino Savings!`,
+          description: `Welcome${result.username ? `, ${result.username}` : ''}!`,
         });
         onClose();
       } else {
@@ -166,11 +199,38 @@ const LoginForm = ({ onClose }) => {
     }
   };
 
+  const loginWithUsername = async (username, password) => {
+    try {
+      const backendUrl = process.env.REACT_APP_BACKEND_URL;
+      const response = await axios.post(`${backendUrl}/api/auth/login-username`, {
+        username: username,
+        password: password
+      });
+
+      if (response.data.success) {
+        const userData = {
+          user_id: response.data.user_id,
+          username: response.data.username,
+          wallet_address: response.data.wallet_address,
+          created_at: response.data.created_at
+        };
+
+        localStorage.setItem('casino_user', JSON.stringify(userData));
+        return { success: true, username: response.data.username };
+      } else {
+        return { success: false, error: response.data.message || "Invalid credentials" };
+      }
+    } catch (error) {
+      console.error('Username login error:', error);
+      return { success: false, error: "Connection failed. Please try again." };
+    }
+  };
+
   const generateSampleWallet = () => {
     // Generate a sample wallet address for demo purposes
     const sampleWallets = [
       'RealWallet9876543210XYZ',
-      'CRTHolder1234567890ABC',
+      'CRTHolder1234567890ABC', 
       'DOGEFan5678901234DEF',
       'TRXInvestor234567GHI'
     ];
