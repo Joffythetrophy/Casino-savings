@@ -103,9 +103,14 @@ class GameBet(BaseModel):
 class RegisterRequest(BaseModel):
     wallet_address: str
     password: str
+    username: Optional[str] = None  # Add optional username
 
 class LoginRequest(BaseModel):
-    wallet_address: str
+    identifier: str  # Can be username OR wallet_address
+    password: str
+
+class UsernameLoginRequest(BaseModel):
+    username: str
     password: str
 
 class DepositRequest(BaseModel):
