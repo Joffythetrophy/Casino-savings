@@ -1320,7 +1320,9 @@ class WalletAPITester:
                                "Game Betting", "Savings System", "Database Integration",
                                "Real DOGE Balance", "Real TRX Balance", "Real CRT Balance", 
                                "Real SOL Balance", "All Blockchain Balances", "CRT Token Info",
-                               "CRT Simulate Deposit"]:
+                               "CRT Simulate Deposit", "Specific User Login (Wallet)",
+                               "Specific User Login (Username)", "Password Hashing Verification",
+                               "Authentication Endpoints Availability"]:
                     critical_failures.append(result)
                 else:
                     minor_issues.append(result)
