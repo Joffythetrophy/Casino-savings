@@ -1114,39 +1114,52 @@ async def withdraw_savings(
 # Authentication endpoints
 @app.post("/api/auth/register")
 async def register_user(request: RegisterRequest):
-    """Register a new user with wallet address"""
+    """Register new user with wallet address and optional username"""
     try:
         # Check if wallet address already exists
         existing_user = await db.users.find_one({"wallet_address": request.wallet_address})
         if existing_user:
             return {"success": False, "message": "Wallet address already registered"}
         
-        # Create user ID
-        user_id = str(uuid.uuid4())
+        # Check if username already exists (if provided)
+        username = request.username
+        if username:
+            username = username.strip().lower()
+            if len(username) < 3:
+                return {"success": False, "message": "Username must be at least 3 characters"}
+            
+            existing_username = await db.users.find_one({"username": username})
+            if existing_username:
+                return {"success": False, "message": "Username already taken"}
+        else:
+            # Generate default username from wallet address
+            username = f"user_{request.wallet_address[:8]}"
         
-        # Hash password (basic implementation - use proper hashing in production)
-        import hashlib
-        password_hash = hashlib.sha256(request.password.encode()).hexdigest()
+        # Hash password
+        password_hash = pwd_context.hash(request.password)
         
-        # Create user document
-        user_doc = {
-            "user_id": user_id,
+        # Create new user
+        user_data = {
+            "user_id": str(uuid.uuid4()),
             "wallet_address": request.wallet_address,
-            "password_hash": password_hash,
-            "created_at": datetime.now(),
+            "username": username,
+            "password": password_hash,
             "deposit_balance": {"CRT": 0, "DOGE": 0, "TRX": 0, "USDC": 0},
             "winnings_balance": {"CRT": 0, "DOGE": 0, "TRX": 0, "USDC": 0},
-            "savings_balance": {"CRT": 0, "DOGE": 0, "TRX": 0, "USDC": 0}
+            "savings_balance": {"CRT": 0, "DOGE": 0, "TRX": 0, "USDC": 0},
+            "liquidity_pool": {"CRT": 0, "DOGE": 0, "TRX": 0, "USDC": 0},
+            "created_at": datetime.utcnow()
         }
         
-        # Insert user
-        await db.users.insert_one(user_doc)
+        result = await db.users.insert_one(user_data)
         
         return {
             "success": True,
             "message": "User registered successfully",
-            "user_id": user_id,
-            "created_at": user_doc["created_at"].isoformat()
+            "user_id": user_data["user_id"],
+            "username": username,
+            "wallet_address": request.wallet_address,
+            "created_at": user_data["created_at"].isoformat()
         }
         
     except Exception as e:
