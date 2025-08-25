@@ -49,12 +49,14 @@ async def test_user_doge_deposit_request():
                         print(f"   🌐 Network: {network}")
                         print(f"   💰 Minimum Deposit: {min_deposit} DOGE")
                         print(f"   ⏱️  Processing Time: {processing_time}")
+                        if note:
+                            print(f"   📝 Note: {note}")
                         print()
                         
                         # Test 2: Get complete deposit instructions
                         print("2️⃣ DEPOSIT INSTRUCTIONS:")
-                        if "steps" in instructions:
-                            for i, step in enumerate(instructions["steps"], 1):
+                        if instructions and isinstance(instructions, list):
+                            for i, step in enumerate(instructions, 1):
                                 print(f"   Step {i}: {step}")
                         print()
                         
