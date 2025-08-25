@@ -199,7 +199,7 @@ class DogeAddressSystemTester:
             
             payload = {
                 "doge_address": real_doge_address,
-                "casino_wallet": self.user_wallet,
+                "casino_wallet_address": self.user_wallet,
                 "amount": 100.0  # Test amount
             }
             
