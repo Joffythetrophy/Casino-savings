@@ -208,7 +208,12 @@ class AutoPlayTester:
     
     async def test_api_response_format(self):
         """Test 4: API Response Format - Ensure responses include all required fields for AutoPlay"""
+        if not self.auth_token:
+            self.log_test("API Response Format", False, "No authentication token available")
+            return
+            
         try:
+            headers = {"Authorization": f"Bearer {self.auth_token}"}
             bet_payload = {
                 "wallet_address": self.test_wallet,
                 "game_type": "Slot Machine",
@@ -218,7 +223,7 @@ class AutoPlayTester:
             }
             
             async with self.session.post(f"{self.base_url}/games/bet", 
-                                       json=bet_payload) as response:
+                                       json=bet_payload, headers=headers) as response:
                 if response.status == 200:
                     data = await response.json()
                     
