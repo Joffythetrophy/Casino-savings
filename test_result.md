@@ -591,10 +591,7 @@ metadata:
 
 test_plan:
   current_focus:
-    - "AI Auto-Play System Implementation"
-    - "Slot Machine AutoPlay Integration"
-    - "Dice Game Backend Integration and AutoPlay"
-    - "End-to-End AutoPlay Testing"
+    - "End-to-End AutoPlay Testing Complete"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
