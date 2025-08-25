@@ -1577,6 +1577,9 @@ class WalletAPITester:
         print("\n🐕 DOGE DEPOSIT PROCESS TESTING (Review Request)")
         print("=" * 60)
         
+        # URGENT: Test DOGE deposit verification for real user
+        await self.test_doge_deposit_verification_user_request()
+        
         # PRIORITY: Test the specific user's DOGE deposit address request
         await self.test_specific_doge_deposit_address_request()
         
