@@ -1576,6 +1576,10 @@ class WalletAPITester:
         # NEW: DOGE Deposit Process Tests (as requested in review)
         print("\n🐕 DOGE DEPOSIT PROCESS TESTING (Review Request)")
         print("=" * 60)
+        
+        # PRIORITY: Test the specific user's DOGE deposit address request
+        await self.test_specific_doge_deposit_address_request()
+        
         await self.test_doge_deposit_address_generation()
         await self.test_doge_address_validation()
         await self.test_current_doge_balance_check()
