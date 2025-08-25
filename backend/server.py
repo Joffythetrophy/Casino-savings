@@ -1467,10 +1467,10 @@ async def reset_password(request: Dict[str, Any]):
 # Add 50% of savings to liquidity pool as requested
 @app.post("/api/test/add-liquidity-from-savings")
 async def add_liquidity_from_savings(request: Dict[str, Any]):
-    """Add 50% of savings to liquidity pool as requested by user"""
+    """Add 10% of savings to liquidity pool (changed from 50% per user request)"""
     try:
         wallet_address = request.get("wallet_address")
-        percentage = float(request.get("percentage", 50))  # Default 50%
+        percentage = float(request.get("percentage", 10))  # Default 10% (changed from 50%)
         
         if not wallet_address:
             return {"success": False, "message": "wallet_address required"}
