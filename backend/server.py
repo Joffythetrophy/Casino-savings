@@ -1926,62 +1926,79 @@ async def get_doge_deposit_address(wallet_address: str):
     except Exception as e:
         return {"success": False, "error": str(e)}
 
-@app.post("/api/deposit/credit-doge")
-async def credit_doge_deposit(request: Dict[str, Any]):
-    """Credit DOGE to casino account (manual system for now)"""
+@app.post("/api/deposit/doge/manual")
+async def manual_doge_deposit(request: Dict[str, Any]):
+    """Manual DOGE deposit - for users who have sent DOGE to their address"""
     try:
         wallet_address = request.get("wallet_address")
-        amount = float(request.get("amount", 0))
-        doge_address = request.get("doge_address", "")
+        if not wallet_address:
+            return {"success": False, "message": "Wallet address required"}
         
-        if not wallet_address or amount <= 0:
-            return {"success": False, "message": "wallet_address and positive amount required"}
+        # Validate DOGE address format
+        validation = await doge_manager.validate_address(wallet_address)
+        if not validation.get("valid"):
+            return {"success": False, "message": "Invalid DOGE address format"}
         
-        if amount < 10:
-            return {"success": False, "message": "Minimum DOGE deposit is 10 DOGE"}
+        # Get real DOGE balance from blockchain
+        balance_result = await doge_manager.get_balance(wallet_address)
+        if not balance_result.get("success"):
+            return {"success": False, "message": f"Could not fetch DOGE balance: {balance_result.get('error')}"}
         
-        # Get user
+        real_doge_balance = balance_result.get("balance", 0.0)
+        
+        if real_doge_balance <= 0:
+            return {
+                "success": False, 
+                "message": f"No DOGE found at address {wallet_address}. Current balance: {real_doge_balance} DOGE"
+            }
+        
+        # Find or create user
         user = await db.users.find_one({"wallet_address": wallet_address})
         if not user:
-            return {"success": False, "message": "User not found"}
+            return {"success": False, "message": "User not found. Please register first."}
         
-        # Credit DOGE to casino account
-        current_doge_balance = user.get("deposit_balance", {}).get("DOGE", 0)
-        new_doge_balance = current_doge_balance + amount
+        # Check for recent deposits to prevent double-crediting
+        recent_deposit = await db.transactions.find_one({
+            "wallet_address": wallet_address,
+            "type": "doge_deposit",
+            "timestamp": {"$gte": datetime.utcnow() - timedelta(hours=1)}
+        })
         
-        await db.users.update_one(
-            {"wallet_address": wallet_address},
-            {"$set": {"deposit_balance.DOGE": new_doge_balance}}
-        )
+        if recent_deposit:
+            return {
+                "success": False, 
+                "message": "Recent DOGE deposit found. Please wait 1 hour between deposit checks.",
+                "last_deposit": recent_deposit["timestamp"].isoformat()
+            }
         
-        # Record the deposit
-        deposit_record = {
+        # Record the deposit (real blockchain balance is the deposit amount)
+        transaction = {
+            "transaction_id": str(uuid.uuid4()),
             "wallet_address": wallet_address,
             "type": "doge_deposit",
             "currency": "DOGE",
-            "amount": amount,
-            "doge_address": doge_address,
-            "casino_balance_before": current_doge_balance,
-            "casino_balance_after": new_doge_balance,
+            "amount": real_doge_balance,
+            "blockchain_balance": real_doge_balance,
+            "source": "manual_blockchain_check",
             "timestamp": datetime.utcnow(),
-            "status": "completed",
-            "source": "manual_credit"
+            "status": "confirmed"
         }
         
-        await db.transactions.insert_one(deposit_record)
+        await db.transactions.insert_one(transaction)
         
         return {
             "success": True,
-            "message": f"✅ {amount:,.0f} DOGE credited to your casino account!",
-            "amount_credited": amount,
-            "new_doge_balance": new_doge_balance,
-            "usd_value": amount * 0.08,  # DOGE price ~$0.08
-            "note": "DOGE is now available for gaming and conversion!",
-            "transaction_id": str(deposit_record.get("_id", "unknown"))
+            "message": f"DOGE deposit confirmed! {real_doge_balance} DOGE available for trading/gaming",
+            "amount": real_doge_balance,
+            "currency": "DOGE",
+            "transaction_id": transaction["transaction_id"],
+            "balance_source": "real_blockchain",
+            "instructions": "Your real DOGE balance is now available for use in the casino!"
         }
         
     except Exception as e:
-        return {"success": False, "error": str(e)}
+        print(f"Error in manual_doge_deposit: {e}")
+        return {"success": False, "message": f"Error processing DOGE deposit: {str(e)}"}
 
 @app.post("/api/deposit/check-doge")
 async def check_doge_deposits(request: Dict[str, Any]):
