@@ -122,7 +122,24 @@ const Dice = ({ onBack }) => {
   };
 
   return (
-    <CasinoGameLayout title="Dice Game" onBack={onBack} stats={stats}>
+    <CasinoGameLayout 
+      title="Dice Game" 
+      onBack={onBack} 
+      stats={stats}
+      sidebarContent={
+        <AutoPlayPanel
+          onBet={rollDice}
+          gameType="Dice"
+          disabled={rolling}
+          minBet={1}
+          maxBet={100}
+          gameSpecificSettings={{
+            diceRollOver: rollOver,
+            dicePrediction: prediction
+          }}
+        />
+      }
+    >
       <div className="space-y-6">
         {/* Dice Display */}
         <Card className="p-8 bg-gradient-to-br from-blue-900 to-purple-900 border-2 border-yellow-400/30">
