@@ -274,7 +274,12 @@ class AutoPlayTester:
     
     async def test_high_volume_betting_simulation(self):
         """Test 5: High-Volume Betting Simulation - Test rapid successive bets for AutoPlay"""
+        if not self.auth_token:
+            self.log_test("High-Volume Betting Simulation", False, "No authentication token available")
+            return
+            
         try:
+            headers = {"Authorization": f"Bearer {self.auth_token}"}
             bet_count = 10  # Number of rapid bets to simulate
             bet_results = []
             start_time = time.time()
@@ -292,7 +297,7 @@ class AutoPlayTester:
                 
                 try:
                     async with self.session.post(f"{self.base_url}/games/bet", 
-                                               json=bet_payload) as response:
+                                               json=bet_payload, headers=headers) as response:
                         if response.status == 200:
                             data = await response.json()
                             if data.get("success"):
