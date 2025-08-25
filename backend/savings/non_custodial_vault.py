@@ -234,9 +234,6 @@ class NonCustodialSavingsVault:
                                      amount: float, bet_id: str) -> Dict[str, Any]:
         """Transfer TRX to savings smart contract"""
         try:
-            # Connect to TRON network
-            tron = Tron(network='mainnet')
-            
             # In production, implement TRX smart contract for savings
             # For now, simulate the transfer
             
