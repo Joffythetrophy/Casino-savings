@@ -39,9 +39,10 @@ async def test_user_doge_deposit_request():
                     if data.get("success"):
                         doge_address = data.get("doge_deposit_address")
                         network = data.get("network")
-                        instructions = data.get("instructions", {})
-                        min_deposit = instructions.get("min_deposit_amount")
-                        processing_time = instructions.get("processing_time")
+                        instructions = data.get("instructions", [])
+                        min_deposit = data.get("min_deposit")
+                        processing_time = data.get("processing_time")
+                        note = data.get("note", "")
                         
                         print("   ✅ SUCCESS!")
                         print(f"   🏦 DOGE Deposit Address: {doge_address}")
