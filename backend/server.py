@@ -1100,7 +1100,16 @@ async def place_bet(bet: GameBet, wallet_info: Dict = Depends(get_authenticated_
             "payout": payout,
             "savings_contribution": savings_contribution,
             "liquidity_added": liquidity_added,
-            "message": f"Lost {bet.bet_amount} {bet.currency}! Saved to vault + {liquidity_added:.2f} added to liquidity!" if not is_winner else f"Won {payout:.2f} {bet.currency}!"
+            # Non-custodial savings vault info
+            "savings_vault": {
+                "transferred": savings_vault_result.get("success", False),
+                "vault_address": savings_vault_result.get("savings_address"),
+                "transaction_id": savings_vault_result.get("transaction_id"),
+                "blockchain_hash": savings_vault_result.get("blockchain_hash"),
+                "vault_type": "non_custodial",
+                "user_controlled": True
+            },
+            "message": f"Game processed. Savings: {'✅ Transferred to secure vault' if savings_vault_result.get('success') else '⚠️ Saved in database'}"
         }
         
     except Exception as e:
