@@ -438,6 +438,9 @@ backend:
         - working: true
           agent: "testing"
           comment: "✅ User login endpoint working correctly. Validates wallet address and password against MongoDB records, returns success response with user_id and created_at. Password hashing and verification functional."
+        - working: true
+          agent: "testing"
+          comment: "✅ COMPREHENSIVE LOGIN TESTING COMPLETED - USER COMPLAINT RESOLVED: Tested specific user login with wallet address 'DwK4nUM8TKWAxEBKTG6mWA6PBRDHFPA3beLB18pwCekq' and password 'crt21million' - LOGIN SUCCESSFUL! Also tested username login with 'cryptoking' - SUCCESSFUL! Both /api/auth/login and /api/auth/login-username endpoints working perfectly. Password hashing (bcrypt) working correctly. Error handling for invalid credentials working properly. 6/6 login tests passed (100% success rate). The user's login complaint appears to be resolved - both authentication methods are fully functional."
 
   - task: "Real-time crypto conversion rates from CoinGecko API"
     implemented: true
