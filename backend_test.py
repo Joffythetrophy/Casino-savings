@@ -2418,7 +2418,79 @@ class WalletAPITester:
         await self.test_security_features_validation()
         await self.test_deterministic_address_generation()
     
-    def print_summary(self):
+    def print_test_summary(self):
+        """Print comprehensive test summary"""
+        print("\n" + "=" * 80)
+        print("📊 CASINO SAVINGS DAPP BACKEND API TEST SUMMARY")
+        print("=" * 80)
+        
+        total_tests = len(self.test_results)
+        passed_tests = sum(1 for result in self.test_results if result["success"])
+        failed_tests = total_tests - passed_tests
+        
+        print(f"Total Tests: {total_tests}")
+        print(f"✅ Passed: {passed_tests}")
+        print(f"❌ Failed: {failed_tests}")
+        print(f"Success Rate: {(passed_tests/total_tests*100):.1f}%")
+        
+        # Categorize results by test type
+        vault_tests = [r for r in self.test_results if any(keyword in r["test"] for keyword in 
+                      ["Vault", "Non-Custodial", "Deterministic", "Security Features", "Multi-Currency Vault"])]
+        
+        doge_tests = [r for r in self.test_results if "DOGE" in r["test"]]
+        
+        auth_tests = [r for r in self.test_results if any(keyword in r["test"] for keyword in 
+                     ["Login", "Auth", "Registration", "Password"])]
+        
+        blockchain_tests = [r for r in self.test_results if any(keyword in r["test"] for keyword in 
+                           ["Blockchain", "Balance", "CRT", "TRX", "SOL"])]
+        
+        # Print category summaries
+        if vault_tests:
+            vault_passed = sum(1 for test in vault_tests if test["success"])
+            print(f"\n🔐 NON-CUSTODIAL VAULT TESTS: {vault_passed}/{len(vault_tests)} passed ({vault_passed/len(vault_tests)*100:.1f}%)")
+            for test in vault_tests:
+                status = "✅" if test["success"] else "❌"
+                print(f"  {status} {test['test']}")
+        
+        if doge_tests:
+            doge_passed = sum(1 for test in doge_tests if test["success"])
+            print(f"\n🐕 DOGE DEPOSIT TESTS: {doge_passed}/{len(doge_tests)} passed ({doge_passed/len(doge_tests)*100:.1f}%)")
+        
+        if auth_tests:
+            auth_passed = sum(1 for test in auth_tests if test["success"])
+            print(f"\n🔐 AUTHENTICATION TESTS: {auth_passed}/{len(auth_tests)} passed ({auth_passed/len(auth_tests)*100:.1f}%)")
+        
+        if blockchain_tests:
+            blockchain_passed = sum(1 for test in blockchain_tests if test["success"])
+            print(f"\n⛓️ BLOCKCHAIN INTEGRATION TESTS: {blockchain_passed}/{len(blockchain_tests)} passed ({blockchain_passed/len(blockchain_tests)*100:.1f}%)")
+        
+        # Identify critical failures
+        critical_failures = []
+        for result in self.test_results:
+            if not result["success"]:
+                test_name = result["test"]
+                if any(keyword in test_name for keyword in 
+                      ["Non-Custodial", "Vault", "Security Features", "Multi-Currency", "Deterministic"]):
+                    critical_failures.append(result)
+        
+        if critical_failures:
+            print("\n🚨 CRITICAL NON-CUSTODIAL VAULT FAILURES:")
+            for result in critical_failures:
+                print(f"  ❌ {result['test']}: {result['details']}")
+        
+        print("\n" + "=" * 80)
+        
+        return {
+            "total": total_tests,
+            "passed": passed_tests,
+            "failed": failed_tests,
+            "vault_tests": len(vault_tests),
+            "vault_passed": sum(1 for test in vault_tests if test["success"]) if vault_tests else 0,
+            "critical_failures": len(critical_failures),
+            "success_rate": passed_tests/total_tests*100,
+            "results": self.test_results
+        }
         """Print test summary"""
         print("\n" + "=" * 70)
         print("📊 WALLET MANAGEMENT SYSTEM TEST SUMMARY")
