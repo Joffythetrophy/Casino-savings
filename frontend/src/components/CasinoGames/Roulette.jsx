@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Card } from '../ui/card';
 import { Button } from '../ui/button';
 import CasinoGameLayout, { BettingPanel, useWallet, CRTCoin } from './CasinoGameLayout';
+import AutoPlayPanel from './AutoPlayPanel';
 import { useToast } from '../../hooks/use-toast';
 
 const Roulette = ({ onBack }) => {
