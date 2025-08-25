@@ -1170,7 +1170,7 @@ async def login_user(request: LoginRequest):
     """Login user with wallet address and password"""
     try:
         # Find user by wallet address
-        user = await db.users.find_one({"wallet_address": request.wallet_address})
+        user = await db.users.find_one({"wallet_address": request.identifier})
         if not user:
             return {"success": False, "message": "Wallet address not found"}
         
@@ -1197,6 +1197,48 @@ async def login_user(request: LoginRequest):
             "success": True,
             "message": "Login successful",
             "user_id": user["user_id"],
+            "username": user.get("username", ""),
+            "wallet_address": user["wallet_address"],
+            "created_at": user["created_at"].isoformat()
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/auth/login-username")
+async def login_with_username(request: UsernameLoginRequest):
+    """Login user with username and password"""
+    try:
+        # Find user by username
+        username = request.username.strip().lower()
+        user = await db.users.find_one({"username": username})
+        
+        if not user:
+            return {"success": False, "message": "Username not found"}
+        
+        # Verify password
+        stored_password = user.get("password") or user.get("password_hash", "")
+        
+        # Try bcrypt first (new format), then fallback to SHA256 (old format)
+        password_valid = False
+        if stored_password:
+            try:
+                password_valid = pwd_context.verify(request.password, stored_password)
+            except:
+                # Fallback to SHA256 check for backwards compatibility
+                import hashlib
+                sha256_hash = hashlib.sha256(request.password.encode()).hexdigest()
+                password_valid = (stored_password == sha256_hash)
+        
+        if not password_valid:
+            return {"success": False, "message": "Invalid password"}
+        
+        return {
+            "success": True,
+            "message": "Login successful",
+            "user_id": user["user_id"],
+            "username": user["username"],
+            "wallet_address": user["wallet_address"],
             "created_at": user["created_at"].isoformat()
         }
         
