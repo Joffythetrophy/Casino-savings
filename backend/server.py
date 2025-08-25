@@ -467,6 +467,13 @@ async def get_wallet_info(wallet_address: str):
         # Keep database savings balance (this should remain as internal tracking)
         savings_balance = user.get("savings_balance", {"CRT": 0, "DOGE": 0, "TRX": 0, "USDC": 0})
         
+        # Get database deposit balances for converted currencies like USDC
+        deposit_balances = user.get("deposit_balance", {"CRT": 0, "DOGE": 0, "TRX": 0, "USDC": 0})
+        
+        # For USDC (and other converted currencies), use database balance since it's from conversions
+        if deposit_balances.get("USDC", 0) > 0:
+            real_balances["USDC"] = deposit_balances.get("USDC", 0)
+        
         user_data = {
             "user_id": user["user_id"],
             "wallet_address": user["wallet_address"],
