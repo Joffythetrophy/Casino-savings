@@ -582,10 +582,10 @@ metadata:
 
 test_plan:
   current_focus:
-    - "End-to-End Authentication Flow Testing"
-    - "Real Blockchain Integration Testing"
-    - "Wallet Manager Full Integration Testing"
-    - "Savings Page Real Data Testing"
+    - "AI Auto-Play System Implementation"
+    - "Slot Machine AutoPlay Integration"
+    - "Dice Game Backend Integration and AutoPlay"
+    - "End-to-End AutoPlay Testing"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
