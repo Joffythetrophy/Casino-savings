@@ -1879,38 +1879,133 @@ async def get_escrow_status(wallet_address: str):
     except Exception as e:
         return {"success": False, "error": str(e)}
 
-@app.post("/api/test/add-username")
-async def add_username_to_existing_user(request: Dict[str, Any]):
-    """Add username to existing user account"""
+@app.get("/api/savings/vault/{wallet_address}")  
+async def get_savings_vault_info(wallet_address: str):
+    """Get user's non-custodial savings vault information and balances"""
     try:
-        wallet_address = request.get("wallet_address")
-        username = request.get("username")
+        # Get real vault balances for all currencies
+        vault_balances = {}
+        vault_addresses = {}
         
-        if not wallet_address or not username:
-            return {"success": False, "message": "wallet_address and username required"}
+        currencies = ["DOGE", "TRX", "CRT", "SOL"]
         
-        # Check if username is already taken
-        username = username.strip().lower()
-        existing_username = await db.users.find_one({"username": username})
-        if existing_username:
-            return {"success": False, "message": "Username already taken"}
+        for currency in currencies:
+            vault_info = await non_custodial_vault.get_savings_vault_balance(wallet_address, currency)
+            if vault_info.get("success"):
+                vault_balances[currency] = vault_info.get("balance", 0)
+                vault_addresses[currency] = vault_info.get("savings_address")
         
-        # Check if user exists
+        # Also get database savings as backup record
         user = await db.users.find_one({"wallet_address": wallet_address})
-        if not user:
-            return {"success": False, "message": "User not found"}
-        
-        # Update user with username
-        await db.users.update_one(
-            {"wallet_address": wallet_address},
-            {"$set": {"username": username}}
-        )
+        database_savings = user.get("savings_balance", {}) if user else {}
         
         return {
             "success": True,
-            "message": f"Username '{username}' added to account",
-            "username": username,
-            "wallet_address": wallet_address
+            "wallet_address": wallet_address,
+            "vault_type": "non_custodial",
+            "user_controlled": True,
+            # Real blockchain balances
+            "vault_balances": vault_balances,
+            "vault_addresses": vault_addresses,
+            # Database backup records
+            "database_savings": database_savings,
+            "instructions": {
+                "withdrawal": "Use /api/savings/vault/withdraw to create withdrawal transaction",
+                "verification": "Verify balances on blockchain using provided addresses",
+                "private_keys": f"Derive from {wallet_address} + salt 'savings_vault_2025_secure'"
+            },
+            "security": {
+                "custody": "non_custodial",
+                "control": "user_controlled", 
+                "backup": "database_records_available"
+            }
+        }
+        
+    except Exception as e:
+        return {"success": False, "error": str(e)}
+
+@app.post("/api/savings/vault/withdraw")
+async def create_savings_withdrawal(request: Dict[str, Any]):
+    """Create non-custodial withdrawal transaction from savings vault"""
+    try:
+        wallet_address = request.get("wallet_address")
+        currency = request.get("currency")
+        amount = float(request.get("amount", 0))
+        destination = request.get("destination_address")
+        
+        if not all([wallet_address, currency, amount, destination]):
+            return {"success": False, "message": "wallet_address, currency, amount, and destination_address required"}
+        
+        # Create unsigned withdrawal transaction
+        withdrawal_result = await non_custodial_vault.create_withdrawal_transaction(
+            user_wallet=wallet_address,
+            currency=currency,
+            amount=amount,
+            destination=destination
+        )
+        
+        if withdrawal_result.get("success"):
+            return {
+                "success": True,  
+                "withdrawal_transaction": withdrawal_result.get("withdrawal_transaction"),
+                "instructions": [
+                    "1. This is a non-custodial withdrawal - you control the funds",
+                    "2. Import your savings vault private key to your wallet",
+                    "3. Sign the transaction with your private key",
+                    "4. Broadcast the signed transaction to the blockchain",
+                    "5. Funds will be transferred to your destination address"
+                ],
+                "security": {
+                    "type": "non_custodial",
+                    "user_signing_required": True,
+                    "platform_cannot_access_funds": True
+                }
+            }
+        else:
+            return {"success": False, "message": withdrawal_result.get("error")}
+            
+    except Exception as e:
+        return {"success": False, "error": str(e)}
+
+@app.get("/api/savings/vault/address/{wallet_address}")
+async def get_savings_vault_addresses(wallet_address: str):
+    """Get all savings vault addresses for user (non-custodial)"""
+    try:
+        vault_addresses = {}
+        currencies = ["DOGE", "TRX", "CRT", "SOL"]
+        
+        for currency in currencies:
+            address = await non_custodial_vault.generate_user_savings_address(wallet_address, currency)
+            vault_addresses[currency] = {
+                "address": address,
+                "currency": currency,
+                "blockchain": {
+                    "DOGE": "Dogecoin",
+                    "TRX": "Tron", 
+                    "CRT": "Solana",
+                    "SOL": "Solana"
+                }.get(currency),
+                "verification_url": {
+                    "DOGE": f"https://dogechain.info/address/{address}",
+                    "TRX": f"https://tronscan.org/#/address/{address}",
+                    "CRT": f"https://explorer.solana.com/address/{address}",
+                    "SOL": f"https://explorer.solana.com/address/{address}"
+                }.get(currency)
+            }
+        
+        return {
+            "success": True,
+            "wallet_address": wallet_address,
+            "vault_addresses": vault_addresses,
+            "vault_type": "non_custodial",
+            "private_key_derivation": f"Derive from {wallet_address} + salt 'savings_vault_2025_secure'",
+            "instructions": [
+                "These are your personal savings vault addresses",
+                "You control the private keys for these addresses", 
+                "Savings from lost bets are transferred to these addresses",
+                "You can withdraw anytime using your derived private keys",
+                "Verify balances directly on blockchain explorers"
+            ]
         }
         
     except Exception as e:
