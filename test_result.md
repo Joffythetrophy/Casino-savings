@@ -251,6 +251,9 @@ frontend:
         - working: true
           agent: "testing"
           comment: "✅ AUTHENTICATION FLOW WORKING: User registration with demo wallet generation functional, password authentication working, real backend API integration confirmed (/api/auth/register, /api/auth/login), session persistence working across page refreshes, logout/login cycle operational. Registration creates real MongoDB records with proper user data structure."
+        - working: true
+          agent: "testing"
+          comment: "🎉 CRITICAL LOGIN BUG FIX VERIFIED AND WORKING! Successfully tested user login with username 'cryptoking' and password 'crt21million' - user is now properly redirected to casino lobby after successful login (not stuck on welcome screen). Fixed missing setUser() call in loginWithUsername function by adding setUser to AuthProvider context exports. Authentication state properly maintained, navigation to games section working, and user can access casino lobby immediately after login. The reported user complaint 'Log in still not working wont go to lobby' has been resolved!"
 
   - task: "Real Blockchain Balance Display Integration"
     implemented: true
