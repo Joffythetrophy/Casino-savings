@@ -1,0 +1,226 @@
+{
+  "total_tests": 8,
+  "passed_tests": 7,
+  "failed_tests": 1,
+  "success_rate": 87.5,
+  "critical_passed": 4,
+  "critical_total": 5,
+  "overall_success": true,
+  "conversion_details": {
+    "success": true,
+    "message": "Converted 100000.0 CRT to 980000.0000 TRX",
+    "converted_amount": 980000.0000000001,
+    "rate": 9.8,
+    "liquidity_contributed": 98000.00000000001,
+    "new_liquidity_balance": 294000.00000000006,
+    "transaction_id": "caae997d-09ef-4e75-8446-a9093b829d88",
+    "note": "50% (98000.0000) added to TRX liquidity pool for withdrawals"
+  },
+  "test_results": [
+    {
+      "test": "User CRT Balance Check",
+      "success": true,
+      "details": "\u2705 User has sufficient CRT: 21,000,000 CRT (need 100,000)",
+      "timestamp": "2025-08-25T23:46:00.771076",
+      "response_data": {
+        "success": true,
+        "wallet": {
+          "user_id": "0834c788-b59e-4656-9c8b-19a16a446747",
+          "wallet_address": "DwK4nUM8TKWAxEBKTG6mWA6PBRDHFPA3beLB18pwCekq",
+          "deposit_balance": {
+            "CRT": 21000000.0,
+            "DOGE": 0.0,
+            "TRX": 0.0,
+            "SOL": 0.027695921,
+            "USDC": 167925.44999999998
+          },
+          "winnings_balance": {
+            "CRT": 0,
+            "DOGE": 0,
+            "TRX": 0,
+            "SOL": 0
+          },
+          "savings_balance": {
+            "CRT": 21000203.0,
+            "DOGE": 0,
+            "TRX": 0,
+            "USDC": 0
+          },
+          "created_at": "2025-08-23T15:52:57.360000",
+          "balance_source": "real_blockchain_api",
+          "last_balance_update": "2025-08-25T23:46:00.767447"
+        }
+      }
+    },
+    {
+      "test": "CRT to TRX Rate Available",
+      "success": true,
+      "details": "\u2705 CRT_TRX conversion rate: 2.2864600000000004",
+      "timestamp": "2025-08-25T23:46:00.899941",
+      "response_data": {
+        "success": true,
+        "rates": {
+          "DOGE_TRX": 1.636021484859471,
+          "DOGE_USDC": 4.769252418477743,
+          "DOGE_CRT": 0.7155259592818027,
+          "TRX_DOGE": 0.6112389166367805,
+          "TRX_USDC": 2.915152681437681,
+          "TRX_CRT": 0.4373573121769022,
+          "USDC_DOGE": 0.20967646755823874,
+          "USDC_TRX": 0.3430352057947184,
+          "USDC_CRT": 0.15002895558842855,
+          "CRT_DOGE": 1.3975733333333333,
+          "CRT_TRX": 2.2864600000000004,
+          "CRT_USDC": 6.66538
+        },
+        "prices_usd": {
+          "DOGE": 0.209636,
+          "TRX": 0.342969,
+          "USDC": 0.999807,
+          "CRT": 0.15
+        },
+        "last_updated": "2025-08-25T23:46:00.856064",
+        "source": "coingecko"
+      }
+    },
+    {
+      "test": "Execute Real CRT to TRX Conversion",
+      "success": true,
+      "details": "\u2705 REAL CONVERSION SUCCESSFUL: 100,000 CRT \u2192 980,000.00 TRX (rate: 9.8, tx: caae997d-09ef-4e75-8446-a9093b829d88, liquidity: 98,000.00)",
+      "timestamp": "2025-08-25T23:46:00.915573",
+      "response_data": {
+        "success": true,
+        "message": "Converted 100000.0 CRT to 980000.0000 TRX",
+        "converted_amount": 980000.0000000001,
+        "rate": 9.8,
+        "liquidity_contributed": 98000.00000000001,
+        "new_liquidity_balance": 294000.00000000006,
+        "transaction_id": "caae997d-09ef-4e75-8446-a9093b829d88",
+        "note": "50% (98000.0000) added to TRX liquidity pool for withdrawals"
+      }
+    },
+    {
+      "test": "CRT Balance Decreased",
+      "success": false,
+      "details": "\u274c CRT balance decrease incorrect: expected 100,000, actual 0",
+      "timestamp": "2025-08-25T23:46:03.507491",
+      "response_data": {
+        "success": true,
+        "wallet": {
+          "user_id": "0834c788-b59e-4656-9c8b-19a16a446747",
+          "wallet_address": "DwK4nUM8TKWAxEBKTG6mWA6PBRDHFPA3beLB18pwCekq",
+          "deposit_balance": {
+            "CRT": 21000000.0,
+            "DOGE": 0.0,
+            "TRX": 0.0,
+            "SOL": 0.027695921,
+            "USDC": 167925.44999999998
+          },
+          "winnings_balance": {
+            "CRT": 0,
+            "DOGE": 0,
+            "TRX": 0,
+            "SOL": 0
+          },
+          "savings_balance": {
+            "CRT": 21000203.0,
+            "DOGE": 0,
+            "TRX": 0,
+            "USDC": 0
+          },
+          "created_at": "2025-08-23T15:52:57.360000",
+          "balance_source": "real_blockchain_api",
+          "last_balance_update": "2025-08-25T23:46:03.503341"
+        }
+      }
+    },
+    {
+      "test": "Transaction Recorded",
+      "success": true,
+      "details": "\u2705 Conversion transaction recorded with ID: caae997d-09ef-4e75-8446-a9093b829d88",
+      "timestamp": "2025-08-25T23:46:03.507557",
+      "response_data": {
+        "transaction_id": "caae997d-09ef-4e75-8446-a9093b829d88"
+      }
+    },
+    {
+      "test": "Liquidity Pool Updated",
+      "success": true,
+      "details": "\u2705 Liquidity pool updated: 98,000.00 TRX added (10% of 980,000.00)",
+      "timestamp": "2025-08-25T23:46:03.507572",
+      "response_data": {
+        "success": true,
+        "converted_amount": 980000.0000000001,
+        "rate": 9.8,
+        "transaction_id": "caae997d-09ef-4e75-8446-a9093b829d88",
+        "liquidity_contributed": 98000.00000000001
+      }
+    },
+    {
+      "test": "Real Money Verification",
+      "success": true,
+      "details": "\u2705 REAL MONEY CONFIRMED: Using real conversion rates from coingecko, last updated: 2025-08-25T23:46:03.562743",
+      "timestamp": "2025-08-25T23:46:03.566366",
+      "response_data": {
+        "success": true,
+        "rates": {
+          "DOGE_TRX": 1.636021484859471,
+          "DOGE_USDC": 4.769252418477743,
+          "DOGE_CRT": 0.7155259592818027,
+          "TRX_DOGE": 0.6112389166367805,
+          "TRX_USDC": 2.915152681437681,
+          "TRX_CRT": 0.4373573121769022,
+          "USDC_DOGE": 0.20967646755823874,
+          "USDC_TRX": 0.3430352057947184,
+          "USDC_CRT": 0.15002895558842855,
+          "CRT_DOGE": 1.3975733333333333,
+          "CRT_TRX": 2.2864600000000004,
+          "CRT_USDC": 6.66538
+        },
+        "prices_usd": {
+          "DOGE": 0.209636,
+          "TRX": 0.342969,
+          "USDC": 0.999807,
+          "CRT": 0.15
+        },
+        "last_updated": "2025-08-25T23:46:03.562743",
+        "source": "coingecko"
+      }
+    },
+    {
+      "test": "No Mock Data Used",
+      "success": true,
+      "details": "\u2705 NO FAKE DATA: Wallet uses real blockchain API (source: real_blockchain_api)",
+      "timestamp": "2025-08-25T23:46:04.184323",
+      "response_data": {
+        "success": true,
+        "wallet": {
+          "user_id": "0834c788-b59e-4656-9c8b-19a16a446747",
+          "wallet_address": "DwK4nUM8TKWAxEBKTG6mWA6PBRDHFPA3beLB18pwCekq",
+          "deposit_balance": {
+            "CRT": 0.0,
+            "DOGE": 0.0,
+            "TRX": 0.0,
+            "SOL": 0.027695921,
+            "USDC": 167925.44999999998
+          },
+          "winnings_balance": {
+            "CRT": 0,
+            "DOGE": 0,
+            "TRX": 0,
+            "SOL": 0
+          },
+          "savings_balance": {
+            "CRT": 21000203.0,
+            "DOGE": 0,
+            "TRX": 0,
+            "USDC": 0
+          },
+          "created_at": "2025-08-23T15:52:57.360000",
+          "balance_source": "real_blockchain_api",
+          "last_balance_update": "2025-08-25T23:46:04.180098"
+        }
+      }
+    }
+  ]
+}
