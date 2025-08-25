@@ -17,6 +17,7 @@ export const useAuth = () => {
       login: () => {},
       logout: () => {},
       register: () => {},
+      setUser: () => {},
       isAuthenticated: false,
       loading: false
     };
