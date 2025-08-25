@@ -427,10 +427,10 @@ class DogeAddressSystemTester:
                 data = await response.json()
                 if not data.get("success"):
                     self.log_test("Complete DOGE Deposit Flow", False, 
-                                "Step 1 failed: DOGE address generation unsuccessful")
+                                f"Step 1 failed: DOGE address generation unsuccessful: {data.get('message', 'Unknown error')}")
                     return
                 
-                generated_address = data.get("doge_address", "")
+                generated_address = data.get("doge_deposit_address", "")
                 if self.is_fake_doge_address(generated_address):
                     self.log_test("Complete DOGE Deposit Flow", False, 
                                 f"Step 1 failed: Generated fake address {generated_address}")
