@@ -1,16 +1,16 @@
 {
-  "total": 39,
-  "passed": 30,
-  "failed": 9,
+  "total": 45,
+  "passed": 35,
+  "failed": 10,
   "critical_failures": 3,
-  "minor_issues": 6,
-  "success_rate": 76.92307692307693,
+  "minor_issues": 7,
+  "success_rate": 77.77777777777779,
   "results": [
     {
       "test": "Basic Connectivity",
       "success": true,
       "details": "API accessible, version: 1.0.0",
-      "timestamp": "2025-08-25T10:53:51.474893",
+      "timestamp": "2025-08-25T18:02:05.471767",
       "response_data": {
         "message": "Casino Savings dApp API",
         "version": "1.0.0",
@@ -31,7 +31,7 @@
       "test": "Authentication Endpoints Availability",
       "success": true,
       "details": "\u2705 All authentication endpoints are available and responding",
-      "timestamp": "2025-08-25T10:53:51.506296",
+      "timestamp": "2025-08-25T18:02:05.535804",
       "response_data": {
         "/auth/login": {
           "status": 200,
@@ -55,7 +55,7 @@
       "test": "Specific User Login (Wallet)",
       "success": true,
       "details": "\u2705 LOGIN SUCCESSFUL for wallet DwK4nUM8TKWAxEBKTG6mWA6PBRDHFPA3beLB18pwCekq (username: cryptoking)",
-      "timestamp": "2025-08-25T10:53:51.768121",
+      "timestamp": "2025-08-25T18:02:05.879189",
       "response_data": {
         "success": true,
         "message": "Login successful",
@@ -69,7 +69,7 @@
       "test": "Specific User Login (Username)",
       "success": true,
       "details": "\u2705 USERNAME LOGIN SUCCESSFUL for cryptoking (wallet: DwK4nUM8TKWAxEBKTG6mWA6PBRDHFPA3beLB18pwCekq)",
-      "timestamp": "2025-08-25T10:53:52.010090",
+      "timestamp": "2025-08-25T18:02:06.210884",
       "response_data": {
         "success": true,
         "message": "Login successful",
@@ -83,7 +83,7 @@
       "test": "Password Hashing Verification",
       "success": true,
       "details": "\u2705 Password hashing/verification working correctly - bcrypt authentication successful",
-      "timestamp": "2025-08-25T10:53:52.247315",
+      "timestamp": "2025-08-25T18:02:06.536300",
       "response_data": {
         "success": true,
         "message": "Login successful",
@@ -97,7 +97,7 @@
       "test": "Login Error - Invalid Wallet",
       "success": true,
       "details": "\u2705 Invalid wallet correctly rejected: Wallet address not found",
-      "timestamp": "2025-08-25T10:53:52.296957",
+      "timestamp": "2025-08-25T18:02:06.547571",
       "response_data": {
         "success": false,
         "message": "Wallet address not found"
@@ -107,7 +107,7 @@
       "test": "Login Error - Wrong Password",
       "success": true,
       "details": "\u2705 Wrong password correctly rejected: Invalid password",
-      "timestamp": "2025-08-25T10:53:52.574020",
+      "timestamp": "2025-08-25T18:02:06.892698",
       "response_data": {
         "success": false,
         "message": "Invalid password"
@@ -117,7 +117,7 @@
       "test": "Login Error - Invalid Username",
       "success": true,
       "details": "\u2705 Invalid username correctly rejected: Username not found",
-      "timestamp": "2025-08-25T10:53:52.582847",
+      "timestamp": "2025-08-25T18:02:06.942788",
       "response_data": {
         "success": false,
         "message": "Username not found"
@@ -127,7 +127,7 @@
       "test": "Login Error - Username Wrong Password",
       "success": true,
       "details": "\u2705 Wrong password for username correctly rejected: Invalid password",
-      "timestamp": "2025-08-25T10:53:52.819017",
+      "timestamp": "2025-08-25T18:02:07.253242",
       "response_data": {
         "success": false,
         "message": "Invalid password"
@@ -137,28 +137,28 @@
       "test": "User Registration",
       "success": true,
       "details": "User registered successfully: User registered successfully",
-      "timestamp": "2025-08-25T10:53:53.097008",
+      "timestamp": "2025-08-25T18:02:07.588220",
       "response_data": {
         "success": true,
         "message": "User registered successfully",
-        "user_id": "20cfca24-a647-4bb3-be10-b7021bde3df4",
+        "user_id": "dc0d95c9-0428-4720-85af-0a6cd0f6bd6c",
         "username": "user_RegTestW",
-        "wallet_address": "RegTestWallet20250825105352",
-        "created_at": "2025-08-25T10:53:53.052085"
+        "wallet_address": "RegTestWallet20250825180207",
+        "created_at": "2025-08-25T18:02:07.570339"
       }
     },
     {
       "test": "User Login",
       "success": false,
-      "details": "HTTP 422: {\"detail\":[{\"type\":\"missing\",\"loc\":[\"body\",\"identifier\"],\"msg\":\"Field required\",\"input\":{\"wallet_address\":\"RegTestWallet20250825105352\",\"password\":\"SecureTestPassword123!\"}}]}",
-      "timestamp": "2025-08-25T10:53:53.104967",
+      "details": "HTTP 422: {\"detail\":[{\"type\":\"missing\",\"loc\":[\"body\",\"identifier\"],\"msg\":\"Field required\",\"input\":{\"wallet_address\":\"RegTestWallet20250825180207\",\"password\":\"SecureTestPassword123!\"}}]}",
+      "timestamp": "2025-08-25T18:02:07.620554",
       "response_data": null
     },
     {
       "test": "Integration Flow",
       "success": true,
       "details": "Complete integration flow successful: registration \u2192 login \u2192 wallet auth \u2192 conversion rates",
-      "timestamp": "2025-08-25T10:53:54.305047",
+      "timestamp": "2025-08-25T18:02:08.990780",
       "response_data": {
         "registration": true,
         "login": true,
@@ -170,7 +170,7 @@
       "test": "Real DOGE Balance",
       "success": true,
       "details": "Real DOGE balance retrieved: 59204.83199296 DOGE from BlockCypher API",
-      "timestamp": "2025-08-25T10:53:54.602759",
+      "timestamp": "2025-08-25T18:02:09.519578",
       "response_data": {
         "success": true,
         "balance": 59204.83199296,
@@ -185,17 +185,17 @@
       "test": "DOGE Invalid Address Handling",
       "success": false,
       "details": "Expected error for invalid address, got HTTP 200",
-      "timestamp": "2025-08-25T10:53:55.280671",
+      "timestamp": "2025-08-25T18:02:09.981181",
       "response_data": null
     },
     {
       "test": "Real TRX Balance",
       "success": true,
-      "details": "Real TRX balance retrieved: 1046142.551464 TRX from TronGrid API",
-      "timestamp": "2025-08-25T10:53:55.666721",
+      "details": "Real TRX balance retrieved: 1046146.761464 TRX from TronGrid API",
+      "timestamp": "2025-08-25T18:02:10.348198",
       "response_data": {
         "success": true,
-        "balance": 1046142.551464,
+        "balance": 1046146.761464,
         "currency": "TRX",
         "address": "TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t",
         "source": "trongrid"
@@ -205,14 +205,14 @@
       "test": "TRX Invalid Address Handling",
       "success": false,
       "details": "Expected error for invalid address, got HTTP 200",
-      "timestamp": "2025-08-25T10:53:55.912019",
+      "timestamp": "2025-08-25T18:02:10.593830",
       "response_data": null
     },
     {
       "test": "Real CRT Balance",
       "success": true,
       "details": "Real CRT balance retrieved: 0.0 CRT from Solana RPC, mint: 9pjWtc6x88wrRMXTxkBcNB6YtcN7NNcyzDAfUMfRknty",
-      "timestamp": "2025-08-25T10:53:56.068709",
+      "timestamp": "2025-08-25T18:02:10.782798",
       "response_data": {
         "success": true,
         "balance": 0.0,
@@ -227,14 +227,14 @@
       "test": "CRT Invalid Address Handling",
       "success": false,
       "details": "Expected error for invalid address, got HTTP 200",
-      "timestamp": "2025-08-25T10:53:56.154512",
+      "timestamp": "2025-08-25T18:02:10.870649",
       "response_data": null
     },
     {
       "test": "Real SOL Balance",
       "success": true,
       "details": "Real SOL balance retrieved: 0.0 SOL (0 lamports) from Solana RPC",
-      "timestamp": "2025-08-25T10:53:56.242522",
+      "timestamp": "2025-08-25T18:02:11.017048",
       "response_data": {
         "success": true,
         "balance": 0.0,
@@ -248,7 +248,7 @@
       "test": "All Blockchain Balances",
       "success": false,
       "details": "Insufficient blockchain integrations working: only ['CRT', 'SOL']",
-      "timestamp": "2025-08-25T10:53:56.956009",
+      "timestamp": "2025-08-25T18:02:11.884040",
       "response_data": {
         "success": true,
         "wallet_address": "DFvHX8ZdqNqbCLJKnwe4h7qqj3hj4dw3pYvQRzweWnP7",
@@ -268,14 +268,14 @@
           "DOGE": "API Error 400: {\"error\": \"Address DFvHX8ZdqNqbCLJKnwe4h7qqj3hj4dw3pYvQRzweWnP7 is invalid: Address DFvHX8ZdqNqbCLJKnwe4h7qqj3hj4dw3pYvQRzweWnP7 is of unknown size.\"}",
           "TRX": "API Error 400: {\"success\":false,\"error\":\"A valid account address is required.\",\"statusCode\":400}"
         },
-        "last_updated": "2025-08-25T10:53:56.911870"
+        "last_updated": "2025-08-25T18:02:11.880628"
       }
     },
     {
       "test": "CRT Token Info",
       "success": false,
       "details": "CRT token mint/decimals incorrect: mint=9pjWtc6x88wrRMXTxkBcNB6YtcN7NNcyzDAfUMfRknty, decimals=6",
-      "timestamp": "2025-08-25T10:53:57.042584",
+      "timestamp": "2025-08-25T18:02:12.011981",
       "response_data": {
         "success": true,
         "token_info": {
@@ -290,14 +290,14 @@
         "current_price": 0.15,
         "mint_address": "9pjWtc6x88wrRMXTxkBcNB6YtcN7NNcyzDAfUMfRknty",
         "decimals": 6,
-        "last_updated": "2025-08-25T10:53:57.039410"
+        "last_updated": "2025-08-25T18:02:11.968476"
       }
     },
     {
       "test": "CRT Simulate Deposit",
       "success": true,
       "details": "CRT deposit simulation working: Simulated deposit of 1,000,000 CRT to DFvHX8ZdqNqbCLJKnwe4h7qqj3hj4dw3pYvQRzweWnP7",
-      "timestamp": "2025-08-25T10:53:57.170787",
+      "timestamp": "2025-08-25T18:02:12.140795",
       "response_data": {
         "success": true,
         "message": "Simulated deposit of 1,000,000 CRT to DFvHX8ZdqNqbCLJKnwe4h7qqj3hj4dw3pYvQRzweWnP7",
@@ -312,88 +312,88 @@
       "test": "CRT Deposit Validation",
       "success": false,
       "details": "Expected 400 for invalid payload, got HTTP 500",
-      "timestamp": "2025-08-25T10:53:57.177366",
+      "timestamp": "2025-08-25T18:02:12.147896",
       "response_data": null
     },
     {
       "test": "Real Crypto Conversion Rates",
       "success": true,
       "details": "Real conversion rates working: 12 rates, source: coingecko",
-      "timestamp": "2025-08-25T10:53:57.219650",
+      "timestamp": "2025-08-25T18:02:12.301662",
       "response_data": {
         "success": true,
         "rates": {
-          "DOGE_TRX": 1.605542763233187,
-          "DOGE_USDC": 4.576881348793987,
-          "DOGE_CRT": 0.6866654154096874,
-          "TRX_DOGE": 0.6228423327611868,
-          "TRX_USDC": 2.850675456054014,
-          "TRX_CRT": 0.4276842891601991,
-          "USDC_DOGE": 0.21848938694106657,
-          "USDC_TRX": 0.350794054046485,
-          "USDC_CRT": 0.1500291056464954,
-          "CRT_DOGE": 1.4563133333333333,
-          "CRT_TRX": 2.338173333333333,
-          "CRT_USDC": 6.665373333333333
+          "DOGE_TRX": 1.605428452483885,
+          "DOGE_USDC": 4.573930984633261,
+          "DOGE_CRT": 0.6862193431508447,
+          "TRX_DOGE": 0.6228866807815826,
+          "TRX_USDC": 2.849040689142248,
+          "TRX_CRT": 0.4274368889433475,
+          "USDC_DOGE": 0.2186303211306937,
+          "USDC_TRX": 0.3509953381189045,
+          "USDC_CRT": 0.15002835535916287,
+          "CRT_DOGE": 1.45726,
+          "CRT_TRX": 2.3395266666666665,
+          "CRT_USDC": 6.665406666666667
         },
         "prices_usd": {
-          "DOGE": 0.218447,
-          "TRX": 0.350726,
-          "USDC": 0.999806,
+          "DOGE": 0.218589,
+          "TRX": 0.350929,
+          "USDC": 0.999811,
           "CRT": 0.15
         },
-        "last_updated": "2025-08-25T10:53:57.216133",
+        "last_updated": "2025-08-25T18:02:12.298244",
         "source": "coingecko"
       }
     },
     {
       "test": "Crypto Price - DOGE",
       "success": true,
-      "details": "Price: $0.218444, 24h change: -5.111209977874847%",
-      "timestamp": "2025-08-25T10:54:57.294440",
+      "details": "Price: $0.218518, 24h change: -7.121417775080545%",
+      "timestamp": "2025-08-25T18:02:12.578221",
       "response_data": {
         "success": true,
         "data": {
           "currency": "DOGE",
-          "price_usd": 0.218444,
-          "price_change_24h": -5.111209977874847,
-          "market_cap": 32886374859.117992,
-          "volume_24h": 3850609171.14784,
-          "last_updated": "2025-08-25T10:54:57.288351"
+          "price_usd": 0.218518,
+          "price_change_24h": -7.121417775080545,
+          "market_cap": 32944138476.480934,
+          "volume_24h": 3892666162.043758,
+          "last_updated": "2025-08-25T18:02:12.574985"
         }
       }
     },
     {
       "test": "Crypto Price - TRX",
       "success": true,
-      "details": "Price: $0.350742, 24h change: -3.889828961540361%",
-      "timestamp": "2025-08-25T10:54:57.386353",
+      "details": "Price: $0.350929, 24h change: -4.5806517229214805%",
+      "timestamp": "2025-08-25T18:02:12.890951",
       "response_data": {
         "success": true,
         "data": {
           "currency": "TRX",
-          "price_usd": 0.350742,
-          "price_change_24h": -3.889828961540361,
-          "market_cap": 33198274607.37363,
-          "volume_24h": 1509604950.9991665,
-          "last_updated": "2025-08-25T10:54:57.382968"
+          "price_usd": 0.350929,
+          "price_change_24h": -4.5806517229214805,
+          "market_cap": 33220734166.492275,
+          "volume_24h": 1709515394.5088396,
+          "last_updated": "2025-08-25T18:02:12.847505"
         }
       }
     },
     {
       "test": "Crypto Price - USDC",
       "success": true,
-      "details": "Price: $0.999806, 24h change: -0.0002244638934242509%",
-      "timestamp": "2025-08-25T10:54:57.427828",
+      "details": "Price: $0.999811, 24h change: 0.0006618280710635812%",
+      "timestamp": "2025-08-25T18:02:13.136826",
       "response_data": {
         "success": true,
         "data": {
           "currency": "USDC",
-          "price_usd": 0.999806,
-          "price_change_24h": -0.0002244638934242509,
-          "market_cap": 67384819819.373024,
-          "volume_24h": 17479100396.62233,
-          "last_updated": "2025-08-25T10:54:57.424830"
+          "price_usd": 0.999811,
+          "price_change_24h": 0.0006618280710635812,
+          "market_cap": 67420335296.78089,
+          "volume_24h": 19906265636.55188,
+          "last_updated": "2025-08-25T18:02:13.133519"
         }
       }
     },
@@ -401,7 +401,7 @@
       "test": "Crypto Price - CRT",
       "success": true,
       "details": "Price: $0.15, 24h change: 2.5%",
-      "timestamp": "2025-08-25T10:54:57.434765",
+      "timestamp": "2025-08-25T18:02:13.144401",
       "response_data": {
         "success": true,
         "data": {
@@ -410,7 +410,7 @@
           "price_change_24h": 2.5,
           "market_cap": 15000000,
           "volume_24h": 500000,
-          "last_updated": "2025-08-25T10:54:57.431745"
+          "last_updated": "2025-08-25T18:02:13.141524"
         }
       }
     },
@@ -418,7 +418,7 @@
       "test": "Redis Caching",
       "success": true,
       "details": "Redis may be working but cache not hit in test timeframe",
-      "timestamp": "2025-08-25T10:54:57.550839",
+      "timestamp": "2025-08-25T18:03:13.742331",
       "response_data": {
         "first_source": "coingecko",
         "second_source": "coingecko"
@@ -428,11 +428,11 @@
       "test": "Auth Challenge Generation",
       "success": true,
       "details": "Challenge generated successfully",
-      "timestamp": "2025-08-25T10:54:57.557890",
+      "timestamp": "2025-08-25T18:03:13.753346",
       "response_data": {
         "success": true,
-        "challenge": "Hello, please sign this message to authenticate with Casino dApp!\n\nChain: Multi-Chain Casino\nAddress: RealWallet9876543210XYZ\nApp: CasinoSavings\nTime: 2025-08-25T10:54:57.554928\nNonce: ed46b0bd9cdba773d11a9ee053c90d63\n\nThis signature will be used to verify your wallet ownership.",
-        "challenge_hash": "1c207b6e0e0c8afec09cea18c0f205ac02b023fdada8ceee8499415c8b58f5ca",
+        "challenge": "Hello, please sign this message to authenticate with Casino dApp!\n\nChain: Multi-Chain Casino\nAddress: RealWallet9876543210XYZ\nApp: CasinoSavings\nTime: 2025-08-25T18:03:13.749732\nNonce: b3a889a5f233e3d169c919660ca0851f\n\nThis signature will be used to verify your wallet ownership.",
+        "challenge_hash": "5a65ef7cd8a37349b85b2c5ee042f9c750bf384d2b1dc701005cf5dd4a0fce2a",
         "network": "solana"
       }
     },
@@ -440,10 +440,10 @@
       "test": "Auth Verification",
       "success": true,
       "details": "JWT token generated, expires in 86400s",
-      "timestamp": "2025-08-25T10:54:57.568271",
+      "timestamp": "2025-08-25T18:03:13.802071",
       "response_data": {
         "success": true,
-        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ3YWxsZXRfYWRkcmVzcyI6IlJlYWxXYWxsZXQ5ODc2NTQzMjEwWFlaIiwibmV0d29yayI6InNvbGFuYSIsImV4cCI6MTc1NjIwNTY5NywiaWF0IjoxNzU2MTE5Mjk3LCJ0eXBlIjoid2FsbGV0X2F1dGgifQ.M66PQinPqXIVatslYa4SEXwFEghFkHDtgRDH-ciFUIM",
+        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ3YWxsZXRfYWRkcmVzcyI6IlJlYWxXYWxsZXQ5ODc2NTQzMjEwWFlaIiwibmV0d29yayI6InNvbGFuYSIsImV4cCI6MTc1NjIzMTM5MywiaWF0IjoxNzU2MTQ0OTkzLCJ0eXBlIjoid2FsbGV0X2F1dGgifQ.LmWwNf66prB2Q3wo11Gc6E7oLGCS-I7PBsgfqO27WG4",
         "wallet_address": "RealWallet9876543210XYZ",
         "network": "solana",
         "expires_in": 86400
@@ -453,31 +453,33 @@
       "test": "Wallet Info",
       "success": true,
       "details": "Wallet info retrieved successfully",
-      "timestamp": "2025-08-25T10:54:57.576326",
+      "timestamp": "2025-08-25T18:03:14.856411",
       "response_data": {
         "success": true,
         "wallet": {
           "user_id": "b2b13da4-19c8-467f-8dbf-f8857d59966a",
           "wallet_address": "RealWallet9876543210XYZ",
           "deposit_balance": {
-            "CRT": 1085.0,
-            "DOGE": 21715.0,
-            "TRX": 0,
-            "USDC": 2150.0
+            "CRT": 0.0,
+            "DOGE": 0.0,
+            "TRX": 0.0,
+            "SOL": 0.0
           },
           "winnings_balance": {
             "CRT": 0,
             "DOGE": 0,
             "TRX": 0,
-            "USDC": 0
+            "SOL": 0
           },
           "savings_balance": {
-            "CRT": 5.0,
+            "CRT": 10.0,
             "DOGE": 0,
             "TRX": 0,
             "USDC": 0
           },
-          "created_at": "2025-08-23T16:03:19.917000"
+          "created_at": "2025-08-23T16:03:19.917000",
+          "balance_source": "real_blockchain_api",
+          "last_balance_update": "2025-08-25T18:03:14.853660"
         }
       }
     },
@@ -485,19 +487,19 @@
       "test": "Deposit Funds",
       "success": true,
       "details": "Deposit successful: Deposited 100.0 CRT",
-      "timestamp": "2025-08-25T10:54:57.627267",
+      "timestamp": "2025-08-25T18:03:14.878330",
       "response_data": {
         "success": true,
         "message": "Deposited 100.0 CRT",
-        "new_balance": 1185.0,
-        "transaction_id": "7edfe243-eda7-4b9b-932d-64d04d88782b"
+        "new_balance": 1270.0,
+        "transaction_id": "20e0896b-d642-45c1-9f70-195d9bb79b13"
       }
     },
     {
       "test": "Withdraw Funds",
       "success": false,
       "details": "Unexpected withdrawal response",
-      "timestamp": "2025-08-25T10:54:57.637288",
+      "timestamp": "2025-08-25T18:03:14.887888",
       "response_data": {
         "success": false,
         "message": "Insufficient balance"
@@ -507,40 +509,40 @@
       "test": "Crypto Conversion",
       "success": true,
       "details": "Conversion successful: rate 21.5, amount 215.0",
-      "timestamp": "2025-08-25T10:54:57.648024",
+      "timestamp": "2025-08-25T18:03:14.904238",
       "response_data": {
         "success": true,
         "message": "Converted 10.0 CRT to 215.0000 DOGE",
         "converted_amount": 215.0,
         "rate": 21.5,
         "liquidity_contributed": 107.5,
-        "new_liquidity_balance": 2365.0,
-        "transaction_id": "cc835f24-3ba9-48ee-81bf-d9d8cd4d51b6",
+        "new_liquidity_balance": 2472.5,
+        "transaction_id": "d906d384-59f7-4fca-bd0b-c89957fdcbdb",
         "note": "50% (107.5000) added to DOGE liquidity pool for withdrawals"
       }
     },
     {
       "test": "Game Betting",
       "success": true,
-      "details": "Real bet placed: loss, payout: 0, savings: 5.0",
-      "timestamp": "2025-08-25T10:54:57.707763",
+      "details": "Real bet placed: win, payout: 25.0, savings: 0",
+      "timestamp": "2025-08-25T18:03:14.979877",
       "response_data": {
         "success": true,
-        "game_id": "game_c234c35a",
+        "game_id": "game_cebcffe4",
         "bet_amount": 5.0,
         "currency": "CRT",
-        "result": "loss",
-        "payout": 0,
-        "savings_contribution": 5.0,
-        "liquidity_added": 0.5,
-        "message": "Lost 5.0 CRT! Saved to vault + 0.50 added to liquidity!"
+        "result": "win",
+        "payout": 25.0,
+        "savings_contribution": 0,
+        "liquidity_added": 0,
+        "message": "Won 25.00 CRT!"
       }
     },
     {
       "test": "Savings System",
       "success": true,
-      "details": "Savings system working: 5 games, 4 losses, 4 history entries",
-      "timestamp": "2025-08-25T10:54:57.720050",
+      "details": "Savings system working: 6 games, 4 losses, 4 history entries",
+      "timestamp": "2025-08-25T18:03:15.010247",
       "response_data": {
         "success": true,
         "wallet_address": "RealWallet9876543210XYZ",
@@ -591,10 +593,10 @@
           }
         ],
         "stats": {
-          "total_games": 5,
-          "total_wins": 1,
+          "total_games": 6,
+          "total_wins": 2,
           "total_losses": 4,
-          "win_rate": 20.0
+          "win_rate": 33.33333333333333
         }
       }
     },
@@ -602,14 +604,14 @@
       "test": "WebSocket Wallet Monitor",
       "success": false,
       "details": "WebSocket error: server rejected WebSocket connection: HTTP 404",
-      "timestamp": "2025-08-25T10:54:57.819240",
+      "timestamp": "2025-08-25T18:03:15.115238",
       "response_data": null
     },
     {
       "test": "Database Integration",
       "success": true,
-      "details": "Database integration working: 5 games stored with proper fields",
-      "timestamp": "2025-08-25T10:54:57.827795",
+      "details": "Database integration working: 6 games stored with proper fields",
+      "timestamp": "2025-08-25T18:03:15.124534",
       "response_data": {
         "success": true,
         "games": [
@@ -677,9 +679,99 @@
             "result": "loss",
             "payout": 0,
             "status": "completed"
+          },
+          {
+            "_id": "68aca562e908f23e2842b5f5",
+            "wallet_address": "RealWallet9876543210XYZ",
+            "game_type": "Slot Machine",
+            "bet_amount": 5.0,
+            "currency": "CRT",
+            "network": "solana",
+            "timestamp": "2025-08-25T18:03:14.927000",
+            "game_id": "game_cebcffe4",
+            "result": "win",
+            "payout": 25.0,
+            "status": "completed"
           }
         ],
-        "total_games": 5
+        "total_games": 6
+      }
+    },
+    {
+      "test": "DOGE Deposit Address Generation",
+      "success": true,
+      "details": "\u2705 DOGE deposit address generated: DOGE_c0e7e6fe_DwK4nUM8, network: Dogecoin Mainnet, min_deposit: 10",
+      "timestamp": "2025-08-25T18:03:15.133215",
+      "response_data": {
+        "success": true,
+        "doge_deposit_address": "DOGE_c0e7e6fe_DwK4nUM8",
+        "network": "Dogecoin Mainnet",
+        "note": "\u26a0\ufe0f DEMO MODE: This is a simulated DOGE address. Use the manual credit system below to credit DOGE to your casino account.",
+        "instructions": [
+          "1. Send DOGE to your preferred address",
+          "2. Use /api/deposit/credit-doge to manually credit DOGE to casino",
+          "3. Amount will be available for gaming immediately"
+        ],
+        "min_deposit": 10,
+        "processing_time": "5-10 minutes after blockchain confirmation"
+      }
+    },
+    {
+      "test": "DOGE Address Validation",
+      "success": true,
+      "details": "\u2705 DOGE address validation working: 2/3 valid addresses accepted, 4/4 invalid addresses rejected",
+      "timestamp": "2025-08-25T18:03:16.202908",
+      "response_data": null
+    },
+    {
+      "test": "Current DOGE Balance Check",
+      "success": false,
+      "details": "Missing required fields in DOGE balance response",
+      "timestamp": "2025-08-25T18:03:16.662654",
+      "response_data": {
+        "success": false,
+        "balance": 0.0,
+        "currency": "DOGE",
+        "error": "API Error 400: {\"error\": \"Address DwK4nUM8TKWAxEBKTG6mWA6PBRDHFPA3beLB18pwCekq is invalid: Address DwK4nUM8TKWAxEBKTG6mWA6PBRDHFPA3beLB18pwCekq is of unknown size.\"}"
+      }
+    },
+    {
+      "test": "New DOGE Deposit System",
+      "success": true,
+      "details": "\u2705 DOGE deposit system working (expected error): Invalid DOGE address format",
+      "timestamp": "2025-08-25T18:03:16.712251",
+      "response_data": {
+        "success": false,
+        "message": "Invalid DOGE address format"
+      }
+    },
+    {
+      "test": "DOGE Deposit Error Handling",
+      "success": true,
+      "details": "\u2705 Invalid DOGE address correctly rejected by deposit system",
+      "timestamp": "2025-08-25T18:03:16.722273",
+      "response_data": {
+        "success": false,
+        "message": "Invalid DOGE address format"
+      }
+    },
+    {
+      "test": "Complete DOGE Deposit Flow",
+      "success": true,
+      "details": "\u2705 Complete DOGE deposit flow working: address=DOGE_c0e7e6fe_DwK4nUM8, balance=0 DOGE, min_deposit=10, manual_verification=False",
+      "timestamp": "2025-08-25T18:03:17.454332",
+      "response_data": {
+        "deposit_address": "DOGE_c0e7e6fe_DwK4nUM8",
+        "current_balance": 0,
+        "min_deposit": 10,
+        "processing_time": "5-10 minutes after blockchain confirmation",
+        "instructions": [
+          "1. Send DOGE to your preferred address",
+          "2. Use /api/deposit/credit-doge to manually credit DOGE to casino",
+          "3. Amount will be available for gaming immediately"
+        ],
+        "manual_verification": false,
+        "manual_message": "Invalid DOGE address format"
       }
     }
   ]
