@@ -47,8 +47,9 @@ class AutoPlayTester:
         print(f"{status} {test_name}: {details}")
         
     async def test_user_authentication(self):
-        """Test 1: Authentication System - Verify user login for AutoPlay"""
+        """Test 1: Authentication System - Verify user login and get JWT token for AutoPlay"""
         try:
+            # Step 1: Login to get user info
             login_payload = {
                 "username": self.test_user,
                 "password": self.test_password
@@ -59,9 +60,36 @@ class AutoPlayTester:
                 if response.status == 200:
                     data = await response.json()
                     if data.get("success") and data.get("username") == self.test_user:
-                        self.log_test("User Authentication", True, 
-                                    f"✅ User '{self.test_user}' login successful for AutoPlay", data)
-                        return True
+                        # Step 2: Get JWT token via wallet authentication
+                        challenge_payload = {
+                            "wallet_address": self.test_wallet,
+                            "network": "solana"
+                        }
+                        
+                        async with self.session.post(f"{self.base_url}/auth/challenge", 
+                                                   json=challenge_payload) as challenge_response:
+                            if challenge_response.status == 200:
+                                challenge_data = await challenge_response.json()
+                                if challenge_data.get("success"):
+                                    # Step 3: Verify with mock signature to get JWT
+                                    verify_payload = {
+                                        "challenge_hash": challenge_data.get("challenge_hash"),
+                                        "signature": "mock_signature_autoplay_test",
+                                        "wallet_address": self.test_wallet,
+                                        "network": "solana"
+                                    }
+                                    
+                                    async with self.session.post(f"{self.base_url}/auth/verify", 
+                                                               json=verify_payload) as verify_response:
+                                        if verify_response.status == 200:
+                                            verify_data = await verify_response.json()
+                                            if verify_data.get("success"):
+                                                self.auth_token = verify_data.get("token")
+                                                self.log_test("User Authentication", True, 
+                                                            f"✅ User '{self.test_user}' authenticated with JWT token for AutoPlay", verify_data)
+                                                return True
+                        
+                        self.log_test("User Authentication", False, "Failed to get JWT token")
                     else:
                         self.log_test("User Authentication", False, 
                                     f"Login failed: {data.get('message', 'Unknown error')}", data)
