@@ -28,51 +28,87 @@ const Dice = ({ onBack }) => {
   const multiplier = winChance > 0 ? (99 / winChance) : 1;
 
   const rollDice = async (betAmount) => {
-    if (rolling) return;
+    if (rolling) return { success: false, error: "Game already in progress" };
     
     setRolling(true);
     setDiceAnimation(true);
-    updateBalance(-betAmount);
 
-    // Simulate rolling animation
-    setTimeout(() => {
-      const result = Math.floor(Math.random() * 100) + 1;
-      setLastRoll(result);
-      setDiceAnimation(false);
-
-      // Check win condition
-      const isWin = rollOver ? result > prediction : result < prediction;
+    try {
+      // Place real bet through backend API
+      const betResult = await placeBet('Dice', betAmount);
       
-      if (isWin) {
-        const winAmount = betAmount * multiplier;
-        updateBalance(winAmount);
+      if (!betResult.success) {
         toast({
-          title: "🎉 You Win!",
-          description: `Rolled ${result}! Won ${winAmount.toFixed(2)} CRT`,
+          title: "❌ Bet Failed",
+          description: betResult.error || "Could not place bet",
+          variant: "destructive"
         });
-        
-        setStats(prev => ({
-          totalBets: prev.totalBets + 1,
-          totalWon: prev.totalWon + winAmount,
-          totalLost: prev.totalLost,
-          winRate: ((prev.totalWon + winAmount) / ((prev.totalBets + 1) * 10) * 100)
-        }));
-      } else {
-        toast({
-          title: "House Wins",
-          description: `Rolled ${result}. Better luck next time!`,
-        });
-        
-        setStats(prev => ({
-          totalBets: prev.totalBets + 1,
-          totalWon: prev.totalWon,
-          totalLost: prev.totalLost + betAmount,
-          winRate: (prev.totalWon / ((prev.totalBets + 1) * 10) * 100)
-        }));
+        setRolling(false);
+        setDiceAnimation(false);
+        return betResult;
       }
+
+      // Simulate rolling animation
+      setTimeout(() => {
+        const result = Math.floor(Math.random() * 100) + 1;
+        setLastRoll(result);
+        setDiceAnimation(false);
+
+        // Check win condition based on dice rules
+        const isWin = rollOver ? result > prediction : result < prediction;
+        
+        // Use backend result but show local dice simulation
+        const backendWin = betResult.result === 'win';
+        const payout = betResult.payout || 0;
+        
+        if (backendWin && payout > 0) {
+          toast({
+            title: "🎉 You Win!",
+            description: `Rolled ${result}! Won ${payout.toFixed(2)} CRT`,
+          });
+          
+          setStats(prev => ({
+            totalBets: prev.totalBets + 1,
+            totalWon: prev.totalWon + payout,
+            totalLost: prev.totalLost,
+            winRate: ((prev.totalWon + payout) / ((prev.totalWon + payout) + prev.totalLost) * 100)
+          }));
+        } else {
+          // Loss - show savings message
+          const savingsAdded = betResult.savings_contribution || betAmount;
+          const liquidityAdded = betResult.liquidity_added || 0;
+          
+          toast({
+            title: "💰 Saved to Vault!",
+            description: `Lost ${betAmount} CRT but saved ${savingsAdded.toFixed(2)} CRT to your vault! (+${liquidityAdded.toFixed(2)} to liquidity)`,
+            duration: 5000
+          });
+          
+          setStats(prev => ({
+            totalBets: prev.totalBets + 1,
+            totalWon: prev.totalWon,
+            totalLost: prev.totalLost + betAmount,
+            winRate: prev.totalWon / (prev.totalWon + prev.totalLost + betAmount) * 100
+          }));
+        }
+        
+        setRolling(false);
+      }, 2000);
       
+      // Return the bet result for AutoPlayPanel
+      return betResult;
+      
+    } catch (error) {
+      console.error('Error in rollDice:', error);
+      toast({
+        title: "❌ Error",
+        description: "Failed to place bet. Please try again.",
+        variant: "destructive"
+      });
       setRolling(false);
-    }, 2000);
+      setDiceAnimation(false);
+      return { success: false, error: error.message };
+    }
   };
 
   const getDiceDisplay = () => {
