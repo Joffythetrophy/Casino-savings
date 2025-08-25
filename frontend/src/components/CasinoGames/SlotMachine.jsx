@@ -159,7 +159,20 @@ const SlotMachine = ({ onBack }) => {
   };
 
   return (
-    <CasinoGameLayout title="Slot Machine" onBack={onBack} stats={stats}>
+    <CasinoGameLayout 
+      title="Slot Machine" 
+      onBack={onBack} 
+      stats={stats}
+      sidebarContent={
+        <AutoPlayPanel
+          onBet={handleSpin}
+          gameType="Slot Machine"
+          disabled={spinning}
+          minBet={1}
+          maxBet={100}
+        />
+      }
+    >
       <div className="space-y-6">
         {/* Slot Machine */}
         <Card className="p-8 bg-gradient-to-b from-gray-800 to-gray-900 border-2 border-yellow-400/30">
