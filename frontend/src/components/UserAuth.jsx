@@ -216,6 +216,7 @@ const LoginForm = ({ onClose }) => {
         };
 
         localStorage.setItem('casino_user', JSON.stringify(userData));
+        setUser(userData); // Fix: Update React authentication state
         return { success: true, username: response.data.username };
       } else {
         return { success: false, error: response.data.message || "Invalid credentials" };
