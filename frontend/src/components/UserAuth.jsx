@@ -125,7 +125,7 @@ const LoginForm = ({ onClose }) => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const { login, register } = useAuth();
+  const { login, register, setUser } = useAuth();
   const { toast } = useToast();
 
   const handleSubmit = async (e) => {
