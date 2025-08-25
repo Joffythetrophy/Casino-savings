@@ -624,12 +624,12 @@ async def convert_currency(request: ConvertRequest):
         if not user:
             return {"success": False, "message": "User not found"}
         
-        # Get conversion rate (real-time rates)
+        # Conversion rates (simplified for testing - in production use real rates)
         conversion_rates = {
-            "CRT_DOGE": 21.5, "CRT_TRX": 9.8, "CRT_USDC": 0.15,
-            "DOGE_CRT": 0.047, "DOGE_TRX": 0.456, "DOGE_USDC": 0.008,
-            "TRX_CRT": 0.102, "TRX_DOGE": 2.19, "TRX_USDC": 0.015,
-            "USDC_CRT": 6.67, "USDC_DOGE": 125.0, "USDC_TRX": 66.67
+            "CRT_DOGE": 21.5, "CRT_TRX": 9.8, "CRT_USDC": 0.15,  # Added CRT to USDC
+            "DOGE_CRT": 0.047, "DOGE_TRX": 0.456, "DOGE_USDC": 0.236,
+            "TRX_CRT": 0.102, "TRX_DOGE": 2.19, "TRX_USDC": 0.363,
+            "USDC_CRT": 6.67, "USDC_DOGE": 4.24, "USDC_TRX": 2.75
         }
         
         rate_key = f"{request.from_currency}_{request.to_currency}"
