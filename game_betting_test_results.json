@@ -1,0 +1,242 @@
+[
+  {
+    "test": "Backend Health Check",
+    "success": true,
+    "details": "Status: degraded, Healthy: solana, dogecoin, Issues: tron: 'TronManager' object has no attribute 'client'",
+    "timestamp": "2025-08-25T10:55:52.494941",
+    "response_data": {
+      "status": "degraded",
+      "services": {
+        "solana": {
+          "success": true,
+          "network": "Solana Mainnet"
+        },
+        "dogecoin": {
+          "success": true,
+          "network": "main",
+          "latest_block": 5849106,
+          "version": "BlockCypher API v1"
+        },
+        "tron": {
+          "success": false,
+          "error": "'TronManager' object has no attribute 'client'"
+        }
+      },
+      "timestamp": "2025-08-25T10:55:52.451251"
+    }
+  },
+  {
+    "test": "Wallet Balance Management",
+    "success": true,
+    "details": "Wallet balances retrieved: CRT: 5090000.0 (D:5090000.0, W:0, S:21000000), DOGE: 215500.0 (D:215500.0, W:0, S:0), TRX: 0 (D:0, W:0, S:0), USDC: 0 (D:0, W:0, S:0)",
+    "timestamp": "2025-08-25T10:55:52.502714",
+    "response_data": {
+      "success": true,
+      "wallet": {
+        "user_id": "0834c788-b59e-4656-9c8b-19a16a446747",
+        "wallet_address": "DwK4nUM8TKWAxEBKTG6mWA6PBRDHFPA3beLB18pwCekq",
+        "deposit_balance": {
+          "CRT": 5090000.0,
+          "DOGE": 215500.0
+        },
+        "winnings_balance": {
+          "CRT": 0,
+          "DOGE": 0,
+          "TRX": 0,
+          "USDC": 0
+        },
+        "savings_balance": {
+          "CRT": 21000000,
+          "DOGE": 0,
+          "TRX": 0,
+          "USDC": 0
+        },
+        "created_at": "2025-08-23T15:52:57.360000"
+      }
+    }
+  },
+  {
+    "test": "Game Betting - Slot Machine",
+    "success": true,
+    "details": "Result: loss, Payout: 0 CRT, Savings: 5.0, Liquidity: 0.5 | Lost 5.0 CRT! Saved to vault + 0.50 added to liquidity!",
+    "timestamp": "2025-08-25T10:55:52.514887",
+    "response_data": {
+      "success": true,
+      "game_id": "game_59d2f27a",
+      "bet_amount": 5.0,
+      "currency": "CRT",
+      "result": "loss",
+      "payout": 0,
+      "savings_contribution": 5.0,
+      "liquidity_added": 0.5,
+      "message": "Lost 5.0 CRT! Saved to vault + 0.50 added to liquidity!"
+    }
+  },
+  {
+    "test": "Game Betting - Dice",
+    "success": true,
+    "details": "Result: loss, Payout: 0 CRT, Savings: 5.0, Liquidity: 0.5 | Lost 5.0 CRT! Saved to vault + 0.50 added to liquidity!",
+    "timestamp": "2025-08-25T10:55:53.029390",
+    "response_data": {
+      "success": true,
+      "game_id": "game_1afb23c8",
+      "bet_amount": 5.0,
+      "currency": "CRT",
+      "result": "loss",
+      "payout": 0,
+      "savings_contribution": 5.0,
+      "liquidity_added": 0.5,
+      "message": "Lost 5.0 CRT! Saved to vault + 0.50 added to liquidity!"
+    }
+  },
+  {
+    "test": "Game Betting - Roulette",
+    "success": true,
+    "details": "Result: loss, Payout: 0 CRT, Savings: 5.0, Liquidity: 0.5 | Lost 5.0 CRT! Saved to vault + 0.50 added to liquidity!",
+    "timestamp": "2025-08-25T10:55:53.543161",
+    "response_data": {
+      "success": true,
+      "game_id": "game_d88cc111",
+      "bet_amount": 5.0,
+      "currency": "CRT",
+      "result": "loss",
+      "payout": 0,
+      "savings_contribution": 5.0,
+      "liquidity_added": 0.5,
+      "message": "Lost 5.0 CRT! Saved to vault + 0.50 added to liquidity!"
+    }
+  },
+  {
+    "test": "Game Betting - Plinko",
+    "success": true,
+    "details": "Result: loss, Payout: 0 CRT, Savings: 5.0, Liquidity: 0.5 | Lost 5.0 CRT! Saved to vault + 0.50 added to liquidity!",
+    "timestamp": "2025-08-25T10:55:54.109725",
+    "response_data": {
+      "success": true,
+      "game_id": "game_4b6959f2",
+      "bet_amount": 5.0,
+      "currency": "CRT",
+      "result": "loss",
+      "payout": 0,
+      "savings_contribution": 5.0,
+      "liquidity_added": 0.5,
+      "message": "Lost 5.0 CRT! Saved to vault + 0.50 added to liquidity!"
+    }
+  },
+  {
+    "test": "Game Betting - Keno",
+    "success": true,
+    "details": "Result: loss, Payout: 0 CRT, Savings: 5.0, Liquidity: 0.5 | Lost 5.0 CRT! Saved to vault + 0.50 added to liquidity!",
+    "timestamp": "2025-08-25T10:55:54.623864",
+    "response_data": {
+      "success": true,
+      "game_id": "game_a9f77da9",
+      "bet_amount": 5.0,
+      "currency": "CRT",
+      "result": "loss",
+      "payout": 0,
+      "savings_contribution": 5.0,
+      "liquidity_added": 0.5,
+      "message": "Lost 5.0 CRT! Saved to vault + 0.50 added to liquidity!"
+    }
+  },
+  {
+    "test": "Game Betting - Mines",
+    "success": true,
+    "details": "Result: loss, Payout: 0 CRT, Savings: 5.0, Liquidity: 0.5 | Lost 5.0 CRT! Saved to vault + 0.50 added to liquidity!",
+    "timestamp": "2025-08-25T10:55:55.138669",
+    "response_data": {
+      "success": true,
+      "game_id": "game_b6384ece",
+      "bet_amount": 5.0,
+      "currency": "CRT",
+      "result": "loss",
+      "payout": 0,
+      "savings_contribution": 5.0,
+      "liquidity_added": 0.5,
+      "message": "Lost 5.0 CRT! Saved to vault + 0.50 added to liquidity!"
+    }
+  },
+  {
+    "test": "Savings Tracking",
+    "success": true,
+    "details": "Total savings: CRT: 30.0, USD value: $150.60, Games: 6, Losses: 6, Win rate: 0.0%, History entries: 6",
+    "timestamp": "2025-08-25T10:55:55.652948",
+    "response_data": {
+      "success": true,
+      "wallet_address": "DwK4nUM8TKWAxEBKTG6mWA6PBRDHFPA3beLB18pwCekq",
+      "total_savings": {
+        "CRT": 30.0
+      },
+      "total_usd": 150.6,
+      "savings_history": [
+        {
+          "_id": "68ac413b407e88b14a047635",
+          "date": "2025-08-25 10:55",
+          "game": "Mines",
+          "currency": "CRT",
+          "amount": 5.0,
+          "game_result": "Loss",
+          "running_total": 30.0,
+          "game_id": "game_b6384ece"
+        },
+        {
+          "_id": "68ac413a407e88b14a047634",
+          "date": "2025-08-25 10:55",
+          "game": "Keno",
+          "currency": "CRT",
+          "amount": 5.0,
+          "game_result": "Loss",
+          "running_total": 25.0,
+          "game_id": "game_a9f77da9"
+        },
+        {
+          "_id": "68ac413a407e88b14a047633",
+          "date": "2025-08-25 10:55",
+          "game": "Plinko",
+          "currency": "CRT",
+          "amount": 5.0,
+          "game_result": "Loss",
+          "running_total": 20.0,
+          "game_id": "game_4b6959f2"
+        },
+        {
+          "_id": "68ac4139407e88b14a047632",
+          "date": "2025-08-25 10:55",
+          "game": "Roulette",
+          "currency": "CRT",
+          "amount": 5.0,
+          "game_result": "Loss",
+          "running_total": 15.0,
+          "game_id": "game_d88cc111"
+        },
+        {
+          "_id": "68ac4139407e88b14a047631",
+          "date": "2025-08-25 10:55",
+          "game": "Dice",
+          "currency": "CRT",
+          "amount": 5.0,
+          "game_result": "Loss",
+          "running_total": 10.0,
+          "game_id": "game_1afb23c8"
+        },
+        {
+          "_id": "68ac4138407e88b14a047630",
+          "date": "2025-08-25 10:55",
+          "game": "Slot Machine",
+          "currency": "CRT",
+          "amount": 5.0,
+          "game_result": "Loss",
+          "running_total": 5.0,
+          "game_id": "game_59d2f27a"
+        }
+      ],
+      "stats": {
+        "total_games": 6,
+        "total_wins": 0,
+        "total_losses": 6,
+        "win_rate": 0.0
+      }
+    }
+  }
+]
