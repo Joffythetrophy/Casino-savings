@@ -1992,38 +1992,47 @@ async def generate_real_doge_address(user_wallet: str) -> str:
 
 @app.post("/api/deposit/doge/manual")
 async def manual_doge_deposit(request: Dict[str, Any]):
-    """Manual DOGE deposit - for users who have sent DOGE to their address"""
+    """Manual DOGE deposit - for users who have sent DOGE to their real DOGE address"""
     try:
-        wallet_address = request.get("wallet_address")
-        if not wallet_address:
-            return {"success": False, "message": "Wallet address required"}
+        # Get the real DOGE address they sent DOGE to
+        doge_address = request.get("doge_address")
+        # Get their casino wallet address for account identification
+        casino_wallet = request.get("casino_wallet_address") or request.get("wallet_address")
+        
+        if not doge_address:
+            return {"success": False, "message": "DOGE address required (the address you sent DOGE to)"}
+        
+        if not casino_wallet:
+            return {"success": False, "message": "Casino wallet address required (your account identifier)"}
         
         # Validate DOGE address format
-        validation = await doge_manager.validate_address(wallet_address)
+        validation = await doge_manager.validate_address(doge_address)
         if not validation.get("valid"):
-            return {"success": False, "message": "Invalid DOGE address format"}
+            return {"success": False, "message": f"Invalid DOGE address format: {doge_address}. DOGE addresses should start with 'D' and be 25-34 characters long."}
         
         # Get real DOGE balance from blockchain
-        balance_result = await doge_manager.get_balance(wallet_address)
+        balance_result = await doge_manager.get_balance(doge_address)
         if not balance_result.get("success"):
-            return {"success": False, "message": f"Could not fetch DOGE balance: {balance_result.get('error')}"}
+            return {"success": False, "message": f"Could not fetch DOGE balance from blockchain: {balance_result.get('error')}"}
         
         real_doge_balance = balance_result.get("balance", 0.0)
+        unconfirmed_balance = balance_result.get("unconfirmed", 0.0)
+        total_balance = real_doge_balance + unconfirmed_balance
         
-        if real_doge_balance <= 0:
+        if total_balance <= 0:
             return {
                 "success": False, 
-                "message": f"No DOGE found at address {wallet_address}. Current balance: {real_doge_balance} DOGE"
+                "message": f"No DOGE found at address {doge_address}. Current balance: {real_doge_balance} DOGE (unconfirmed: {unconfirmed_balance} DOGE). Please ensure you've sent DOGE to this address and wait for blockchain confirmation."
             }
         
-        # Find or create user
-        user = await db.users.find_one({"wallet_address": wallet_address})
+        # Find casino user account
+        user = await db.users.find_one({"wallet_address": casino_wallet})
         if not user:
-            return {"success": False, "message": "User not found. Please register first."}
+            return {"success": False, "message": f"Casino account not found for wallet {casino_wallet}. Please register first."}
         
         # Check for recent deposits to prevent double-crediting
         recent_deposit = await db.transactions.find_one({
-            "wallet_address": wallet_address,
+            "doge_address": doge_address,
             "type": "doge_deposit",
             "timestamp": {"$gte": datetime.utcnow() - timedelta(hours=1)}
         })
@@ -2031,19 +2040,23 @@ async def manual_doge_deposit(request: Dict[str, Any]):
         if recent_deposit:
             return {
                 "success": False, 
-                "message": "Recent DOGE deposit found. Please wait 1 hour between deposit checks.",
+                "message": f"Recent DOGE deposit found for address {doge_address}. Please wait 1 hour between deposit checks to prevent double-crediting.",
                 "last_deposit": recent_deposit["timestamp"].isoformat()
             }
         
-        # Record the deposit (real blockchain balance is the deposit amount)
+        # Record the deposit (credit the confirmed balance to casino account)
+        deposit_amount = real_doge_balance  # Only credit confirmed balance
+        
         transaction = {
             "transaction_id": str(uuid.uuid4()),
-            "wallet_address": wallet_address,
+            "wallet_address": casino_wallet,
+            "doge_address": doge_address,
             "type": "doge_deposit",
             "currency": "DOGE",
-            "amount": real_doge_balance,
-            "blockchain_balance": real_doge_balance,
-            "source": "manual_blockchain_check",
+            "amount": deposit_amount,
+            "unconfirmed_amount": unconfirmed_balance,
+            "total_blockchain_balance": total_balance,
+            "source": "real_blockchain_verification",
             "timestamp": datetime.utcnow(),
             "status": "confirmed"
         }
@@ -2052,12 +2065,16 @@ async def manual_doge_deposit(request: Dict[str, Any]):
         
         return {
             "success": True,
-            "message": f"DOGE deposit confirmed! {real_doge_balance} DOGE available for trading/gaming",
-            "amount": real_doge_balance,
+            "message": f"✅ DOGE deposit verified! {deposit_amount} DOGE credited to your casino account.",
+            "confirmed_amount": deposit_amount,
+            "unconfirmed_amount": unconfirmed_balance,
+            "total_balance": total_balance,
             "currency": "DOGE",
+            "doge_address": doge_address,
+            "casino_wallet": casino_wallet,
             "transaction_id": transaction["transaction_id"],
-            "balance_source": "real_blockchain",
-            "instructions": "Your real DOGE balance is now available for use in the casino!"
+            "balance_source": "real_blockchain_api",
+            "note": f"Verified via BlockCypher API. {unconfirmed_balance} DOGE unconfirmed will be available after more confirmations."
         }
         
     except Exception as e:
