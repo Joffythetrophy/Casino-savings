@@ -1462,6 +1462,62 @@ class WalletAPITester:
         except Exception as e:
             self.log_test("Complete DOGE Deposit Flow", False, f"Error: {str(e)}")
 
+    async def test_specific_doge_deposit_address_request(self):
+        """Test specific DOGE deposit address request from user review"""
+        try:
+            # Test the exact endpoint mentioned in the review request
+            target_wallet = "DwK4nUM8TKWAxEBKTG6mWA6PBRDHFPA3beLB18pwCekq"
+            
+            async with self.session.get(f"{self.base_url}/deposit/doge-address/{target_wallet}") as response:
+                if response.status == 200:
+                    data = await response.json()
+                    required_fields = ["success", "doge_deposit_address", "network", "instructions"]
+                    
+                    if all(field in data for field in required_fields) and data.get("success"):
+                        doge_address = data.get("doge_deposit_address")
+                        network = data.get("network")
+                        instructions = data.get("instructions", [])
+                        min_deposit = data.get("min_deposit")
+                        processing_time = data.get("processing_time")
+                        
+                        # Verify this is a real DOGE address format
+                        is_real_doge = (
+                            isinstance(doge_address, str) and
+                            doge_address.startswith('D') and
+                            len(doge_address) >= 25 and
+                            len(doge_address) <= 34 and
+                            all(c in "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz" for c in doge_address)
+                        )
+                        
+                        if is_real_doge:
+                            self.log_test("Specific DOGE Deposit Address Request", True, 
+                                        f"✅ REAL DOGE ADDRESS GENERATED: {doge_address} (length: {len(doge_address)}, network: {network}, min_deposit: {min_deposit} DOGE, processing: {processing_time})", data)
+                            
+                            # Additional validation - check if address follows proper DOGE format
+                            if (doge_address.startswith('D') and 
+                                len(doge_address) == 34 and
+                                not doge_address.startswith('DOGE_')):  # Not the old fake format
+                                self.log_test("DOGE Address Format Validation", True, 
+                                            f"✅ PROPER DOGE FORMAT: Address {doge_address} follows correct DOGE address standards", 
+                                            {"address": doge_address, "format": "real_doge", "length": len(doge_address)})
+                            else:
+                                self.log_test("DOGE Address Format Validation", False, 
+                                            f"❌ IMPROPER FORMAT: Address {doge_address} does not follow standard DOGE format", 
+                                            {"address": doge_address, "format": "invalid", "length": len(doge_address)})
+                        else:
+                            self.log_test("Specific DOGE Deposit Address Request", False, 
+                                        f"❌ FAKE DOGE ADDRESS: {doge_address} is not a real DOGE address format", data)
+                    else:
+                        self.log_test("Specific DOGE Deposit Address Request", False, 
+                                    "Invalid DOGE deposit address response format", data)
+                else:
+                    error_text = await response.text()
+                    self.log_test("Specific DOGE Deposit Address Request", False, 
+                                f"HTTP {response.status}: {error_text}")
+                    
+        except Exception as e:
+            self.log_test("Specific DOGE Deposit Address Request", False, f"Error: {str(e)}")
+
     async def run_all_tests(self):
         """Run all wallet management tests"""
         print(f"🚀 Starting Casino Savings dApp Backend Tests - Focus on Login Functionality")
