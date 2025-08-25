@@ -2405,6 +2405,18 @@ class WalletAPITester:
         await self.test_current_doge_balance_check()
         await self.test_new_doge_deposit_system()
         await self.test_doge_deposit_instructions_and_flow()
+        
+        # NEW: Non-Custodial Savings Vault System Tests
+        print("\n" + "="*50)
+        print("🔐 TESTING NON-CUSTODIAL SAVINGS VAULT SYSTEM")
+        print("="*50)
+        await self.test_non_custodial_vault_addresses()
+        await self.test_vault_balance_checking()
+        await self.test_withdrawal_transaction_creation()
+        await self.test_game_betting_vault_integration()
+        await self.test_multi_currency_vault_support()
+        await self.test_security_features_validation()
+        await self.test_deterministic_address_generation()
     
     def print_summary(self):
         """Print test summary"""
