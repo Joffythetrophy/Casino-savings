@@ -20,7 +20,7 @@ const Dice = ({ onBack }) => {
     winRate: 0
   });
 
-  const { updateBalance } = useWallet();
+  const { placeBet, balance } = useWallet();
   const { toast } = useToast();
 
   // Calculate win chance and multiplier
