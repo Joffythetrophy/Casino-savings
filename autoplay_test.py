@@ -369,7 +369,13 @@ class AutoPlayTester:
     
     async def test_game_result_processing(self):
         """Test 6: Game Result Processing - Verify wins/losses update savings/liquidity correctly"""
+        if not self.auth_token:
+            self.log_test("Game Result Processing", False, "No authentication token available")
+            return
+            
         try:
+            headers = {"Authorization": f"Bearer {self.auth_token}"}
+            
             # Get initial balances
             initial_balances = await self.test_wallet_balance_retrieval()
             if not initial_balances:
@@ -388,7 +394,7 @@ class AutoPlayTester:
             }
             
             async with self.session.post(f"{self.base_url}/games/bet", 
-                                       json=bet_payload) as response:
+                                       json=bet_payload, headers=headers) as response:
                 if response.status == 200:
                     data = await response.json()
                     if data.get("success"):
