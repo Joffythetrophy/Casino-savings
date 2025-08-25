@@ -428,7 +428,8 @@ async def get_wallet_info(wallet_address: str):
             "CRT": 0.0,
             "DOGE": 0.0, 
             "TRX": 0.0,
-            "SOL": 0.0
+            "SOL": 0.0,
+            "USDC": 0.0  # Added USDC support for conversions
         }
         
         # Get real CRT balance
