@@ -1121,7 +1121,7 @@ class WalletAPITester:
                 "password": "crt21million"
             }
             
-            async with self.session.post(f"{self.base_url}/auth/login/username", 
+            async with self.session.post(f"{self.base_url}/auth/login-username", 
                                        json=invalid_username_payload) as response:
                 if response.status == 200:
                     data = await response.json()
@@ -1141,7 +1141,7 @@ class WalletAPITester:
                 "password": "wrongpassword123"
             }
             
-            async with self.session.post(f"{self.base_url}/auth/login/username", 
+            async with self.session.post(f"{self.base_url}/auth/login-username", 
                                        json=wrong_password_username_payload) as response:
                 if response.status == 200:
                     data = await response.json()
