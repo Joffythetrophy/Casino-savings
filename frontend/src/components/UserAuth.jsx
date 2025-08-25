@@ -257,25 +257,83 @@ const LoginForm = ({ onClose }) => {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <label className="text-sm text-gray-300">Wallet Address</label>
-              <div className="relative">
+            {mode === 'login' && (
+              <div className="flex justify-center mb-4">
+                <div className="bg-gray-800 rounded-lg p-1 flex">
+                  <button
+                    type="button"
+                    onClick={() => setLoginType('username')}
+                    className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
+                      loginType === 'username' 
+                        ? 'bg-yellow-500 text-black' 
+                        : 'text-gray-400 hover:text-white'
+                    }`}
+                  >
+                    Username
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setLoginType('wallet')}
+                    className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
+                      loginType === 'wallet' 
+                        ? 'bg-yellow-500 text-black' 
+                        : 'text-gray-400 hover:text-white'
+                    }`}
+                  >
+                    Wallet Address
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {mode === 'login' && loginType === 'username' ? (
+              <div className="space-y-2">
+                <label className="text-sm text-gray-300">Username</label>
                 <Input
                   type="text"
-                  value={walletAddress}
-                  onChange={(e) => setWalletAddress(e.target.value)}
-                  placeholder="Enter your wallet address"
-                  className="bg-black/30 border-gray-600 text-white pr-20"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  placeholder="Enter your username"
+                  className="bg-black/30 border-gray-600 text-white"
                 />
-                <Button
-                  type="button"
-                  onClick={generateSampleWallet}
-                  className="absolute right-1 top-1 h-8 px-2 text-xs bg-blue-600 hover:bg-blue-500"
-                >
-                  Demo
-                </Button>
               </div>
-            </div>
+            ) : (
+              <div className="space-y-2">
+                <label className="text-sm text-gray-300">
+                  {mode === 'register' ? 'Wallet Address' : 'Wallet Address'}
+                </label>
+                <div className="relative">
+                  <Input
+                    type="text"
+                    value={walletAddress}
+                    onChange={(e) => setWalletAddress(e.target.value)}
+                    placeholder="Enter your wallet address"
+                    className="bg-black/30 border-gray-600 text-white pr-20"
+                  />
+                  <Button
+                    type="button"
+                    onClick={generateSampleWallet}
+                    className="absolute right-1 top-1 h-8 px-2 text-xs bg-blue-600 hover:bg-blue-500"
+                  >
+                    Demo
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {mode === 'register' && (
+              <div className="space-y-2">
+                <label className="text-sm text-gray-300">Username (Optional)</label>
+                <Input
+                  type="text"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  placeholder="Choose a username (optional)"
+                  className="bg-black/30 border-gray-600 text-white"
+                />
+                <p className="text-xs text-gray-400">Leave blank to auto-generate from wallet address</p>
+              </div>
+            )}
 
             <div className="space-y-2">
               <label className="text-sm text-gray-300">Password</label>
