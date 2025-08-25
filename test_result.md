@@ -441,6 +441,9 @@ backend:
         - working: true
           agent: "testing"
           comment: "✅ COMPREHENSIVE LOGIN TESTING COMPLETED - USER COMPLAINT RESOLVED: Tested specific user login with wallet address 'DwK4nUM8TKWAxEBKTG6mWA6PBRDHFPA3beLB18pwCekq' and password 'crt21million' - LOGIN SUCCESSFUL! Also tested username login with 'cryptoking' - SUCCESSFUL! Both /api/auth/login and /api/auth/login-username endpoints working perfectly. Password hashing (bcrypt) working correctly. Error handling for invalid credentials working properly. 6/6 login tests passed (100% success rate). The user's login complaint appears to be resolved - both authentication methods are fully functional."
+        - working: true
+          agent: "testing"
+          comment: "✅ HEALTH CHECK CONFIRMED: Re-tested user authentication with specific credentials (cryptoking/crt21million) - LOGIN WORKING PERFECTLY! Both wallet address and username login methods successful. Authentication system is robust and ready for AI auto-play features. No issues found with login functionality."
 
   - task: "Real-time crypto conversion rates from CoinGecko API"
     implemented: true
