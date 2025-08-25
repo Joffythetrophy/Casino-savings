@@ -136,9 +136,14 @@ class AutoPlayTester:
     
     async def test_game_betting_all_types(self):
         """Test 3: Game Betting System - Test all 6 game types for AutoPlay"""
+        if not self.auth_token:
+            self.log_test("Game Betting System Status", False, "No authentication token available")
+            return [], []
+            
         game_types = ["Slot Machine", "Dice", "Roulette", "Plinko", "Keno", "Mines"]
         successful_games = []
         failed_games = []
+        headers = {"Authorization": f"Bearer {self.auth_token}"}
         
         for game_type in game_types:
             try:
@@ -151,7 +156,7 @@ class AutoPlayTester:
                 }
                 
                 async with self.session.post(f"{self.base_url}/games/bet", 
-                                           json=bet_payload) as response:
+                                           json=bet_payload, headers=headers) as response:
                     if response.status == 200:
                         data = await response.json()
                         required_fields = ["success", "game_id", "result", "payout", "savings_contribution", "liquidity_added"]
