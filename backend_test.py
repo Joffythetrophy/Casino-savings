@@ -1620,11 +1620,138 @@ class WalletAPITester:
         except Exception as e:
             self.log_test("🐕 DOGE Deposit Verification", False, f"Error: {str(e)}")
 
+    async def test_urgent_doge_deposit_confirmation_status(self):
+        """Test URGENT: DOGE Deposit Confirmation Status Check for Real User"""
+        print("\n🚨 URGENT: Checking DOGE Deposit Confirmation Status for Real User")
+        print("=" * 80)
+        
+        # User's specific details from review request
+        user_doge_address = "DLZccCAopg8SJYdmUWdjEkGq9t7boXMKMe"
+        user_casino_account = "DwK4nUM8TKWAxEBKTG6mWA6PBRDHFPA3beLB18pwCekq"
+        expected_amount = 30.0
+        
+        try:
+            # Test 1: Current DOGE Balance Status Check
+            print(f"🔍 Checking current DOGE balance status for address: {user_doge_address}")
+            async with self.session.get(f"{self.base_url}/wallet/balance/DOGE?wallet_address={user_doge_address}") as response:
+                if response.status == 200:
+                    data = await response.json()
+                    if data.get("success"):
+                        balance = data.get("balance", 0)
+                        unconfirmed = data.get("unconfirmed", 0)
+                        total = data.get("total", 0)
+                        source = data.get("source", "unknown")
+                        
+                        # Check if the 30 DOGE is still there
+                        if total >= expected_amount or balance >= expected_amount:
+                            confirmation_status = "CONFIRMED" if balance >= expected_amount else "UNCONFIRMED"
+                            self.log_test("URGENT: DOGE Balance Status Check", True, 
+                                        f"✅ USER'S DOGE FOUND! Balance: {balance} DOGE, Unconfirmed: {unconfirmed} DOGE, Total: {total} DOGE, Status: {confirmation_status}", data)
+                        else:
+                            self.log_test("URGENT: DOGE Balance Status Check", False, 
+                                        f"❌ USER'S DOGE NOT FOUND! Balance: {balance} DOGE, Unconfirmed: {unconfirmed} DOGE, Total: {total} DOGE", data)
+                    else:
+                        error_msg = data.get("error", "Unknown error")
+                        self.log_test("URGENT: DOGE Balance Status Check", False, 
+                                    f"❌ DOGE balance check failed: {error_msg}", data)
+                else:
+                    error_text = await response.text()
+                    self.log_test("URGENT: DOGE Balance Status Check", False, 
+                                f"❌ HTTP {response.status}: {error_text}")
+            
+            # Test 2: Manual Deposit Re-Check
+            print(f"🔄 Testing manual deposit re-check for DOGE address: {user_doge_address}")
+            manual_deposit_payload = {
+                "doge_address": user_doge_address,
+                "wallet_address": user_casino_account
+            }
+            
+            async with self.session.post(f"{self.base_url}/deposit/doge/manual", 
+                                       json=manual_deposit_payload) as response:
+                if response.status == 200:
+                    data = await response.json()
+                    if data.get("success"):
+                        credited_amount = data.get("credited_amount", 0)
+                        transaction_id = data.get("transaction_id", "N/A")
+                        self.log_test("URGENT: Manual Deposit Re-Check", True, 
+                                    f"✅ MANUAL DEPOSIT SUCCESSFUL! Credited: {credited_amount} DOGE, Transaction ID: {transaction_id}", data)
+                    else:
+                        reason = data.get("message", "Unknown reason")
+                        self.log_test("URGENT: Manual Deposit Re-Check", True, 
+                                    f"⏳ Manual deposit not processed yet: {reason}", data)
+                else:
+                    error_text = await response.text()
+                    self.log_test("URGENT: Manual Deposit Re-Check", False, 
+                                f"❌ Manual deposit check failed - HTTP {response.status}: {error_text}")
+            
+            # Test 3: Casino Account Balance Check
+            print(f"💰 Checking casino account balance for: {user_casino_account}")
+            async with self.session.get(f"{self.base_url}/wallet/{user_casino_account}") as response:
+                if response.status == 200:
+                    data = await response.json()
+                    if data.get("success") and "wallet" in data:
+                        wallet = data["wallet"]
+                        doge_deposit_balance = wallet.get("deposit_balance", {}).get("DOGE", 0)
+                        doge_winnings_balance = wallet.get("winnings_balance", {}).get("DOGE", 0)
+                        total_doge_in_casino = doge_deposit_balance + doge_winnings_balance
+                        
+                        if total_doge_in_casino >= expected_amount:
+                            self.log_test("URGENT: Casino Account Balance", True, 
+                                        f"✅ DOGE CREDITED TO CASINO! Deposit: {doge_deposit_balance} DOGE, Winnings: {doge_winnings_balance} DOGE, Total: {total_doge_in_casino} DOGE", data)
+                        else:
+                            self.log_test("URGENT: Casino Account Balance", True, 
+                                        f"⏳ DOGE not yet credited to casino. Current DOGE in casino: {total_doge_in_casino} DOGE", data)
+                    else:
+                        self.log_test("URGENT: Casino Account Balance", False, 
+                                    f"❌ Could not retrieve casino account balance: {data.get('message', 'Unknown error')}", data)
+                else:
+                    error_text = await response.text()
+                    self.log_test("URGENT: Casino Account Balance", False, 
+                                f"❌ Casino account check failed - HTTP {response.status}: {error_text}")
+            
+            # Test 4: Check for DOGE deposit address generation for this user
+            print(f"🏷️ Checking DOGE deposit address generation for casino account: {user_casino_account}")
+            async with self.session.get(f"{self.base_url}/deposit/doge-address/{user_casino_account}") as response:
+                if response.status == 200:
+                    data = await response.json()
+                    if data.get("success"):
+                        generated_address = data.get("doge_address", "N/A")
+                        network = data.get("network", "N/A")
+                        min_deposit = data.get("min_deposit", "N/A")
+                        
+                        # Check if the generated address matches the user's deposit address
+                        if generated_address == user_doge_address:
+                            self.log_test("URGENT: DOGE Address Verification", True, 
+                                        f"✅ ADDRESS MATCH CONFIRMED! Generated address matches user's deposit address: {generated_address}", data)
+                        else:
+                            self.log_test("URGENT: DOGE Address Verification", True, 
+                                        f"ℹ️ Different address generated: {generated_address} (user used: {user_doge_address})", data)
+                    else:
+                        self.log_test("URGENT: DOGE Address Verification", False, 
+                                    f"❌ Could not generate DOGE address: {data.get('message', 'Unknown error')}", data)
+                else:
+                    error_text = await response.text()
+                    self.log_test("URGENT: DOGE Address Verification", False, 
+                                f"❌ DOGE address generation failed - HTTP {response.status}: {error_text}")
+            
+            print("\n🎯 URGENT DOGE DEPOSIT STATUS SUMMARY:")
+            print("=" * 50)
+            print(f"👤 User Casino Account: {user_casino_account}")
+            print(f"🏷️ DOGE Deposit Address: {user_doge_address}")
+            print(f"💰 Expected Amount: {expected_amount} DOGE")
+            print("📊 Check the test results above for current status!")
+            
+        except Exception as e:
+            self.log_test("URGENT: DOGE Deposit Status Check", False, f"❌ Critical error: {str(e)}")
+
     async def run_all_tests(self):
         """Run all wallet management tests"""
-        print(f"🚀 Starting Casino Savings dApp Backend Tests - Focus on Login Functionality")
+        print(f"🚀 Starting Casino Savings dApp Backend Tests - URGENT DOGE Deposit Status Check")
         print(f"📡 Testing against: {self.base_url}")
         print("=" * 70)
+        
+        # URGENT: Run DOGE deposit confirmation status check FIRST
+        await self.test_urgent_doge_deposit_confirmation_status()
         
         # Run tests in logical order
         await self.test_basic_connectivity()
