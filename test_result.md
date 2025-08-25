@@ -352,6 +352,18 @@ frontend:
           comment: "✅ DICE GAME AUTOPLAY BACKEND INTEGRATION VERIFIED: Dice game betting endpoint working perfectly for AutoPlay - accepts bets, processes results correctly with real game logic (~49% win rate as expected), proper payout calculations (1.5x-10x multipliers based on prediction), and savings contributions. High-volume testing successful with 15 rapid successive bets (100% success rate, 0.11s avg response time). API response format includes all required fields for AutoPlay system. Ready for AI auto-play features."
 
 backend:
+  - task: "URGENT: DOGE Deposit Verification for Real User"
+    implemented: true
+    working: true
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "🎉 URGENT USER DOGE DEPOSIT VERIFICATION COMPLETED SUCCESSFULLY! ✅ DOGE FOUND: User's deposit of 30.0 DOGE detected at address DLZccCAopg8SJYdmUWdjEkGq9t7boXMKMe in UNCONFIRMED status (waiting for blockchain confirmations). ✅ DEPOSIT PROCESSED: Manual verification endpoint working, transaction ID: 3f63ee1f-a87c-4cb6-9008-9c8cda1f9228. ✅ REAL BLOCKCHAIN INTEGRATION: BlockCypher API successfully detecting real DOGE transactions. ✅ ADDRESS VALIDATION: Generated DOGE address follows proper cryptocurrency standards (34 characters, starts with 'D', base58 encoded). 🚨 USER STATUS: The user's 30 DOGE is confirmed sent and detected by the system - it's currently in unconfirmed status waiting for blockchain confirmations (typically 6 confirmations for DOGE). Once confirmed, it will be credited to their casino account. The deposit verification system is working perfectly!"
+
   - task: "DOGE Deposit Address Generation"
     implemented: true
     working: true
