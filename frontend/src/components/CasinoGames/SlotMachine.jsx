@@ -68,7 +68,7 @@ const SlotMachine = ({ onBack }) => {
   };
 
   const handleSpin = async (betAmount) => {
-    if (spinning || betAmount > balance) return;
+    if (spinning || betAmount > balance) return { success: false, error: "Invalid bet conditions" };
     
     setSpinning(true);
     
@@ -83,7 +83,7 @@ const SlotMachine = ({ onBack }) => {
           variant: "destructive"
         });
         setSpinning(false);
-        return;
+        return betResult;
       }
       
       // Animate spinning
@@ -143,6 +143,9 @@ const SlotMachine = ({ onBack }) => {
         }
       }, spinInterval);
       
+      // Return the bet result for AutoPlayPanel
+      return betResult;
+      
     } catch (error) {
       console.error('Error in handleSpin:', error);
       toast({
@@ -151,6 +154,7 @@ const SlotMachine = ({ onBack }) => {
         variant: "destructive"
       });
       setSpinning(false);
+      return { success: false, error: error.message };
     }
   };
 
