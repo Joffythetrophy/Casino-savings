@@ -414,22 +414,68 @@ async def simulate_crt_deposit(request: Dict[str, Any]):
         raise HTTPException(status_code=500, detail=str(e))
 @app.get("/api/wallet/{wallet_address}")
 async def get_wallet_info(wallet_address: str):
-    """Get wallet balance information for a user"""
+    """Get wallet balance information for a user - REAL BLOCKCHAIN BALANCES ONLY"""
     try:
-        # Find user by wallet address (simplified for now)
+        # Find user by wallet address
         user = await db.users.find_one({"wallet_address": wallet_address})
         
         if not user:
             return {"success": False, "message": "Wallet not found"}
         
-        # Convert ObjectId to string to avoid serialization issues
+        # Get REAL blockchain balances instead of fake database balances
+        real_balances = {
+            "CRT": 0.0,
+            "DOGE": 0.0, 
+            "TRX": 0.0,
+            "SOL": 0.0
+        }
+        
+        # Get real CRT balance
+        try:
+            crt_balance = await crt_manager.get_crt_balance(wallet_address)
+            if crt_balance.get("success"):
+                real_balances["CRT"] = crt_balance.get("crt_balance", 0.0)
+        except Exception as e:
+            print(f"Error getting CRT balance: {e}")
+        
+        # Get real DOGE balance
+        try:
+            doge_balance = await doge_manager.get_balance(wallet_address)
+            if doge_balance.get("success"):
+                real_balances["DOGE"] = doge_balance.get("balance", 0.0)
+        except Exception as e:
+            print(f"Error getting DOGE balance: {e}")
+        
+        # Get real TRX balance
+        try:
+            trx_balance = await tron_tx_manager.get_trx_balance(wallet_address)
+            if trx_balance.get("success"):
+                real_balances["TRX"] = trx_balance.get("balance", 0.0)
+        except Exception as e:
+            print(f"Error getting TRX balance: {e}")
+        
+        # Get real SOL balance
+        try:
+            sol_balance = await solana_manager.get_balance(wallet_address)
+            if sol_balance.get("success"):
+                real_balances["SOL"] = sol_balance.get("balance", 0.0)
+        except Exception as e:
+            print(f"Error getting SOL balance: {e}")
+        
+        # Keep database savings balance (this should remain as internal tracking)
+        savings_balance = user.get("savings_balance", {"CRT": 0, "DOGE": 0, "TRX": 0, "USDC": 0})
+        
         user_data = {
             "user_id": user["user_id"],
             "wallet_address": user["wallet_address"],
-            "deposit_balance": user.get("deposit_balance", {"CRT": 0, "DOGE": 0, "TRX": 0, "USDC": 0}),
-            "winnings_balance": user.get("winnings_balance", {"CRT": 0, "DOGE": 0, "TRX": 0, "USDC": 0}),
-            "savings_balance": user.get("savings_balance", {"CRT": 0, "DOGE": 0, "TRX": 0, "USDC": 0}),
-            "created_at": user["created_at"].isoformat() if "created_at" in user else None
+            # REAL blockchain balances for deposit and winnings
+            "deposit_balance": real_balances,
+            "winnings_balance": {"CRT": 0, "DOGE": 0, "TRX": 0, "SOL": 0},  # Winnings start at 0
+            # Keep savings as internal database tracking
+            "savings_balance": savings_balance,
+            "created_at": user["created_at"].isoformat() if "created_at" in user else None,
+            "balance_source": "real_blockchain_api",
+            "last_balance_update": datetime.utcnow().isoformat()
         }
         
         return {
