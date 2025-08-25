@@ -274,7 +274,7 @@ export const GameStats = ({ stats }) => {
 };
 
 // Main Game Layout
-const CasinoGameLayout = ({ children, title, onBack, stats }) => {
+const CasinoGameLayout = ({ children, title, onBack, stats, sidebarContent }) => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
       <div className="container mx-auto px-4 py-8">
@@ -301,6 +301,7 @@ const CasinoGameLayout = ({ children, title, onBack, stats }) => {
           </div>
           <div className="space-y-4">
             <GameStats stats={stats} />
+            {sidebarContent}
           </div>
         </div>
       </div>
