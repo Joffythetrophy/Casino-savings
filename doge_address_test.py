@@ -295,7 +295,7 @@ class DogeAddressSystemTester:
                 try:
                     payload = {
                         "doge_address": address,
-                        "casino_wallet": self.user_wallet,
+                        "casino_wallet_address": self.user_wallet,
                         "amount": 10.0
                     }
                     
