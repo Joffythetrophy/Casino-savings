@@ -1518,6 +1518,108 @@ class WalletAPITester:
         except Exception as e:
             self.log_test("Specific DOGE Deposit Address Request", False, f"Error: {str(e)}")
 
+    async def test_doge_deposit_verification_user_request(self):
+        """Test URGENT: DOGE Deposit Verification for Real User - DwK4nUM8TKWAxEBKTG6mWA6PBRDHFPA3beLB18pwCekq"""
+        try:
+            print("\n🚨 URGENT USER DOGE DEPOSIT VERIFICATION TESTING 🚨")
+            print("User Details:")
+            print("- Casino Wallet: DwK4nUM8TKWAxEBKTG6mWA6PBRDHFPA3beLB18pwCekq")
+            print("- DOGE Deposit Address: DLZccCAopg8SJYdmUWdjEkGq9t7boXMKMe")
+            print("- Status: User just sent DOGE and says 'Done sent'")
+            print("=" * 80)
+            
+            # Test 1: Check DOGE Balance at deposit address
+            deposit_address = "DLZccCAopg8SJYdmUWdjEkGq9t7boXMKMe"
+            
+            async with self.session.get(f"{self.base_url}/wallet/balance/DOGE?wallet_address={deposit_address}") as response:
+                if response.status == 200:
+                    data = await response.json()
+                    if data.get("success"):
+                        balance = data.get("balance", 0)
+                        unconfirmed = data.get("unconfirmed", 0)
+                        total = data.get("total", 0)
+                        source = data.get("source", "unknown")
+                        
+                        if balance > 0 or unconfirmed > 0:
+                            self.log_test("🐕 DOGE Balance Check - User Deposit Address", True, 
+                                        f"✅ DOGE FOUND! Balance: {balance} DOGE, Unconfirmed: {unconfirmed} DOGE, Total: {total} DOGE (Source: {source})", data)
+                        else:
+                            self.log_test("🐕 DOGE Balance Check - User Deposit Address", False, 
+                                        f"❌ NO DOGE FOUND at deposit address {deposit_address}. Balance: {balance}, Unconfirmed: {unconfirmed}", data)
+                    else:
+                        error_msg = data.get("error", "Unknown error")
+                        self.log_test("🐕 DOGE Balance Check - User Deposit Address", False, 
+                                    f"❌ DOGE balance check failed: {error_msg}", data)
+                else:
+                    error_text = await response.text()
+                    self.log_test("🐕 DOGE Balance Check - User Deposit Address", False, 
+                                f"❌ HTTP {response.status}: {error_text}")
+            
+            # Test 2: Manual DOGE Deposit Verification
+            casino_wallet = "DwK4nUM8TKWAxEBKTG6mWA6PBRDHFPA3beLB18pwCekq"
+            
+            manual_deposit_payload = {
+                "doge_address": deposit_address,
+                "casino_wallet_address": casino_wallet
+            }
+            
+            async with self.session.post(f"{self.base_url}/deposit/doge/manual", 
+                                       json=manual_deposit_payload) as response:
+                if response.status == 200:
+                    data = await response.json()
+                    if data.get("success"):
+                        credited_amount = data.get("credited_amount", 0)
+                        transaction_id = data.get("transaction_id", "N/A")
+                        self.log_test("🐕 Manual DOGE Deposit Verification", True, 
+                                    f"✅ DEPOSIT PROCESSED! Credited: {credited_amount} DOGE to casino account. Transaction ID: {transaction_id}", data)
+                    else:
+                        error_msg = data.get("message", "Unknown error")
+                        self.log_test("🐕 Manual DOGE Deposit Verification", False, 
+                                    f"❌ DEPOSIT FAILED: {error_msg}", data)
+                else:
+                    error_text = await response.text()
+                    self.log_test("🐕 Manual DOGE Deposit Verification", False, 
+                                f"❌ HTTP {response.status}: {error_text}")
+            
+            # Test 3: Check if user's casino account was credited
+            async with self.session.get(f"{self.base_url}/wallet/{casino_wallet}") as response:
+                if response.status == 200:
+                    data = await response.json()
+                    if data.get("success") and "wallet" in data:
+                        wallet_data = data["wallet"]
+                        doge_balance = wallet_data.get("deposit_balance", {}).get("DOGE", 0)
+                        self.log_test("🐕 Casino Account DOGE Balance Check", True, 
+                                    f"✅ User's casino DOGE balance: {doge_balance} DOGE", data)
+                    else:
+                        self.log_test("🐕 Casino Account DOGE Balance Check", False, 
+                                    "❌ Could not retrieve user's casino wallet balance", data)
+                else:
+                    error_text = await response.text()
+                    self.log_test("🐕 Casino Account DOGE Balance Check", False, 
+                                f"❌ HTTP {response.status}: {error_text}")
+            
+            # Test 4: Generate new DOGE deposit address for user (for future deposits)
+            async with self.session.get(f"{self.base_url}/deposit/doge-address/{casino_wallet}") as response:
+                if response.status == 200:
+                    data = await response.json()
+                    if data.get("success"):
+                        new_deposit_address = data.get("deposit_address", "N/A")
+                        network = data.get("network", "N/A")
+                        min_deposit = data.get("min_deposit", "N/A")
+                        self.log_test("🐕 DOGE Deposit Address Generation", True, 
+                                    f"✅ New DOGE deposit address generated: {new_deposit_address} (Network: {network}, Min: {min_deposit} DOGE)", data)
+                    else:
+                        error_msg = data.get("message", "Unknown error")
+                        self.log_test("🐕 DOGE Deposit Address Generation", False, 
+                                    f"❌ Address generation failed: {error_msg}", data)
+                else:
+                    error_text = await response.text()
+                    self.log_test("🐕 DOGE Deposit Address Generation", False, 
+                                f"❌ HTTP {response.status}: {error_text}")
+                    
+        except Exception as e:
+            self.log_test("🐕 DOGE Deposit Verification", False, f"Error: {str(e)}")
+
     async def run_all_tests(self):
         """Run all wallet management tests"""
         print(f"🚀 Starting Casino Savings dApp Backend Tests - Focus on Login Functionality")
