@@ -1291,6 +1291,15 @@ class WalletAPITester:
         # Real-time and database features
         await self.test_websocket_wallet_monitor()
         await self.test_database_integration()
+        
+        # NEW: DOGE Deposit Process Tests (as requested in review)
+        print("\n🐕 DOGE DEPOSIT PROCESS TESTING (Review Request)")
+        print("=" * 60)
+        await self.test_doge_deposit_address_generation()
+        await self.test_doge_address_validation()
+        await self.test_current_doge_balance_check()
+        await self.test_new_doge_deposit_system()
+        await self.test_doge_deposit_instructions_and_flow()
     
     def print_summary(self):
         """Print test summary"""
