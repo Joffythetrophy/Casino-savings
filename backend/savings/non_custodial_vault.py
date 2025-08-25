@@ -11,14 +11,6 @@ import secrets
 from datetime import datetime, timedelta
 from typing import Dict, Any, Optional, List
 import aiohttp
-from tronpy import Tron
-from tronpy.keys import PrivateKey as TronPrivateKey
-from solana.rpc.async_api import AsyncClient
-from solana.transaction import Transaction
-from solana.system_program import transfer, TransferParams
-from solana.publickey import PublicKey
-from solana.keypair import Keypair
-import blockcypher
 
 class NonCustodialSavingsVault:
     """
@@ -103,8 +95,6 @@ class NonCustodialSavingsVault:
         try:
             # Simplified TRON address generation (for demo purposes)
             # In production, use proper TRON key derivation
-            import hashlib
-            import base58
             
             # Create a deterministic address from seed
             address_hash = hashlib.sha256(seed + b"TRON").digest()
@@ -130,8 +120,6 @@ class NonCustodialSavingsVault:
         try:
             # Simplified Solana address generation (for demo purposes)
             # In production, use proper Solana key derivation
-            import hashlib
-            import base58
             
             # Create a deterministic address from seed
             address_hash = hashlib.sha256(seed + b"SOLANA").digest()
