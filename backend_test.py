@@ -1196,7 +1196,7 @@ class WalletAPITester:
             # Test that both login endpoints exist and return proper error structure
             endpoints_to_test = [
                 ("/auth/login", {"identifier": "test", "password": "test"}),
-                ("/auth/login/username", {"username": "test", "password": "test"})
+                ("/auth/login-username", {"username": "test", "password": "test"})
             ]
             
             all_endpoints_available = True
