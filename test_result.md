@@ -300,20 +300,41 @@ frontend:
           agent: "testing"
           comment: "✅ SAVINGS PAGE REAL INTEGRATION READY: SavingsPage component includes proper messaging about real blockchain integration ('Blockchain Connected', 'Real-time updates'), designed to display authentic savings data from game losses, includes export functionality for transaction history, proper USD value calculations using real conversion rates. Ready to receive real data from backend savings endpoints."
 
-  - task: "Frontend Authentication State Management"
+  - task: "AI Auto-Play System Implementation"
     implemented: true
-    working: true
-    file: "/app/frontend/src/components/UserAuth.jsx"
-    stuck_count: 1
+    working: "NA"
+    file: "/app/frontend/src/components/CasinoGames/AutoPlayPanel.jsx"
+    stuck_count: 0
     priority: "high"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
-        - working: false
-          agent: "testing"
-          comment: "❌ AUTHENTICATION STATE PERSISTENCE ISSUE: User authentication works for registration/login but state doesn't persist properly across direct navigation to /wallet or /savings URLs. Users get redirected to welcome screen when accessing protected routes directly. This prevents full testing of wallet manager and savings page UI. AuthContext may need session storage improvements or route protection enhancements."
-        - working: true
-          agent: "testing"
-          comment: "✅ AUTHENTICATION ROUTING FIX VERIFIED: The authentication state management has been successfully fixed! Direct navigation to /wallet and /savings now shows proper 'Authentication Required' messages instead of crashing or causing redirect loops. Protected routes are properly secured with clear login prompts. Authentication modal works correctly from protected routes. Backend APIs are accessible and ready for real blockchain integration. The fix allows users to safely navigate to protected routes and see appropriate authentication messages, resolving the previous routing issues."
+        - working: "NA"
+          agent: "main"
+          comment: "Implemented comprehensive AI Auto-Play system with 5 betting strategies (Constant, Martingale, Anti-Martingale, Fibonacci, Custom Pattern), smart stop conditions, real-time statistics, and integration with Slot Machine and Dice games. Ready for testing."
+
+  - task: "Slot Machine AutoPlay Integration"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/components/CasinoGames/SlotMachine.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "NA"
+          agent: "main"
+          comment: "Updated SlotMachine component to support AutoPlay functionality with proper return values for bet results, integrated AutoPlayPanel in sidebar."
+
+  - task: "Dice Game Backend Integration and AutoPlay"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/components/CasinoGames/Dice.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "NA"
+          agent: "main"
+          comment: "Updated Dice game to use real backend API (placeBet function) instead of mock updateBalance, added AutoPlay integration with game-specific settings for dice prediction and roll over/under logic."
 
 backend:
   - task: "Basic API connectivity and health check"
