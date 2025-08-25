@@ -1733,6 +1733,43 @@ async def get_escrow_status(wallet_address: str):
     except Exception as e:
         return {"success": False, "error": str(e)}
 
+@app.post("/api/test/add-username")
+async def add_username_to_existing_user(request: Dict[str, Any]):
+    """Add username to existing user account"""
+    try:
+        wallet_address = request.get("wallet_address")
+        username = request.get("username")
+        
+        if not wallet_address or not username:
+            return {"success": False, "message": "wallet_address and username required"}
+        
+        # Check if username is already taken
+        username = username.strip().lower()
+        existing_username = await db.users.find_one({"username": username})
+        if existing_username:
+            return {"success": False, "message": "Username already taken"}
+        
+        # Check if user exists
+        user = await db.users.find_one({"wallet_address": wallet_address})
+        if not user:
+            return {"success": False, "message": "User not found"}
+        
+        # Update user with username
+        await db.users.update_one(
+            {"wallet_address": wallet_address},
+            {"$set": {"username": username}}
+        )
+        
+        return {
+            "success": True,
+            "message": f"Username '{username}' added to account",
+            "username": username,
+            "wallet_address": wallet_address
+        }
+        
+    except Exception as e:
+        return {"success": False, "error": str(e)}
+
 # Generate unique casino deposit address for user
 @app.post("/api/deposit/create-address")
 async def create_casino_deposit_address(request: Dict[str, Any]):
