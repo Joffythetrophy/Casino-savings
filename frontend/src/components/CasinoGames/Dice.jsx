@@ -4,6 +4,7 @@ import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Slider } from '../ui/slider';
 import CasinoGameLayout, { BettingPanel, useWallet, CRTCoin } from './CasinoGameLayout';
+import AutoPlayPanel from './AutoPlayPanel';
 import { useToast } from '../../hooks/use-toast';
 
 const Dice = ({ onBack }) => {
