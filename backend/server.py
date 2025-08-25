@@ -569,7 +569,7 @@ async def withdraw_from_wallet(request: WithdrawRequest):
 
 @app.post("/api/wallet/convert")
 async def convert_currency(request: ConvertRequest):
-    """Convert between currencies - ALWAYS ALLOWED for gameplay, withdrawal limits separate"""
+    """Convert between currencies - ALWAYS ALLOWED to build liquidity, withdrawal limits separate"""
     try:
         # Find user by wallet address
         user = await db.users.find_one({"wallet_address": request.wallet_address})
@@ -580,9 +580,9 @@ async def convert_currency(request: ConvertRequest):
         # Get conversion rate (real-time rates)
         conversion_rates = {
             "CRT_DOGE": 21.5, "CRT_TRX": 9.8, "CRT_USDC": 0.15,
-            "DOGE_CRT": 0.047, "DOGE_TRX": 0.456, "DOGE_USDC": 0.007,
+            "DOGE_CRT": 0.047, "DOGE_TRX": 0.456, "DOGE_USDC": 0.008,
             "TRX_CRT": 0.102, "TRX_DOGE": 2.19, "TRX_USDC": 0.015,
-            "USDC_CRT": 6.67, "USDC_DOGE": 142.86, "USDC_TRX": 66.67
+            "USDC_CRT": 6.67, "USDC_DOGE": 125.0, "USDC_TRX": 66.67
         }
         
         rate_key = f"{request.from_currency}_{request.to_currency}"
@@ -599,9 +599,7 @@ async def convert_currency(request: ConvertRequest):
         if current_from_balance < request.amount:
             return {"success": False, "message": "Insufficient balance"}
         
-        # ALWAYS ALLOW CONVERSION - Remove liquidity restrictions for conversions
-        # Conversions are for gameplay and should never be blocked
-        
+        # ALWAYS ALLOW CONVERSION - No liquidity restrictions for building up coins
         # Update balances
         new_from_balance = current_from_balance - request.amount
         current_to_balance = deposit_balance.get(request.to_currency, 0)
@@ -615,8 +613,8 @@ async def convert_currency(request: ConvertRequest):
             }}
         )
         
-        # Add 10% of converted amount to liquidity pool (as per user's requirement)
-        liquidity_contribution = converted_amount * 0.1
+        # Add 50% of converted amount to liquidity pool (as per user's requirement)
+        liquidity_contribution = converted_amount * 0.5  # 50% to liquidity!
         current_liquidity = user.get("liquidity_pool", {"CRT": 0, "DOGE": 0, "TRX": 0, "USDC": 0})
         new_liquidity = current_liquidity.get(request.to_currency, 0) + liquidity_contribution
         
@@ -629,7 +627,7 @@ async def convert_currency(request: ConvertRequest):
         transaction = {
             "transaction_id": str(uuid.uuid4()),
             "wallet_address": request.wallet_address,
-            "type": "conversion",
+            "type": "conversion_liquidity_builder",
             "from_currency": request.from_currency,
             "to_currency": request.to_currency,
             "amount": request.amount,
@@ -650,11 +648,81 @@ async def convert_currency(request: ConvertRequest):
             "liquidity_contributed": liquidity_contribution,
             "new_liquidity_balance": new_liquidity,
             "transaction_id": transaction["transaction_id"],
-            "note": "10% added to liquidity pool for future withdrawals"
+            "note": f"50% ({liquidity_contribution:.4f}) added to {request.to_currency} liquidity pool for withdrawals"
         }
         
     except Exception as e:
         print(f"Error in convert_currency: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/wallet/withdraw")
+async def withdraw_currency(request: WithdrawRequest):
+    """Withdraw currency - LIMITED BY LIQUIDITY AMOUNT as requested"""
+    try:
+        user = await db.users.find_one({"wallet_address": request.wallet_address})
+        
+        if not user:
+            return {"success": False, "message": "User not found"}
+        
+        # Get available liquidity for this currency
+        liquidity_pool = user.get("liquidity_pool", {})
+        available_liquidity = liquidity_pool.get(request.currency, 0)
+        
+        # WITHDRAWAL LIMIT = LIQUIDITY AMOUNT (as requested)
+        if request.amount > available_liquidity:
+            return {
+                "success": False, 
+                "message": f"Withdrawal exceeds liquidity limit. Available: {available_liquidity:.2f} {request.currency}",
+                "available_liquidity": available_liquidity,
+                "requested_amount": request.amount,
+                "note": "Build more liquidity by converting other currencies to increase withdrawal limit"
+            }
+        
+        # Check wallet balance
+        wallet_type_balance = user.get(f"{request.wallet_type}_balance", {})
+        current_balance = wallet_type_balance.get(request.currency, 0)
+        
+        if current_balance < request.amount:
+            return {"success": False, "message": "Insufficient wallet balance"}
+        
+        # Process withdrawal
+        new_balance = current_balance - request.amount
+        new_liquidity = available_liquidity - request.amount  # Reduce liquidity
+        
+        # Update balances
+        await db.users.update_one(
+            {"wallet_address": request.wallet_address},
+            {"$set": {
+                f"{request.wallet_type}_balance.{request.currency}": new_balance,
+                f"liquidity_pool.{request.currency}": max(0, new_liquidity)
+            }}
+        )
+        
+        # Record transaction
+        transaction = {
+            "transaction_id": str(uuid.uuid4()),
+            "wallet_address": request.wallet_address,
+            "type": "withdrawal",
+            "wallet_type": request.wallet_type,
+            "currency": request.currency,
+            "amount": request.amount,
+            "liquidity_used": request.amount,
+            "remaining_liquidity": max(0, new_liquidity),
+            "timestamp": datetime.now(),
+            "status": "completed"
+        }
+        
+        await db.transactions.insert_one(transaction)
+        
+        return {
+            "success": True,
+            "message": f"Withdrew {request.amount} {request.currency}",
+            "new_balance": new_balance,
+            "liquidity_remaining": max(0, new_liquidity),
+            "transaction_id": transaction["transaction_id"]
+        }
+        
+    except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 @api_router.post("/session/start")
