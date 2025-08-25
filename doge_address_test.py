@@ -94,7 +94,7 @@ class DogeAddressSystemTester:
                     data = await response.json()
                     
                     # Check if response has required fields
-                    required_fields = ["success", "doge_address", "network", "instructions"]
+                    required_fields = ["success", "doge_deposit_address", "network", "instructions"]
                     if not all(field in data for field in required_fields):
                         self.log_test("DOGE Address Generation - User Wallet", False, 
                                     f"Missing required fields in response: {list(data.keys())}", data)
@@ -105,7 +105,7 @@ class DogeAddressSystemTester:
                                     f"API returned success=false: {data.get('message', 'Unknown error')}", data)
                         return
                     
-                    doge_address = data.get("doge_address", "")
+                    doge_address = data.get("doge_deposit_address", "")
                     network = data.get("network", "")
                     
                     # CRITICAL TEST: Check if address is REAL DOGE format
