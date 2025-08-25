@@ -659,8 +659,8 @@ async def convert_currency(request: ConvertRequest):
             }}
         )
         
-        # Add 50% of converted amount to liquidity pool (as per user's requirement)
-        liquidity_contribution = converted_amount * 0.5  # 50% to liquidity!
+        # Add 10% of converted amount to liquidity pool (changed from 50% per user request)
+        liquidity_contribution = converted_amount * 0.1  # 10% to liquidity pool
         current_liquidity = user.get("liquidity_pool", {"CRT": 0, "DOGE": 0, "TRX": 0, "USDC": 0})
         new_liquidity = current_liquidity.get(request.to_currency, 0) + liquidity_contribution
         
