@@ -597,7 +597,8 @@ metadata:
 
 test_plan:
   current_focus:
-    - "End-to-End AutoPlay Testing Complete"
+    - "Login Fix Verification Complete"
+    - "AutoPlay Demonstration Complete"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
