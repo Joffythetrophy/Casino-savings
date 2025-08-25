@@ -499,6 +499,18 @@ backend:
           agent: "testing"
           comment: "✅ Complete integration flow working flawlessly: User registration → Login → Wallet authentication (challenge/verify) → Conversion rates - all steps successful. Real user records created, authentication tokens generated, live crypto prices fetched."
 
+  - task: "Wallet balance management and tracking"
+    implemented: true
+    working: true
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "✅ HEALTH CHECK CONFIRMED: Wallet balance management working correctly for user 'cryptoking'. Current balances: CRT: 5,090,000 (deposit), DOGE: 215,500 (deposit), with 21,000,000 CRT in savings. Balance tracking, updates, and multi-currency support all functional. Wallet info endpoint returning proper balance structures with deposit_balance, winnings_balance, and savings_balance for all supported currencies (CRT, DOGE, TRX, USDC)."
+
   - task: "Real blockchain balance integration (CRT, DOGE, TRX)"
     implemented: true
     working: true
