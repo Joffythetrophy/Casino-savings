@@ -382,7 +382,7 @@ class DogeAddressSystemTester:
                             data = await response.json()
                             
                             if data.get("success"):
-                                doge_address = data.get("doge_address", "")
+                                doge_address = data.get("doge_deposit_address", "")
                                 
                                 if self.is_fake_doge_address(doge_address):
                                     fake_addresses_found.append({
