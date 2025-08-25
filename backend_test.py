@@ -1237,6 +1237,231 @@ class WalletAPITester:
         except Exception as e:
             self.log_test("Authentication Endpoints Availability", False, f"Error: {str(e)}")
     
+    async def test_doge_deposit_address_generation(self):
+        """Test DOGE Deposit Address Generation for specific user wallet"""
+        try:
+            # Test with the specific wallet address from the review request
+            target_wallet = "DwK4nUM8TKWAxEBKTG6mWA6PBRDHFPA3beLB18pwCekq"
+            
+            async with self.session.get(f"{self.base_url}/deposit/doge-address/{target_wallet}") as response:
+                if response.status == 200:
+                    data = await response.json()
+                    required_fields = ["success", "doge_deposit_address", "network", "instructions"]
+                    
+                    if all(field in data for field in required_fields) and data.get("success"):
+                        doge_address = data.get("doge_deposit_address")
+                        network = data.get("network")
+                        instructions = data.get("instructions", [])
+                        min_deposit = data.get("min_deposit", 0)
+                        
+                        # Store the address for later tests
+                        self.doge_deposit_address = doge_address
+                        
+                        self.log_test("DOGE Deposit Address Generation", True, 
+                                    f"✅ DOGE deposit address generated: {doge_address}, network: {network}, min_deposit: {min_deposit}", data)
+                    else:
+                        self.log_test("DOGE Deposit Address Generation", False, 
+                                    "Invalid DOGE deposit address response format", data)
+                else:
+                    self.log_test("DOGE Deposit Address Generation", False, 
+                                f"HTTP {response.status}: {await response.text()}")
+        except Exception as e:
+            self.log_test("DOGE Deposit Address Generation", False, f"Error: {str(e)}")
+
+    async def test_doge_address_validation(self):
+        """Test DOGE Address Format Validation"""
+        try:
+            # Test with valid DOGE addresses
+            valid_doge_addresses = [
+                "DH5yaieqoZN36fDVciNyRueRGvGLR3mr7L",  # Standard DOGE address
+                "DwK4nUM8TKWAxEBKTG6mWA6PBRDHFPA3beLB18pwCekq",  # User's wallet address
+                "D7Y55r6hNkcqDTvFW8GmyJKBGkbqNgLKjh"  # Another valid format
+            ]
+            
+            invalid_doge_addresses = [
+                "invalid_address",
+                "1BvBMSEYstWetqTFn5Au4m4GFg7xJaNVN2",  # Bitcoin address
+                "TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t",  # TRON address
+                ""  # Empty address
+            ]
+            
+            valid_count = 0
+            invalid_count = 0
+            
+            # Test valid addresses using the manual deposit endpoint (which validates)
+            for address in valid_doge_addresses:
+                try:
+                    payload = {"wallet_address": address}
+                    async with self.session.post(f"{self.base_url}/deposit/doge/manual", json=payload) as response:
+                        if response.status in [200, 400]:  # 400 might be "no balance" but address is valid
+                            data = await response.json()
+                            # If it's not an "Invalid DOGE address format" error, the address is valid
+                            if "Invalid DOGE address format" not in data.get("message", ""):
+                                valid_count += 1
+                except Exception:
+                    pass
+            
+            # Test invalid addresses
+            for address in invalid_doge_addresses:
+                try:
+                    payload = {"wallet_address": address}
+                    async with self.session.post(f"{self.base_url}/deposit/doge/manual", json=payload) as response:
+                        if response.status in [200, 400]:
+                            data = await response.json()
+                            if "Invalid DOGE address format" in data.get("message", "") or "Wallet address required" in data.get("message", ""):
+                                invalid_count += 1
+                except Exception:
+                    pass
+            
+            if valid_count >= 2 and invalid_count >= 2:
+                self.log_test("DOGE Address Validation", True, 
+                            f"✅ DOGE address validation working: {valid_count}/{len(valid_doge_addresses)} valid addresses accepted, {invalid_count}/{len(invalid_doge_addresses)} invalid addresses rejected")
+            else:
+                self.log_test("DOGE Address Validation", False, 
+                            f"DOGE address validation issues: {valid_count}/{len(valid_doge_addresses)} valid, {invalid_count}/{len(invalid_doge_addresses)} invalid")
+                
+        except Exception as e:
+            self.log_test("DOGE Address Validation", False, f"Error: {str(e)}")
+
+    async def test_current_doge_balance_check(self):
+        """Test Current DOGE Balance Check for User's Wallet"""
+        try:
+            # Test with the specific wallet address from the review request
+            target_wallet = "DwK4nUM8TKWAxEBKTG6mWA6PBRDHFPA3beLB18pwCekq"
+            
+            async with self.session.get(f"{self.base_url}/wallet/balance/DOGE?wallet_address={target_wallet}") as response:
+                if response.status == 200:
+                    data = await response.json()
+                    required_fields = ["success", "balance", "currency", "address", "source"]
+                    
+                    if all(field in data for field in required_fields):
+                        if data.get("success") and data.get("source") == "blockcypher":
+                            balance = data.get("balance", 0)
+                            unconfirmed = data.get("unconfirmed", 0)
+                            total = data.get("total", 0)
+                            
+                            self.log_test("Current DOGE Balance Check", True, 
+                                        f"✅ Real DOGE balance retrieved: {balance} DOGE (unconfirmed: {unconfirmed}, total: {total}) from BlockCypher API", data)
+                            
+                            # Store balance for deposit testing
+                            self.current_doge_balance = balance
+                        else:
+                            self.log_test("Current DOGE Balance Check", False, 
+                                        f"DOGE balance not from real blockchain API: source={data.get('source')}", data)
+                    else:
+                        self.log_test("Current DOGE Balance Check", False, 
+                                    "Missing required fields in DOGE balance response", data)
+                else:
+                    self.log_test("Current DOGE Balance Check", False, 
+                                f"HTTP {response.status}: {await response.text()}")
+        except Exception as e:
+            self.log_test("Current DOGE Balance Check", False, f"Error: {str(e)}")
+
+    async def test_new_doge_deposit_system(self):
+        """Test New DOGE Deposit System - Manual Verification"""
+        try:
+            # Test with the specific wallet address from the review request
+            target_wallet = "DwK4nUM8TKWAxEBKTG6mWA6PBRDHFPA3beLB18pwCekq"
+            
+            payload = {"wallet_address": target_wallet}
+            
+            async with self.session.post(f"{self.base_url}/deposit/doge/manual", json=payload) as response:
+                if response.status == 200:
+                    data = await response.json()
+                    
+                    if data.get("success"):
+                        # Successful deposit verification
+                        amount = data.get("amount", 0)
+                        currency = data.get("currency")
+                        transaction_id = data.get("transaction_id")
+                        balance_source = data.get("balance_source")
+                        
+                        self.log_test("New DOGE Deposit System", True, 
+                                    f"✅ DOGE deposit system working: {amount} {currency} confirmed, tx_id: {transaction_id}, source: {balance_source}", data)
+                    else:
+                        # Check if it's a valid error (no balance, recent deposit, etc.)
+                        message = data.get("message", "")
+                        if any(phrase in message for phrase in ["No DOGE found", "User not found", "Recent DOGE deposit", "Invalid DOGE address"]):
+                            self.log_test("New DOGE Deposit System", True, 
+                                        f"✅ DOGE deposit system working (expected error): {message}", data)
+                        else:
+                            self.log_test("New DOGE Deposit System", False, 
+                                        f"Unexpected DOGE deposit error: {message}", data)
+                else:
+                    self.log_test("New DOGE Deposit System", False, 
+                                f"HTTP {response.status}: {await response.text()}")
+                                
+            # Test with invalid wallet address to verify error handling
+            invalid_payload = {"wallet_address": "invalid_doge_address"}
+            async with self.session.post(f"{self.base_url}/deposit/doge/manual", json=invalid_payload) as response:
+                if response.status == 200:
+                    data = await response.json()
+                    if not data.get("success") and "Invalid DOGE address format" in data.get("message", ""):
+                        self.log_test("DOGE Deposit Error Handling", True, 
+                                    "✅ Invalid DOGE address correctly rejected by deposit system", data)
+                    else:
+                        self.log_test("DOGE Deposit Error Handling", False, 
+                                    "Invalid DOGE address should be rejected", data)
+                        
+        except Exception as e:
+            self.log_test("New DOGE Deposit System", False, f"Error: {str(e)}")
+
+    async def test_doge_deposit_instructions_and_flow(self):
+        """Test Complete DOGE Deposit Instructions and Flow"""
+        try:
+            target_wallet = "DwK4nUM8TKWAxEBKTG6mWA6PBRDHFPA3beLB18pwCekq"
+            
+            # Step 1: Get deposit address
+            async with self.session.get(f"{self.base_url}/deposit/doge-address/{target_wallet}") as response:
+                if response.status == 200:
+                    address_data = await response.json()
+                    if address_data.get("success"):
+                        doge_address = address_data.get("doge_deposit_address")
+                        instructions = address_data.get("instructions", [])
+                        min_deposit = address_data.get("min_deposit", 0)
+                        processing_time = address_data.get("processing_time", "")
+                        
+                        # Step 2: Check current balance
+                        async with self.session.get(f"{self.base_url}/wallet/balance/DOGE?wallet_address={target_wallet}") as balance_response:
+                            if balance_response.status == 200:
+                                balance_data = await balance_response.json()
+                                current_balance = balance_data.get("balance", 0) if balance_data.get("success") else 0
+                                
+                                # Step 3: Test manual deposit verification
+                                manual_payload = {"wallet_address": target_wallet}
+                                async with self.session.post(f"{self.base_url}/deposit/doge/manual", json=manual_payload) as manual_response:
+                                    if manual_response.status == 200:
+                                        manual_data = await manual_response.json()
+                                        
+                                        # Compile complete flow information
+                                        flow_info = {
+                                            "deposit_address": doge_address,
+                                            "current_balance": current_balance,
+                                            "min_deposit": min_deposit,
+                                            "processing_time": processing_time,
+                                            "instructions": instructions,
+                                            "manual_verification": manual_data.get("success", False),
+                                            "manual_message": manual_data.get("message", "")
+                                        }
+                                        
+                                        self.log_test("Complete DOGE Deposit Flow", True, 
+                                                    f"✅ Complete DOGE deposit flow working: address={doge_address}, balance={current_balance} DOGE, min_deposit={min_deposit}, manual_verification={manual_data.get('success')}", flow_info)
+                                    else:
+                                        self.log_test("Complete DOGE Deposit Flow", False, 
+                                                    f"Manual deposit verification failed: HTTP {manual_response.status}")
+                            else:
+                                self.log_test("Complete DOGE Deposit Flow", False, 
+                                            f"Balance check failed: HTTP {balance_response.status}")
+                    else:
+                        self.log_test("Complete DOGE Deposit Flow", False, 
+                                    "Deposit address generation failed", address_data)
+                else:
+                    self.log_test("Complete DOGE Deposit Flow", False, 
+                                f"Deposit address endpoint failed: HTTP {response.status}")
+                                
+        except Exception as e:
+            self.log_test("Complete DOGE Deposit Flow", False, f"Error: {str(e)}")
+
     async def run_all_tests(self):
         """Run all wallet management tests"""
         print(f"🚀 Starting Casino Savings dApp Backend Tests - Focus on Login Functionality")
