@@ -217,10 +217,20 @@ const WalletManager = () => {
     if (amount <= 0 || wallets[walletType][currency] < amount) return;
     
     try {
-      const testWallet = 'RealWallet9876543210XYZ'; // TODO: Replace with real wallet from auth
+      // Get user from localStorage for real wallet address
+      const savedUser = localStorage.getItem('casino_user');
+      if (!savedUser) {
+        toast({
+          title: "❌ Error", 
+          description: "User not logged in",
+          variant: "destructive"
+        });
+        return;
+      }
       
+      const user = JSON.parse(savedUser);
       const response = await axios.post(`${BACKEND_URL}/api/wallet/withdraw`, {
-        wallet_address: testWallet,
+        wallet_address: user.wallet_address, // Use real authenticated user wallet
         wallet_type: walletType,
         currency: currency,
         amount: amount
