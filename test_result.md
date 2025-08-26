@@ -853,9 +853,9 @@ test_plan:
   test_priority: "high_first"
 
 backend:
-  - task: "URGENT: Critical Fixes Verification for User DwK4nUM8TKWAxEBKTG6mWA6PBRDHFPA3beLB18pwCekq"
+  - task: "URGENT: Critical Balance Fixes Verification for User DwK4nUM8TKWAxEBKTG6mWA6PBRDHFPA3beLB18pwCekq"
     implemented: true
-    working: true
+    working: false
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
@@ -870,6 +870,9 @@ backend:
         - working: true
           agent: "testing"
           comment: "🎯 CRITICAL FIXES VERIFICATION COMPLETED - ALL 3 PRIORITIES SUCCESSFUL! ✅ PRIORITY 1 - CRT Balance Display Fix: User's CRT balance now correctly shows 21,000,000 CRT (not 845,824) with blockchain balance prioritized over database balance. Balance source: 'hybrid_blockchain_database' with note 'Real blockchain + converted amounts'. ✅ PRIORITY 2 - 500 USDC Refund Verification: USDC balance shows 317,582.45 (expected ~317,582 after refund), CRT savings reset to 0, USDC savings reset to 0 - all corrections applied successfully. ✅ PRIORITY 3 - Real Blockchain Withdrawal Methods: Both send_spl_token and send_crt_token methods implemented and working. CRT withdrawal generates real blockchain transaction hash (3285490311f13141cf6a281aa727e0fdd476b039ab62d0b0bd523c4e522297af), USDC withdrawal generates real blockchain transaction hash (ab7bfc7e9f8e20be72f76c8b4faf8fd8021db7b246faf6f8e8b2818d984f2349). Withdrawal endpoints correctly route to appropriate methods. 📊 COMPREHENSIVE RESULTS: User authentication successful with cryptoking/crt21million, complete wallet state shows $4,971,359.05 total portfolio value. 🎉 FINAL ASSESSMENT: 9/10 tests passed (90% success rate) - All critical fixes verified and working correctly!"
+        - working: false
+          agent: "testing"
+          comment: "🚨 URGENT BALANCE FIXES VERIFICATION - PARTIAL SUCCESS! Tested 4 critical fixes from review request: ✅ FIX 2: Winnings Balance FIXED - Shows real database values {'CRT': 387.62, 'DOGE': 0, 'TRX': 500, 'USDC': 200} instead of hardcoded 0. ✅ FIX 4: Liquidity Pool ADDED - Shows $2,228,784.09 USD liquidity (≥$2.2M expected). ❌ FIX 1: CRT Balance Logic ISSUE - Shows 18,985,494 CRT (unexpected value, should be ~1M with database priority for converted users, not 21M blockchain). ❌ FIX 3: Gaming Balance PARTIAL - Field added but missing DOGE/TRX currencies {'CRT': 510000, 'USDC': 2200}. 📊 RESULTS: 2/4 critical fixes fully verified. Authentication successful with cryptoking/crt21million. Total portfolio: $7,691,876.55. Balance source: hybrid_blockchain_database. Main issues: CRT balance logic not showing expected ~1M (database priority), gaming balance missing some currencies."
 
   - task: "URGENT: Multiple Frontend UI Bugs Fix"
     implemented: false
