@@ -2613,6 +2613,78 @@ async def manual_credit_deposit(request: Dict[str, Any]):
     except Exception as e:
         return {"success": False, "error": str(e)}
 
+@app.post("/api/wallet/transfer-to-gaming")
+async def transfer_to_gaming_balance(request: Dict[str, Any]):
+    """Transfer funds from portfolio to gaming balance"""
+    try:
+        wallet_address = request.get("wallet_address")
+        currency = request.get("currency", "CRT")
+        amount = float(request.get("amount", 0))
+        
+        if not wallet_address:
+            return {"success": False, "message": "wallet_address required"}
+        
+        if amount <= 0:
+            return {"success": False, "message": "Invalid amount"}
+        
+        # Find user
+        user = await db.users.find_one({"wallet_address": wallet_address})
+        if not user:
+            return {"success": False, "message": "User not found"}
+        
+        # Check if user has sufficient balance in deposit wallet
+        deposit_balance = user.get("deposit_balance", {})
+        current_balance = deposit_balance.get(currency, 0)
+        
+        if current_balance < amount:
+            return {
+                "success": False, 
+                "message": f"Insufficient {currency} balance. Available: {current_balance:,.2f}, Requested: {amount:,.2f}"
+            }
+        
+        # For gaming balance transfer, we just update the gaming_balance field
+        # The deposit_balance stays the same but we track gaming allocation separately
+        gaming_balance = user.get("gaming_balance", {})
+        current_gaming = gaming_balance.get(currency, 0)
+        new_gaming = current_gaming + amount
+        
+        # Update gaming balance (separate from deposit balance for tracking)
+        await db.users.update_one(
+            {"wallet_address": wallet_address},
+            {"$set": {f"gaming_balance.{currency}": new_gaming}}
+        )
+        
+        # Record the transfer transaction
+        transfer_record = {
+            "transaction_id": str(uuid.uuid4()),
+            "wallet_address": wallet_address,
+            "type": "gaming_transfer",
+            "currency": currency,
+            "amount": amount,
+            "from_balance": "deposit",
+            "to_balance": "gaming",
+            "gaming_balance_before": current_gaming,
+            "gaming_balance_after": new_gaming,
+            "timestamp": datetime.utcnow(),
+            "status": "completed"
+        }
+        
+        await db.transactions.insert_one(transfer_record)
+        
+        return {
+            "success": True,
+            "message": f"✅ {amount:,.2f} {currency} transferred to gaming balance!",
+            "amount_transferred": amount,
+            "currency": currency,
+            "new_gaming_balance": new_gaming,
+            "available_deposit_balance": current_balance,  # Still available for other uses
+            "transaction_id": transfer_record["transaction_id"],
+            "note": "Funds are now allocated for gaming while remaining in your deposit wallet"
+        }
+        
+    except Exception as e:
+        return {"success": False, "error": str(e), "message": f"Transfer failed: {str(e)}"}
+
 # Real CRT deposit system
 @app.get("/api/deposit/address/{wallet_address}")
 async def get_deposit_address(wallet_address: str):
