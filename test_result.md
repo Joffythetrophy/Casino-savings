@@ -843,10 +843,11 @@ metadata:
 
 test_plan:
   current_focus:
-    - "URGENT: Critical Fixes Verification for User DwK4nUM8TKWAxEBKTG6mWA6PBRDHFPA3beLB18pwCekq - COMPLETED"
+    - "URGENT: Critical Verification for User DwK4nUM8TKWAxEBKTG6mWA6PBRDHFPA3beLB18pwCekq - COMPLETED SUCCESSFULLY"
     - "CRT Balance Display Fix - VERIFIED WORKING"
-    - "500 USDC Refund and Savings Reset - VERIFIED WORKING"
+    - "1000 USDC Withdrawal - VERIFIED WORKING"
     - "Real Blockchain Withdrawal Methods - VERIFIED WORKING"
+    - "Cross-chain Transaction History - VERIFIED WORKING"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
