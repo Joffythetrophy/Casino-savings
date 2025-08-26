@@ -87,8 +87,12 @@ export const WalletProvider = ({ children }) => {
     setBalance(prev => Math.max(0, prev + amount));
   };
   
-  const placeBet = async (gameType, betAmount, currency = 'CRT') => {
+  const placeBet = async (gameType, betAmount, currency) => {
     try {
+      if (!currency) {
+        throw new Error('Currency is required for betting');
+      }
+      
       // Get authenticated user
       const user = JSON.parse(localStorage.getItem('casino_user') || '{}');
       if (!user.wallet_address) {
