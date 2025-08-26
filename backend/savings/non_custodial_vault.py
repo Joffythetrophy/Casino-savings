@@ -226,7 +226,7 @@ class NonCustodialSavingsVault:
         """
         try:
             # Get user's savings address
-            savings_address = await self.generate_user_savings_address(user_wallet, currency)
+            savings_address = await self.get_or_create_vault_address(user_wallet, currency)
             
             print(f"💰 SAVINGS VAULT: Transferring {amount} {currency} to {savings_address}")
             
