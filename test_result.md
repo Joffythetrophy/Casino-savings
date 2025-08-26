@@ -881,6 +881,81 @@ test_plan:
   test_priority: "high_first"
 
 backend:
+  - task: "REVIEW REQUEST: Test Autoplay Fix - /api/games/autoplay endpoint"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: "NA"
+          agent: "testing"
+          comment: "Testing new autoplay endpoint with authentication (cryptoking/crt21million)"
+        - working: true
+          agent: "testing"
+          comment: "✅ AUTOPLAY ENDPOINT WORKING: Successfully tested /api/games/autoplay with JWT authentication. Endpoint processes single automated bets with proper game logic (15% win rate), integrates with savings vault system for losses (5.0 CRT savings contribution), supports strategy parameter ('constant'), and includes autoplay flag in response. Authentication working correctly with cryptoking user."
+
+  - task: "REVIEW REQUEST: Test External Withdrawal Fix - /api/wallet/external-withdraw endpoint"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: "NA"
+          agent: "testing"
+          comment: "Testing new external withdrawal endpoint with external wallet addresses"
+        - working: true
+          agent: "testing"
+          comment: "✅ EXTERNAL WITHDRAWAL ENDPOINT WORKING: Successfully tested /api/wallet/external-withdraw with JWT authentication. Endpoint accepts external wallet addresses (tested with valid DOGE address DH5yaieqoZN36fDVciNyRueRGvGLR3mr7L), validates minimum withdrawal limits, performs balance validation, and processes external withdrawals correctly. Response includes proper transaction details and destination address confirmation."
+
+  - task: "REVIEW REQUEST: Execute User's Conversion Request - /api/wallet/batch-convert endpoint"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: "NA"
+          agent: "testing"
+          comment: "Testing batch conversion of DOGE to CRT and TRX evenly as requested by user"
+        - working: true
+          agent: "testing"
+          comment: "✅ BATCH CONVERSION SUCCESSFUL: Successfully executed user's conversion request via /api/wallet/batch-convert. Converted 20,000 DOGE to CRT and TRX evenly: 20,000 DOGE → 470.0 CRT + 4,560.0 TRX. User had sufficient DOGE balance (36M+ as mentioned in request), conversion rates working correctly, amounts split evenly between target currencies, and all balance updates processed successfully."
+
+  - task: "REVIEW REQUEST: Verify Loss Tracker Status"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: "NA"
+          agent: "testing"
+          comment: "Re-confirming loss tracker is working as requested"
+        - working: true
+          agent: "testing"
+          comment: "✅ LOSS TRACKER CONFIRMED WORKING: Loss tracking system fully operational with 80 losses tracked and 50 recent loss entries in savings history. Real-time loss tracking verified - new game losses properly recorded with savings contributions (5.0 CRT added to savings from test bet). System correctly processes game losses and transfers to savings vault."
+
+  - task: "REVIEW REQUEST: Test Gaming Balance Functionality"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: "NA"
+          agent: "testing"
+          comment: "Testing gaming balance transfer functionality and management"
+        - working: true
+          agent: "testing"
+          comment: "✅ GAMING BALANCE FUNCTIONAL: Gaming balance system working correctly. User has proper gaming balance structure (CRT gaming: 510,000.0, CRT deposit: 920.0), balance management operational, and gaming balance transfers supported. Gaming balance properly separated from deposit balance and tracked independently for casino gameplay."
+
   - task: "URGENT: Critical Balance Fixes Verification for User DwK4nUM8TKWAxEBKTG6mWA6PBRDHFPA3beLB18pwCekq"
     implemented: true
     working: true
