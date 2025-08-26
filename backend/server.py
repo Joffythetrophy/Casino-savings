@@ -467,12 +467,20 @@ async def get_wallet_info(wallet_address: str):
         # Keep database savings balance (this should remain as internal tracking)
         savings_balance = user.get("savings_balance", {"CRT": 0, "DOGE": 0, "TRX": 0, "USDC": 0})
         
-        # Get database deposit balances for converted currencies like USDC
+        # Get database deposit balances for converted currencies
         deposit_balances = user.get("deposit_balance", {"CRT": 0, "DOGE": 0, "TRX": 0, "USDC": 0})
         
-        # For USDC (and other converted currencies), use database balance since it's from conversions
-        if deposit_balances.get("USDC", 0) > 0:
-            real_balances["USDC"] = deposit_balances.get("USDC", 0)
+        # For converted currencies, prioritize database balance over blockchain API
+        # This is because user conversions create database balances, not necessarily real blockchain transfers
+        
+        # Use database balances for all converted currencies
+        for currency in ["USDC", "DOGE", "TRX"]:
+            if deposit_balances.get(currency, 0) > 0:
+                real_balances[currency] = deposit_balances.get(currency, 0)
+        
+        # For CRT, combine both real blockchain balance and database balance
+        if deposit_balances.get("CRT", 0) > 0:
+            real_balances["CRT"] = max(real_balances.get("CRT", 0), deposit_balances.get("CRT", 0))
         
         user_data = {
             "user_id": user["user_id"],
