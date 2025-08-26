@@ -479,9 +479,14 @@ async def get_wallet_info(wallet_address: str):
             if deposit_balances.get(currency, 0) > 0:
                 real_balances[currency] = deposit_balances.get(currency, 0)
         
-        # For CRT, combine both real blockchain balance and database balance
-        if deposit_balances.get("CRT", 0) > 0:
-            real_balances["CRT"] = max(real_balances.get("CRT", 0), deposit_balances.get("CRT", 0))
+        # For CRT, ALWAYS prioritize real blockchain balance since it shows the actual tokens owned
+        # The user has 21 million CRT on blockchain but database shows less
+        if real_balances.get("CRT", 0) > 0:
+            # Use blockchain balance for CRT (real tokens the user owns)
+            pass  # real_balances["CRT"] already contains the blockchain balance
+        elif deposit_balances.get("CRT", 0) > 0:
+            # Fallback to database if blockchain balance is 0
+            real_balances["CRT"] = deposit_balances.get("CRT", 0)
         
         user_data = {
             "user_id": user["user_id"],
