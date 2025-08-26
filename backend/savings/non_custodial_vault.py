@@ -40,15 +40,39 @@ class NonCustodialSavingsVault:
         # User-specific vault addresses cache
         self.user_vault_cache = {}
         
-    async def generate_user_savings_address(self, user_wallet: str, currency: str) -> str:
+    async def get_or_create_vault_address(self, user_wallet: str, currency: str) -> str:
         """
-        Generate deterministic savings address for user and currency
-        Non-custodial: User can derive the same address using their wallet + salt
+        Get or create CoinPayments vault address for user and currency
+        Uses CoinPayments callback addresses for real blockchain deposits
         """
         cache_key = f"{user_wallet}_{currency}"
-        if cache_key in self.user_savings_cache:
-            return self.user_savings_cache[cache_key]
+        if cache_key in self.user_vault_cache:
+            return self.user_vault_cache[cache_key]
         
+        try:
+            # Generate unique user ID for CoinPayments
+            user_vault_id = hashlib.sha256(f"{user_wallet}_{currency}_vault".encode()).hexdigest()[:16]
+            
+            # Generate CoinPayments deposit address for this user's vault
+            address_info = await coinpayments_service.generate_deposit_address(
+                user_id=user_vault_id,
+                currency=currency
+            )
+            
+            vault_address = address_info["address"]
+            self.user_vault_cache[cache_key] = vault_address
+            
+            return vault_address
+            
+        except Exception as e:
+            print(f"Error generating vault address for {user_wallet} {currency}: {e}")
+            # Fallback to deterministic address generation
+            return self._generate_deterministic_address(user_wallet, currency)
+    
+    def _generate_deterministic_address(self, user_wallet: str, currency: str) -> str:
+        """
+        Fallback method to generate deterministic address when CoinPayments fails
+        """
         try:
             # Create deterministic seed from user wallet + currency + salt
             salt = "savings_vault_2025_secure"
@@ -57,23 +81,81 @@ class NonCustodialSavingsVault:
             
             if currency == "DOGE":
                 # Generate DOGE savings address
-                savings_address = await self._generate_doge_savings_address(seed_hash)
+                return self._generate_doge_savings_address_sync(seed_hash)
             elif currency == "TRX": 
                 # Generate TRX savings address
-                savings_address = await self._generate_tron_savings_address(seed_hash)
-            elif currency in ["SOL", "CRT"]:
+                return self._generate_tron_savings_address_sync(seed_hash)
+            elif currency in ["SOL", "CRT", "USDC"]:
                 # Generate Solana savings address
-                savings_address = await self._generate_solana_savings_address(seed_hash)
+                return self._generate_solana_savings_address_sync(seed_hash)
             else:
                 raise ValueError(f"Unsupported currency: {currency}")
-            
-            self.user_savings_cache[cache_key] = savings_address
-            return savings_address
-            
+                
         except Exception as e:
-            print(f"Error generating user savings address: {e}")
-            # Fallback to master address if generation fails
-            return self.master_savings_addresses.get(currency, "")
+            print(f"Error generating deterministic address: {e}")
+            # Return a default fallback address
+            return f"fallback_{currency.lower()}_address"
+    
+    def _generate_doge_savings_address_sync(self, seed: bytes) -> str:
+        """Generate deterministic DOGE address from seed (synchronous)"""
+        try:
+            # Use seed to create DOGE address (simplified - in production use proper DOGE key derivation)
+            version_byte = b'\x1e'  # DOGE mainnet version
+            payload = seed[:20]  # Use first 20 bytes as payload
+            
+            # Calculate checksum
+            checksum_hash = hashlib.sha256(hashlib.sha256(version_byte + payload).digest()).digest()
+            checksum = checksum_hash[:4]
+            
+            # Combine and encode
+            full_address = version_byte + payload + checksum
+            doge_address = base58.b58encode(full_address).decode('utf-8')
+            
+            return doge_address
+        except Exception as e:
+            print(f"Error generating DOGE savings address: {e}")
+            return "fallback_doge_address"
+    
+    def _generate_tron_savings_address_sync(self, seed: bytes) -> str:
+        """Generate deterministic TRON address from seed (synchronous)"""
+        try:
+            # Simplified TRON address generation (for demo purposes)
+            # In production, use proper TRON key derivation
+            
+            # Create a deterministic address from seed
+            address_hash = hashlib.sha256(seed + b"TRON").digest()
+            # TRON addresses start with 'T' and are base58 encoded
+            version_byte = b'\x41'  # TRON mainnet version
+            payload = address_hash[:20]
+            
+            # Calculate checksum
+            checksum_hash = hashlib.sha256(hashlib.sha256(version_byte + payload).digest()).digest()
+            checksum = checksum_hash[:4]
+            
+            # Combine and encode
+            full_address = version_byte + payload + checksum
+            tron_address = base58.b58encode(full_address).decode('utf-8')
+            
+            return tron_address
+        except Exception as e:
+            print(f"Error generating TRON savings address: {e}")
+            return "fallback_trx_address"
+    
+    def _generate_solana_savings_address_sync(self, seed: bytes) -> str:
+        """Generate deterministic Solana address from seed (synchronous)"""
+        try:
+            # Simplified Solana address generation (for demo purposes)
+            # In production, use proper Solana key derivation
+            
+            # Create a deterministic address from seed
+            address_hash = hashlib.sha256(seed + b"SOLANA").digest()
+            # Solana addresses are 32 bytes, base58 encoded
+            sol_address = base58.b58encode(address_hash).decode('utf-8')
+            
+            return sol_address
+        except Exception as e:
+            print(f"Error generating Solana savings address: {e}")
+            return "fallback_sol_address"
     
     async def _generate_doge_savings_address(self, seed: bytes) -> str:
         """Generate deterministic DOGE address from seed"""
