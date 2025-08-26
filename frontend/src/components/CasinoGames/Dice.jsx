@@ -27,15 +27,22 @@ const Dice = ({ onBack }) => {
   const winChance = rollOver ? (100 - prediction) : prediction;
   const multiplier = winChance > 0 ? (99 / winChance) : 1;
 
-  const rollDice = async (betAmount) => {
-    if (rolling) return { success: false, error: "Game already in progress" };
+  const rollDice = async (betAmount, currency) => {
+    if (rolling || !currency) {
+      toast({
+        title: "❌ Invalid Bet", 
+        description: "Please select a currency and valid bet amount",
+        variant: "destructive"
+      });
+      return { success: false, error: "Game already in progress or invalid currency" };
+    }
     
     setRolling(true);
     setDiceAnimation(true);
 
     try {
-      // Place real bet through backend API
-      const betResult = await placeBet('Dice', betAmount);
+      // Place real bet through backend API with selected currency
+      const betResult = await placeBet('Dice', betAmount, currency);
       
       if (!betResult.success) {
         toast({
