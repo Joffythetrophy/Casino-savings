@@ -450,7 +450,7 @@ class NonCustodialSavingsVault:
         Returns unsigned transaction for user to sign (non-custodial)
         """
         try:
-            savings_address = await self.generate_user_savings_address(user_wallet, currency)
+            savings_address = await self.get_or_create_vault_address(user_wallet, currency)
             
             # Create unsigned transaction for user to sign
             withdrawal_tx = {
