@@ -124,6 +124,7 @@ class WithdrawRequest(BaseModel):
     wallet_type: str
     currency: str
     amount: float
+    destination_address: Optional[str] = None
 
 class ConvertRequest(BaseModel):
     wallet_address: str
