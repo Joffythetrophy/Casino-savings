@@ -68,7 +68,11 @@ class NonCustodialSavingsVault:
             user_vault_id = hashlib.sha256(f"{user_wallet}_{currency}_vault".encode()).hexdigest()[:16]
             
             # Generate CoinPayments deposit address for this user's vault
-            address_info = await coinpayments_service.generate_deposit_address(
+            cp_service = get_coinpayments_service()
+            if not cp_service:
+                raise Exception("CoinPayments service not available")
+                
+            address_info = await cp_service.generate_deposit_address(
                 user_id=user_vault_id,
                 currency=currency
             )
