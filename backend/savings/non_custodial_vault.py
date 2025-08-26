@@ -216,7 +216,7 @@ class NonCustodialSavingsVault:
             return sol_address
         except Exception as e:
             print(f"Error generating Solana savings address: {e}")
-            return self.master_savings_addresses["SOL"]
+            return "fallback_sol_address"
     
     async def transfer_to_savings_vault(self, user_wallet: str, currency: str, amount: float, 
                                      bet_id: str = None) -> Dict[str, Any]:
