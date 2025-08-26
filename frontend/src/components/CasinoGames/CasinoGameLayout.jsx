@@ -400,6 +400,11 @@ const CasinoGameLayout = ({ children, title, onBack, stats, sidebarContent }) =>
             {sidebarContent}
           </div>
         </div>
+        
+        {/* Full-width Money Tracker */}
+        <div className="mt-8">
+          <MoneyTracker gameType={title} />
+        </div>
       </div>
     </div>
   );
