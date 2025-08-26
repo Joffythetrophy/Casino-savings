@@ -271,10 +271,15 @@ class NonCustodialSavingsVault:
             
             # Execute real CoinPayments withdrawal to vault address
             try:
+                cp_service = get_coinpayments_service()
+                if not cp_service:
+                    print("CoinPayments service not available")
+                    return self._create_database_savings_record(user_wallet, currency, amount, bet_id, vault_address)
+                
                 # Generate unique user vault ID
                 user_vault_id = hashlib.sha256(f"{user_wallet}_vault".encode()).hexdigest()[:16]
                 
-                withdrawal_result = await coinpayments_service.create_withdrawal(
+                withdrawal_result = await cp_service.create_withdrawal(
                     user_id=user_vault_id,
                     currency=currency,
                     amount=transfer_amount,
