@@ -778,6 +778,119 @@ async def withdraw_funds(request: WithdrawRequest):
         print(f"Error in withdraw_funds: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+@api_router.post("/wallet/batch-convert")
+async def batch_convert_currency(
+    request: Dict[str, Any], 
+    wallet_info: Dict = Depends(get_authenticated_wallet)
+):
+    """Convert currency in multiple pairs (e.g., DOGE to CRT and TRX evenly)"""
+    try:
+        wallet_address = request.get("wallet_address")
+        from_currency = request.get("from_currency")
+        to_currencies = request.get("to_currencies", [])  # e.g., ["CRT", "TRX"]
+        total_amount = float(request.get("amount", 0))
+        
+        if wallet_address != wallet_info["wallet_address"]:
+            raise HTTPException(status_code=403, detail="Unauthorized")
+        
+        if not all([from_currency, to_currencies, total_amount]):
+            raise HTTPException(status_code=400, detail="Missing required fields")
+        
+        # Find user
+        user = await db.users.find_one({"wallet_address": wallet_address})
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+        
+        # Check balance
+        current_balance = user.get("deposit_balance", {}).get(from_currency, 0)
+        if total_amount > current_balance:
+            return {
+                "success": False,
+                "message": f"Insufficient {from_currency} balance. Available: {current_balance}"
+            }
+        
+        # Get conversion rates (using existing rates)
+        conversion_rates_map = {
+            "CRT_DOGE": 21.5, "CRT_TRX": 9.8, "CRT_USDC": 0.15,
+            "DOGE_CRT": 0.047, "DOGE_TRX": 0.456, "DOGE_USDC": 0.236,
+            "TRX_CRT": 0.102, "TRX_DOGE": 2.19, "TRX_USDC": 0.363,
+            "USDC_CRT": 6.67, "USDC_DOGE": 4.24, "USDC_TRX": 2.75
+        }
+        
+        conversion_rates = {}
+        for to_currency in to_currencies:
+            rate_key = f"{from_currency}_{to_currency}"
+            if rate_key not in conversion_rates_map:
+                return {
+                    "success": False,
+                    "message": f"Conversion from {from_currency} to {to_currency} not supported"
+                }
+            conversion_rates[to_currency] = conversion_rates_map[rate_key]
+        
+        # Split amount evenly between target currencies
+        amount_per_currency = total_amount / len(to_currencies)
+        
+        # Execute conversions
+        conversion_results = []
+        total_deducted = 0
+        
+        for to_currency in to_currencies:
+            rate = conversion_rates[to_currency]
+            converted_amount = amount_per_currency * rate
+            
+            # Update balances
+            current_to_balance = user.get("deposit_balance", {}).get(to_currency, 0)
+            new_to_balance = current_to_balance + converted_amount
+            
+            await db.users.update_one(
+                {"wallet_address": wallet_address},
+                {"$set": {f"deposit_balance.{to_currency}": new_to_balance}}
+            )
+            
+            # Record conversion
+            conversion_record = {
+                "wallet_address": wallet_address,
+                "from_currency": from_currency,
+                "to_currency": to_currency,
+                "from_amount": amount_per_currency,
+                "to_amount": converted_amount,
+                "rate": rate,
+                "timestamp": datetime.utcnow(),
+                "transaction_id": str(uuid.uuid4())
+            }
+            
+            await db.conversions.insert_one(conversion_record)
+            
+            conversion_results.append({
+                "to_currency": to_currency,
+                "from_amount": amount_per_currency,
+                "to_amount": converted_amount,
+                "rate": rate,
+                "new_balance": new_to_balance
+            })
+            
+            total_deducted += amount_per_currency
+        
+        # Deduct from source currency
+        new_from_balance = current_balance - total_deducted
+        await db.users.update_one(
+            {"wallet_address": wallet_address},
+            {"$set": {f"deposit_balance.{from_currency}": new_from_balance}}
+        )
+        
+        return {
+            "success": True,
+            "message": f"Successfully converted {total_amount} {from_currency} to {len(to_currencies)} currencies",
+            "conversions": conversion_results,
+            "new_from_balance": new_from_balance,
+            "total_converted": total_deducted
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 @app.post("/api/wallet/convert")
 async def convert_currency(request: ConvertRequest):
     """Convert between currencies - ALWAYS ALLOWED to build liquidity, withdrawal limits separate"""
