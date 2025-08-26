@@ -799,6 +799,18 @@ test_plan:
   test_priority: "high_first"
 
 backend:
+  - task: "URGENT: Portfolio Display Fix Verification for User DwK4nUM8TKWAxEBKTG6mWA6PBRDHFPA3beLB18pwCekq"
+    implemented: true
+    working: false
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: false
+          agent: "testing"
+          comment: "🚨 URGENT PORTFOLIO VERIFICATION COMPLETED - CRITICAL BALANCE DISPLAY BUG FOUND! ✅ HARDCODED WALLET FIX CONFIRMED: System correctly uses real user wallet DwK4nUM8TKWAxEBKTG6mWA6PBRDHFPA3beLB18pwCekq with real_blockchain_api source (not hardcoded test wallet). ✅ USER AUTHENTICATION WORKING: cryptoking login successful, returns correct wallet address. ✅ CONVERSION SYSTEM FUNCTIONAL: Successfully tested CRT conversions - 100K CRT→2.15M DOGE (real_blockchain type) and 100K CRT→980K TRX (database_tracked type) both work with proper transaction IDs. ❌ CRITICAL ISSUE: CONVERTED BALANCES NOT DISPLAYING! User has 319,455 USDC visible but 0 DOGE and 0 TRX showing despite successful conversions. Portfolio shows $3.47M instead of expected $4.14M (missing $670K). ❌ ROOT CAUSE IDENTIFIED: /api/wallet/{wallet_address} endpoint prioritizes real blockchain balances over database balances. For converted currencies (USDC from CRT conversion, DOGE/TRX from CRT conversion), balances exist in database deposit_balance but wallet endpoint tries to fetch from real blockchain APIs where they don't exist. The balance retrieval logic needs to properly merge database balances with blockchain balances. 🎯 TEST RESULTS: 3/6 tests passed (50% success rate). User can authenticate and convert but cannot see full portfolio due to balance display bug."
+
   - task: "CRT to USDC Conversion System"
     implemented: true
     working: true
