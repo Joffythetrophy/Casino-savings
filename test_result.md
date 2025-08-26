@@ -855,11 +855,12 @@ metadata:
 
 test_plan:
   current_focus:
-    - "URGENT: Critical Verification for User DwK4nUM8TKWAxEBKTG6mWA6PBRDHFPA3beLB18pwCekq - COMPLETED SUCCESSFULLY"
-    - "CRT Balance Display Fix - VERIFIED WORKING"
-    - "1000 USDC Withdrawal - VERIFIED WORKING"
-    - "Real Blockchain Withdrawal Methods - VERIFIED WORKING"
-    - "Cross-chain Transaction History - VERIFIED WORKING"
+    - "CoinPayments Frontend Integration Testing - COMPLETED SUCCESSFULLY"
+    - "User Authentication with cryptoking/crt21million - VERIFIED WORKING"
+    - "Wallet Management CoinPayments Integration - VERIFIED WORKING"
+    - "Casino Games Real Transfer Integration - VERIFIED WORKING"
+    - "Savings Page CoinPayments Vault - VERIFIED WORKING"
+    - "Deposit/Withdrawal Flow Testing - VERIFIED WORKING"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
