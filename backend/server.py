@@ -3185,11 +3185,11 @@ async def websocket_wallet_monitor(websocket: WebSocket, wallet_address: str):
 # Pydantic models for CoinPayments
 class DepositAddressRequest(BaseModel):
     user_id: str = Field(..., description="User ID")
-    currency: str = Field(..., regex="^(DOGE|TRX|USDC)$", description="Currency code")
+    currency: str = Field(..., pattern="^(DOGE|TRX|USDC)$", description="Currency code")
 
 class WithdrawalRequest(BaseModel):
     user_id: str = Field(..., description="User ID")
-    currency: str = Field(..., regex="^(DOGE|TRX|USDC)$", description="Currency code")
+    currency: str = Field(..., pattern="^(DOGE|TRX|USDC)$", description="Currency code")
     amount: Decimal = Field(..., gt=0, description="Withdrawal amount")
     destination_address: str = Field(..., description="External wallet address")
 
