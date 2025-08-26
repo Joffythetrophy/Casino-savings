@@ -141,7 +141,7 @@ export const WalletProvider = ({ children }) => {
   );
 };
 
-// Betting Component
+// Multi-Currency Betting Component
 export const BettingPanel = ({ 
   onBet, 
   minBet = 1, 
@@ -150,15 +150,94 @@ export const BettingPanel = ({
   gameActive = false 
 }) => {
   const [betAmount, setBetAmount] = useState(10);
-  const { balance, loading } = useWallet();
+  const [selectedCurrency, setSelectedCurrency] = useState('USDC');
+  const [allBalances, setAllBalances] = useState({});
+  const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
+  
+  const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
-  const quickBets = [1, 5, 10, 25, 50];
-
-  const handleBet = () => {
-    if (betAmount <= balance && betAmount >= minBet && betAmount <= maxBet) {
-      onBet(betAmount);
+  // Currency configurations
+  const currencies = {
+    'USDC': { 
+      symbol: '$', 
+      color: 'text-green-400', 
+      icon: '🟢', 
+      name: 'USDC'
+    },
+    'DOGE': { 
+      symbol: 'Ð', 
+      color: 'text-yellow-400', 
+      icon: '🐕', 
+      name: 'DOGE'
+    },
+    'TRX': { 
+      symbol: 'T', 
+      color: 'text-red-400', 
+      icon: '🔴', 
+      name: 'TRX'
+    },
+    'CRT': { 
+      symbol: 'C', 
+      color: 'text-blue-400', 
+      icon: '🟦', 
+      name: 'CRT'
     }
   };
+
+  useEffect(() => {
+    fetchAllBalances();
+  }, []);
+
+  const fetchAllBalances = async () => {
+    try {
+      setLoading(true);
+      const savedUser = localStorage.getItem('casino_user');
+      if (!savedUser) return;
+      
+      const user = JSON.parse(savedUser);
+      const response = await axios.get(`${BACKEND_URL}/api/wallet/${user.wallet_address}`);
+      
+      if (response.data.success && response.data.wallet) {
+        const depositBalance = response.data.wallet.deposit_balance || {};
+        setAllBalances(depositBalance);
+        
+        // Auto-select currency with highest balance > 0
+        const availableCurrency = Object.keys(depositBalance).find(currency => 
+          depositBalance[currency] > 0 && currencies[currency]
+        );
+        if (availableCurrency) {
+          setSelectedCurrency(availableCurrency);
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching balances:', error);
+      toast({
+        title: "❌ Error",
+        description: "Failed to load wallet balances",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleBet = () => {
+    const currentBalance = allBalances[selectedCurrency] || 0;
+    if (betAmount <= currentBalance && betAmount >= minBet && betAmount <= maxBet) {
+      onBet(betAmount, selectedCurrency);
+    } else {
+      toast({
+        title: "❌ Invalid Bet",
+        description: `Insufficient ${selectedCurrency} balance or invalid amount`,
+        variant: "destructive"
+      });
+    }
+  };
+
+  const quickBets = [1, 5, 10, 25, 50, 100];
+  const currentBalance = allBalances[selectedCurrency] || 0;
+  const currencyConfig = currencies[selectedCurrency];
 
   if (loading) {
     return (
@@ -171,70 +250,86 @@ export const BettingPanel = ({
   return (
     <Card className="p-4 bg-gray-900/50 border-yellow-400/20">
       <div className="space-y-4">
+        {/* Currency Selector */}
+        <div className="space-y-2">
+          <label className="text-sm text-gray-300">Choose Currency:</label>
+          <select
+            value={selectedCurrency}
+            onChange={(e) => setSelectedCurrency(e.target.value)}
+            className="w-full p-2 bg-gray-800 border border-gray-700 text-white rounded"
+            disabled={gameActive}
+          >
+            {Object.entries(currencies).map(([currency, config]) => {
+              const balance = allBalances[currency] || 0;
+              return (
+                <option key={currency} value={currency} disabled={balance <= 0}>
+                  {config.icon} {config.name} - Balance: {balance.toFixed(2)}
+                  {balance <= 0 ? ' (No Balance)' : ''}
+                </option>
+              );
+            })}
+          </select>
+        </div>
+
+        {/* Selected Currency Balance Display */}
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
-            <CRTCoin size="w-6 h-6" />
-            <span className="text-yellow-400 font-bold">Balance: {balance.toFixed(2)}</span>
-          </div>
-        </div>
-        
-        <div className="space-y-2">
-          <label className="text-sm text-gray-300">Bet Amount</label>
-          <div className="flex space-x-2">
-            <Input
-              type="number"
-              value={betAmount}
-              onChange={(e) => setBetAmount(Number(e.target.value))}
-              min={minBet}
-              max={Math.min(maxBet, balance)}
-              className="flex-1 bg-gray-800 border-gray-700 text-white"
-            />
-            <Button
-              onClick={handleBet}
-              disabled={disabled || gameActive || betAmount > balance || loading}
-              className="bg-gradient-to-r from-yellow-400 to-yellow-600 text-black font-bold hover:from-yellow-300 hover:to-yellow-500"
-            >
-              {gameActive ? 'Playing...' : 'Bet'}
-            </Button>
+            <span className="text-2xl">{currencyConfig?.icon}</span>
+            <span className={`font-bold ${currencyConfig?.color}`}>
+              Balance: {currencyConfig?.symbol}{currentBalance.toFixed(2)} {selectedCurrency}
+            </span>
           </div>
         </div>
 
-        <div className="flex flex-wrap gap-2">
-          {quickBets.map(amount => (
+        {/* Bet Amount Input */}
+        <div className="space-y-2">
+          <label className="text-sm text-gray-300">Bet Amount:</label>
+          <Input
+            type="number"
+            value={betAmount}
+            onChange={(e) => setBetAmount(Number(e.target.value))}
+            min={minBet}
+            max={Math.min(maxBet, currentBalance)}
+            className="bg-gray-800 border-gray-700 text-white"
+            disabled={disabled || gameActive || currentBalance <= 0}
+          />
+        </div>
+
+        {/* Quick Bet Buttons */}
+        <div className="grid grid-cols-3 gap-2">
+          {quickBets
+            .filter(amount => amount <= currentBalance && amount <= maxBet)
+            .map((amount) => (
             <Button
               key={amount}
-              size="sm"
-              variant="outline"
               onClick={() => setBetAmount(amount)}
-              disabled={amount > balance}
-              className="border-yellow-400/50 text-yellow-400 hover:bg-yellow-400/10"
+              variant="outline"
+              size="sm"
+              className="border-gray-600 text-gray-300 hover:bg-yellow-400/20"
+              disabled={disabled || gameActive || amount > currentBalance}
             >
-              {amount}
+              {currencyConfig?.symbol}{amount}
             </Button>
           ))}
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => setBetAmount(Math.floor(balance / 2))}
-            disabled={balance === 0}
-            className="border-yellow-400/50 text-yellow-400 hover:bg-yellow-400/10"
-          >
-            Half
-          </Button>
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => setBetAmount(balance)}
-            disabled={balance === 0}
-            className="border-yellow-400/50 text-yellow-400 hover:bg-yellow-400/10"
-          >
-            Max
-          </Button>
         </div>
 
-        <div className="text-xs text-gray-400">
-          Min: {minBet} CRT | Max: {maxBet} CRT
-        </div>
+        {/* Bet Button */}
+        <Button
+          onClick={handleBet}
+          disabled={disabled || gameActive || betAmount > currentBalance || betAmount < minBet || currentBalance <= 0}
+          className="w-full bg-yellow-600 hover:bg-yellow-500 text-black font-bold"
+        >
+          {gameActive ? 'Game In Progress...' : 
+           currentBalance <= 0 ? `No ${selectedCurrency} Balance` :
+           `Bet ${currencyConfig?.symbol}${betAmount} ${selectedCurrency}`}
+        </Button>
+
+        {/* Balance Warning */}
+        {currentBalance <= 0 && (
+          <div className="text-center text-red-400 text-sm">
+            No {selectedCurrency} balance. Choose a different currency or add funds.
+          </div>
+        )}
       </div>
     </Card>
   );
