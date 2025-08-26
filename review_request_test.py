@@ -248,7 +248,13 @@ class ReviewRequestTester:
 
     async def test_batch_convert_endpoint(self):
         """Test 3: USER'S CONVERSION REQUEST - Test /api/wallet/batch-convert endpoint"""
+        if not self.auth_token:
+            self.log_test("Batch Convert Endpoint", False, "No JWT token available")
+            return
+            
         try:
+            headers = {"Authorization": f"Bearer {self.auth_token}"}
+            
             # Test the new batch conversion endpoint as requested
             # Convert DOGE to CRT and TRX evenly
             payload = {
@@ -259,7 +265,7 @@ class ReviewRequestTester:
             }
             
             async with self.session.post(f"{self.base_url}/wallet/batch-convert", 
-                                       json=payload) as response:
+                                       json=payload, headers=headers) as response:
                 if response.status == 200:
                     data = await response.json()
                     required_fields = ["success", "conversions", "new_from_balance", "total_converted"]
@@ -292,7 +298,7 @@ class ReviewRequestTester:
                                 "Batch convert endpoint not found - may not be implemented yet")
                 elif response.status == 403:
                     self.log_test("Batch Convert Endpoint", False, 
-                                "Authentication required for batch convert endpoint")
+                                "Authentication failed for batch convert endpoint")
                 elif response.status == 400:
                     # Check if it's proper validation
                     data = await response.json()
