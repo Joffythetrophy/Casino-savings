@@ -367,6 +367,9 @@ const WalletManager = () => {
     const [depositAmount, setDepositAmount] = useState('');
     const [withdrawAmount, setWithdrawAmount] = useState('');
     const [selectedCurrency, setSelectedCurrency] = useState('CRT');
+    const [externalWithdrawAmount, setExternalWithdrawAmount] = useState('');
+    const [destinationAddress, setDestinationAddress] = useState('');
+    const [showExternalWithdraw, setShowExternalWithdraw] = useState(false);
     
     return (
       <Card className={`p-6 bg-gradient-to-br ${color} border border-opacity-20`}>
@@ -439,6 +442,7 @@ const WalletManager = () => {
         
         {(type === 'winnings' || type === 'savings') && (
           <div className="space-y-4">
+            {/* Regular Internal Withdrawal */}
             <div className="flex space-x-2">
               <select 
                 value={selectedCurrency}
@@ -469,6 +473,67 @@ const WalletManager = () => {
                 Withdraw
               </Button>
             </div>
+            
+            {/* External Withdrawal Toggle */}
+            <div className="flex justify-center">
+              <Button
+                onClick={() => setShowExternalWithdraw(!showExternalWithdraw)}
+                variant="outline"
+                className="text-yellow-400 border-yellow-400 hover:bg-yellow-400 hover:text-black"
+              >
+                🌐 {showExternalWithdraw ? 'Hide' : 'External Wallet Withdrawal'}
+              </Button>
+            </div>
+            
+            {/* External Withdrawal Form */}
+            {showExternalWithdraw && (
+              <div className="space-y-3 p-4 bg-black/30 rounded-lg border border-yellow-400/30">
+                <h4 className="text-lg font-semibold text-yellow-400 flex items-center">
+                  🚀 Withdraw to External Wallet
+                </h4>
+                <p className="text-sm text-gray-300 mb-3">
+                  Send your {selectedCurrency} to any external wallet address. 
+                  Minimum: {selectedCurrency === 'DOGE' ? '10' : selectedCurrency === 'USDC' ? '5' : '10'} {selectedCurrency}
+                </p>
+                
+                <div className="space-y-2">
+                  <Input
+                    type="text" 
+                    placeholder={`Enter ${selectedCurrency} wallet address`}
+                    value={destinationAddress}
+                    onChange={(e) => setDestinationAddress(e.target.value)}
+                    className="bg-black/20 border-gray-600 text-white"
+                  />
+                  
+                  <div className="flex space-x-2">
+                    <Input
+                      type="number"
+                      placeholder="Amount"
+                      value={externalWithdrawAmount}
+                      onChange={(e) => setExternalWithdrawAmount(e.target.value)}
+                      max={wallet[selectedCurrency]}
+                      className="flex-1 bg-black/20 border-gray-600 text-white"
+                    />
+                    <Button
+                      onClick={() => {
+                        handleExternalWithdraw(
+                          selectedCurrency, 
+                          parseFloat(externalWithdrawAmount), 
+                          destinationAddress
+                        );
+                        setExternalWithdrawAmount('');
+                        setDestinationAddress('');
+                        setShowExternalWithdraw(false);
+                      }}
+                      className="bg-yellow-600 hover:bg-yellow-500 text-black"
+                      disabled={!destinationAddress || !externalWithdrawAmount}
+                    >
+                      🚀 Send to External Wallet
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         )}
       </Card>
