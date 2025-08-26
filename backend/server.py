@@ -1,4 +1,4 @@
-from fastapi import FastAPI, APIRouter, HTTPException, Depends, WebSocket
+from fastapi import FastAPI, APIRouter, HTTPException, Depends, WebSocket, Request, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -15,12 +15,16 @@ from pycoingecko import CoinGeckoAPI
 import redis
 from passlib.context import CryptContext
 from savings.non_custodial_vault import non_custodial_vault
+from decimal import Decimal
 
 # Import blockchain managers
 from blockchain.solana_manager import SolanaManager, SPLTokenManager, CRTTokenManager
 from blockchain.tron_manager import TronManager, TronTransactionManager
 from blockchain.doge_manager import DogeManager, DogeTransactionManager
 from auth.wallet_auth import WalletAuthManager, get_authenticated_wallet, ChallengeRequest, VerifyRequest
+
+# Import CoinPayments service
+from services.coinpayments_service import coinpayments_service
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
