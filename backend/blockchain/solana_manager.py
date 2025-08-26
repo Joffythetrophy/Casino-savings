@@ -76,6 +76,17 @@ class SolanaManager:
         except Exception as e:
             return {"success": False, "error": str(e)}
 
+    def is_valid_solana_address(self, address: str) -> bool:
+        """Validate Solana address format (base58, 44 characters)"""
+        try:
+            if not address or len(address) < 32 or len(address) > 44:
+                return False
+            # Try to decode as base58
+            decoded = base58.b58decode(address)
+            return len(decoded) == 32  # Solana public keys are 32 bytes
+        except:
+            return False
+
 class SPLTokenManager:
     def __init__(self, solana_manager: SolanaManager):
         self.solana = solana_manager
