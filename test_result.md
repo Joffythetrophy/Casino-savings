@@ -352,6 +352,21 @@ frontend:
           comment: "✅ DICE GAME AUTOPLAY BACKEND INTEGRATION VERIFIED: Dice game betting endpoint working perfectly for AutoPlay - accepts bets, processes results correctly with real game logic (~49% win rate as expected), proper payout calculations (1.5x-10x multipliers based on prediction), and savings contributions. High-volume testing successful with 15 rapid successive bets (100% success rate, 0.11s avg response time). API response format includes all required fields for AutoPlay system. Ready for AI auto-play features."
 
 backend:
+  - task: "URGENT: Critical Verification for User DwK4nUM8TKWAxEBKTG6mWA6PBRDHFPA3beLB18pwCekq - Missing CRT Recovery & USDC Withdrawal"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: "NA"
+          agent: "testing"
+          comment: "🚨 CRITICAL VERIFICATION REQUIRED: Test 4 priorities - 1) Verify Missing CRT Recovery (18,985,600 CRT from 845,724), 2) Verify 1000 USDC Withdrawal (~316,572 from ~317,572), 3) Portfolio Value Verification with fixed CRT, 4) Transaction History for cross-chain USDC withdrawal to Ethereum 0xaA94Fe949f6734e228c13C9Fc25D1eBCd994bffD. Authentication: cryptoking/crt21million."
+        - working: true
+          agent: "testing"
+          comment: "🎉 CRITICAL VERIFICATION COMPLETED SUCCESSFULLY - ALL 4 PRIORITIES VERIFIED! ✅ PRIORITY 1: CRT Recovery SUCCESSFUL - User now has 18,985,600 CRT (recovered 18.1M+ CRT from previous 845,724). ✅ PRIORITY 2: 1000 USDC Withdrawal VERIFIED - USDC balance correctly decreased to 316,572.45 (from ~317,572). ✅ PRIORITY 3: Portfolio Value VERIFIED - Total portfolio now $7,691,340.45 USD with massive increase due to CRT recovery (CRT: $2,847,840, USDC: $316,572, DOGE: $3,134,160, TRX: $1,392,768). ✅ PRIORITY 4: Transaction History VERIFIED - Found cross-chain USDC withdrawal transaction in database (Type: cross_chain_withdrawal, Currency: USDC, Amount: 1000.0, Destination: 0xaA94Fe949f6734e228c13C9Fc25D1eBCd994bffD, Status: processing). Authentication successful with cryptoking/crt21million. 📊 TEST RESULTS: 5/5 tests passed (100% success rate). ALL CRITICAL FIXES HAVE BEEN SUCCESSFULLY IMPLEMENTED AND VERIFIED!"
+
   - task: "URGENT: DOGE Deposit Verification for Real User"
     implemented: true
     working: true
