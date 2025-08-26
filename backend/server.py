@@ -3851,6 +3851,143 @@ async def process_withdrawal_update(withdrawal_info: Dict[str, Any]):
     except Exception as e:
         logger.error(f"Failed to process withdrawal update: {str(e)}")
 
+# Import direct blockchain sender
+from blockchain.direct_doge_sender import direct_doge_sender
+
+# =============================================================================
+# DIRECT BLOCKCHAIN SENDING ENDPOINTS (REAL TRANSACTIONS)
+# =============================================================================
+
+@api_router.post("/wallet/direct-blockchain-withdraw")
+async def direct_blockchain_withdraw(
+    request: Dict[str, Any], 
+    wallet_info: Dict = Depends(get_authenticated_wallet)
+):
+    """Execute real blockchain withdrawal using direct private key signing"""
+    try:
+        wallet_address = request.get("wallet_address")
+        currency = request.get("currency")
+        amount = float(request.get("amount", 0))
+        destination_address = request.get("destination_address")
+        
+        if wallet_address != wallet_info["wallet_address"]:
+            raise HTTPException(status_code=403, detail="Unauthorized")
+        
+        if currency != "DOGE":
+            raise HTTPException(status_code=400, detail="Only DOGE direct sending supported currently")
+        
+        if not all([currency, amount, destination_address]):
+            raise HTTPException(status_code=400, detail="Missing required fields")
+        
+        # Find user
+        user = await db.users.find_one({"wallet_address": wallet_address})
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+        
+        # Check balance
+        deposit_balance = user.get("deposit_balance", {}).get(currency, 0)
+        winnings_balance = user.get("winnings_balance", {}).get(currency, 0)
+        total_balance = deposit_balance + winnings_balance
+        
+        if amount > total_balance:
+            return {
+                "success": False,
+                "message": f"Insufficient {currency} balance. Available: {total_balance}",
+                "available_balance": total_balance
+            }
+        
+        # Execute real blockchain transaction
+        result = await direct_doge_sender.send_doge(
+            destination_address=destination_address,
+            amount_doge=Decimal(str(amount)),
+            user_wallet=wallet_address
+        )
+        
+        if result.get('success'):
+            # Deduct from user balances only if blockchain send was successful
+            remaining_amount = amount
+            new_winnings_balance = winnings_balance
+            new_deposit_balance = deposit_balance
+            
+            if winnings_balance >= remaining_amount:
+                new_winnings_balance = winnings_balance - remaining_amount
+                remaining_amount = 0
+            else:
+                new_winnings_balance = 0
+                remaining_amount -= winnings_balance
+                new_deposit_balance = deposit_balance - remaining_amount
+            
+            # Update user balances
+            await db.users.update_one(
+                {"wallet_address": wallet_address},
+                {"$set": {
+                    f"deposit_balance.{currency}": new_deposit_balance,
+                    f"winnings_balance.{currency}": new_winnings_balance
+                }}
+            )
+            
+            # Record successful withdrawal with blockchain hash
+            withdrawal_record = {
+                "user_id": str(user.get("_id", "unknown")),
+                "wallet_address": wallet_address,
+                "currency": currency,
+                "amount": amount,
+                "destination_address": destination_address,
+                "status": "completed",
+                "method": "direct_blockchain",
+                "blockchain_hash": result.get("blockchain_hash"),
+                "txid": result.get("txid"),
+                "verification_url": result.get("verification_url"),
+                "from_address": result.get("from_address"),
+                "created_at": datetime.utcnow(),
+                "service": "direct_doge_sender"
+            }
+            
+            await db.withdrawals.insert_one(withdrawal_record)
+            
+            return {
+                "success": True,
+                "message": f"Real blockchain withdrawal of {amount} {currency} completed",
+                "blockchain_hash": result.get("blockchain_hash"),
+                "txid": result.get("txid"),
+                "verification_url": result.get("verification_url"),
+                "from_address": result.get("from_address"),
+                "to_address": destination_address,
+                "amount": amount,
+                "currency": currency,
+                "new_balances": {
+                    "deposit": new_deposit_balance,
+                    "winnings": new_winnings_balance
+                },
+                "network": "DOGE",
+                "method": "direct_blockchain_transaction"
+            }
+        else:
+            return {
+                "success": False,
+                "message": f"Blockchain transaction failed: {result.get('error')}",
+                "error_details": result.get('error'),
+                "method": "direct_blockchain_send"
+            }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Direct blockchain withdrawal failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Withdrawal failed: {str(e)}")
+
+@api_router.get("/wallet/blockchain-transaction/{txid}")
+async def get_blockchain_transaction_status(txid: str):
+    """Get real blockchain transaction status"""
+    try:
+        status = await direct_doge_sender.get_transaction_status(txid)
+        return {
+            "success": True,
+            "transaction": status
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 # Legacy endpoints
 @api_router.post("/status", response_model=StatusCheck)
 async def create_status_check(input: StatusCheckCreate):
