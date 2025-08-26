@@ -662,12 +662,12 @@ async def convert_currency(request: ConvertRequest):
         
         if request.to_currency == "DOGE":
             # Generate real DOGE for user using blockchain integration
+            import hashlib  # Move import outside try block
             try:
                 # Get or create user's DOGE address
                 user_doge_address = user.get("doge_deposit_address")
                 if not user_doge_address:
                     # Generate real DOGE address for user
-                    import hashlib
                     hash_result = hashlib.md5(f"{request.wallet_address}_doge_real".encode()).hexdigest()[:8]
                     # Use real DOGE address format
                     base_addresses = [
