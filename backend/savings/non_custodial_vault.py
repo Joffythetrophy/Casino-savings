@@ -20,8 +20,8 @@ from services.coinpayments_service import coinpayments_service
 
 class NonCustodialSavingsVault:
     """
-    Non-custodial savings vault that moves real tokens to secure addresses
-    Users maintain control through withdrawal mechanisms
+    Non-custodial savings vault with CoinPayments integration for real blockchain transfers
+    Automatically transfers game losses to secure vault addresses
     """
     
     def __init__(self):
@@ -30,16 +30,15 @@ class NonCustodialSavingsVault:
         self.solana_rpc_url = os.getenv("SOLANA_RPC_URL", "https://api.mainnet-beta.solana.com")
         self.crt_mint = os.getenv("CRT_TOKEN_MINT")
         
-        # Secure master savings addresses (these should be generated once and stored securely)
-        self.master_savings_addresses = {
-            "DOGE": "DNfFHTUZ4kkXPa97koksrC9p2xP2aKuRaA",  # Master DOGE savings address
-            "TRX": "TKzxdSv2FZKQrEqkKVgp5DcwEXBEKMg2Ax",   # Master TRX savings address  
-            "SOL": "9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM",  # Master SOL savings address
-            "CRT": "9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM"   # Master CRT savings address
+        # CoinPayments vault addresses - generated once and stored securely
+        self.vault_addresses = {
+            "DOGE": None,  # Will be generated via CoinPayments
+            "TRX": None,   # Will be generated via CoinPayments
+            "USDC": None,  # Will be generated via CoinPayments
         }
         
-        # User savings addresses are derived deterministically from their main wallet
-        self.user_savings_cache = {}
+        # User-specific vault addresses cache
+        self.user_vault_cache = {}
         
     async def generate_user_savings_address(self, user_wallet: str, currency: str) -> str:
         """
