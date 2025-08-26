@@ -126,7 +126,13 @@ class ReviewRequestTester:
 
     async def test_autoplay_endpoint(self):
         """Test 1: NEW AUTOPLAY FIX - Test /api/games/autoplay endpoint"""
+        if not self.auth_token:
+            self.log_test("Autoplay Endpoint", False, "No JWT token available")
+            return
+            
         try:
+            headers = {"Authorization": f"Bearer {self.auth_token}"}
+            
             # Test the new autoplay endpoint with authentication
             payload = {
                 "wallet_address": self.test_wallet,
@@ -138,7 +144,7 @@ class ReviewRequestTester:
             }
             
             async with self.session.post(f"{self.base_url}/games/autoplay", 
-                                       json=payload) as response:
+                                       json=payload, headers=headers) as response:
                 if response.status == 200:
                     data = await response.json()
                     required_fields = ["success", "autoplay_results", "total_bets", "total_winnings", "total_losses"]
@@ -171,7 +177,7 @@ class ReviewRequestTester:
                                 "Autoplay endpoint not found - may not be implemented yet")
                 elif response.status == 403:
                     self.log_test("Autoplay Endpoint", False, 
-                                "Authentication required for autoplay endpoint")
+                                "Authentication failed for autoplay endpoint")
                 else:
                     self.log_test("Autoplay Endpoint", False, 
                                 f"HTTP {response.status}: {await response.text()}")
