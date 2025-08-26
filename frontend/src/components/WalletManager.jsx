@@ -264,6 +264,51 @@ const WalletManager = () => {
     }
   };
 
+  const handleExternalWithdraw = async (currency, amount, destinationAddress) => {
+    if (amount <= 0 || !destinationAddress) return;
+    
+    try {
+      // Get user from localStorage for real wallet address
+      const savedUser = localStorage.getItem('casino_user');
+      if (!savedUser) {
+        toast({
+          title: "❌ Error", 
+          description: "User not logged in",
+          variant: "destructive"
+        });
+        return;
+      }
+      
+      const user = JSON.parse(savedUser);
+      const response = await axios.post(`${BACKEND_URL}/api/wallet/external-withdraw`, {
+        wallet_address: user.wallet_address,
+        currency: currency,
+        amount: amount,
+        destination_address: destinationAddress
+      });
+      
+      if (response.data.success) {
+        await fetchWalletBalances(); // Refresh balances
+        toast({
+          title: "🎉 External Withdrawal Initiated!",
+          description: `${amount} ${currency} being sent to ${destinationAddress}`,
+        });
+      } else {
+        toast({
+          title: "External Withdrawal Failed",
+          description: response.data.message || "Failed to process external withdrawal",
+        });
+      }
+    } catch (error) {
+      console.error('External withdrawal error:', error);
+      toast({
+        title: "External Withdrawal Error",
+        description: error.response?.data?.detail || "Failed to process external withdrawal request",
+        variant: "destructive"
+      });
+    }
+  };
+
   const handleConversion = async () => {
     const amount = parseFloat(convertAmount);
     if (!amount || amount <= 0) return;
