@@ -3178,6 +3178,344 @@ async def websocket_wallet_monitor(websocket: WebSocket, wallet_address: str):
             if not active_connections[wallet_address]:
                 del active_connections[wallet_address]
 
+# =============================================================================
+# COINPAYMENTS REAL BLOCKCHAIN INTEGRATION ENDPOINTS
+# =============================================================================
+
+# Pydantic models for CoinPayments
+class DepositAddressRequest(BaseModel):
+    user_id: str = Field(..., description="User ID")
+    currency: str = Field(..., regex="^(DOGE|TRX|USDC)$", description="Currency code")
+
+class WithdrawalRequest(BaseModel):
+    user_id: str = Field(..., description="User ID")
+    currency: str = Field(..., regex="^(DOGE|TRX|USDC)$", description="Currency code")
+    amount: Decimal = Field(..., gt=0, description="Withdrawal amount")
+    destination_address: str = Field(..., description="External wallet address")
+
+@api_router.post("/coinpayments/generate-deposit-address")
+async def generate_coinpayments_deposit_address(request: DepositAddressRequest):
+    """Generate CoinPayments deposit address for real blockchain deposits"""
+    try:
+        # Generate deposit address using CoinPayments
+        address_info = await coinpayments_service.generate_deposit_address(
+            request.user_id, 
+            request.currency
+        )
+        
+        # Store address in database for tracking
+        deposit_address_record = {
+            "user_id": request.user_id,
+            "currency": request.currency,
+            "address": address_info["address"],
+            "network": address_info["network"],
+            "created_at": datetime.utcnow(),
+            "status": "active"
+        }
+        
+        await db.deposit_addresses.insert_one(deposit_address_record)
+        
+        return {
+            "success": True,
+            "message": f"CoinPayments deposit address generated for {request.currency}",
+            **address_info
+        }
+        
+    except Exception as e:
+        logger.error(f"Failed to generate CoinPayments deposit address: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to generate deposit address: {str(e)}")
+
+@api_router.post("/coinpayments/withdraw")
+async def create_coinpayments_withdrawal(
+    request: WithdrawalRequest,
+    wallet_info: Dict = Depends(get_authenticated_wallet)
+):
+    """Create real blockchain withdrawal using CoinPayments"""
+    try:
+        # Verify user owns the withdrawal request
+        user = await db.users.find_one({"wallet_address": wallet_info["wallet_address"]})
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+        
+        # Check balance
+        deposit_balance = user.get("deposit_balance", {}).get(request.currency, 0)
+        winnings_balance = user.get("winnings_balance", {}).get(request.currency, 0)
+        total_available = deposit_balance + winnings_balance
+        
+        if request.amount > total_available:
+            raise HTTPException(
+                status_code=400, 
+                detail=f"Insufficient balance. Available: {total_available} {request.currency}"
+            )
+        
+        # Check minimum withdrawal amount
+        currency_config = coinpayments_service.get_currency_info(request.currency)
+        min_withdrawal = Decimal(currency_config["min_withdrawal"])
+        
+        if request.amount < min_withdrawal:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Amount below minimum withdrawal: {min_withdrawal} {request.currency}"
+            )
+        
+        # Create withdrawal with CoinPayments
+        withdrawal_info = await coinpayments_service.create_withdrawal(
+            user_id=request.user_id,
+            currency=request.currency,
+            amount=request.amount,
+            destination_address=request.destination_address,
+            auto_confirm=False  # Manual confirmation for security
+        )
+        
+        # Deduct from user balance (prefer winnings first, then deposits)
+        remaining_amount = float(request.amount)
+        new_winnings_balance = winnings_balance
+        new_deposit_balance = deposit_balance
+        
+        if winnings_balance >= remaining_amount:
+            new_winnings_balance = winnings_balance - remaining_amount
+            remaining_amount = 0
+        else:
+            new_winnings_balance = 0
+            remaining_amount -= winnings_balance
+            new_deposit_balance = deposit_balance - remaining_amount
+        
+        # Update user balances
+        await db.users.update_one(
+            {"wallet_address": wallet_info["wallet_address"]},
+            {"$set": {
+                f"deposit_balance.{request.currency}": new_deposit_balance,
+                f"winnings_balance.{request.currency}": new_winnings_balance
+            }}
+        )
+        
+        # Record withdrawal transaction
+        withdrawal_record = {
+            "user_id": request.user_id,
+            "wallet_address": wallet_info["wallet_address"],
+            "withdrawal_id": withdrawal_info["withdrawal_id"],
+            "currency": request.currency,
+            "amount": float(request.amount),
+            "fee": float(withdrawal_info["fee"]),
+            "destination_address": request.destination_address,
+            "status": "pending",
+            "created_at": datetime.utcnow(),
+            "service": "coinpayments",
+            "network": withdrawal_info["network"]
+        }
+        
+        result = await db.withdrawals.insert_one(withdrawal_record)
+        withdrawal_record["_id"] = str(result.inserted_id)
+        
+        return {
+            "success": True,
+            "message": f"Withdrawal of {request.amount} {request.currency} initiated",
+            "withdrawal": {
+                "id": withdrawal_record["_id"],
+                "withdrawal_id": withdrawal_info["withdrawal_id"],
+                "currency": request.currency,
+                "amount": str(request.amount),
+                "fee": withdrawal_info["fee"],
+                "total_amount": withdrawal_info["total_amount"],
+                "destination_address": request.destination_address,
+                "status": "pending",
+                "network": withdrawal_info["network"]
+            },
+            "new_balances": {
+                "deposit": new_deposit_balance,
+                "winnings": new_winnings_balance
+            }
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"CoinPayments withdrawal failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Withdrawal failed: {str(e)}")
+
+@api_router.get("/coinpayments/balances")
+async def get_coinpayments_balances():
+    """Get CoinPayments account balances"""
+    try:
+        balances = await coinpayments_service.get_account_balances()
+        return {
+            "success": True,
+            "coinpayments_balances": balances["balances"],
+            "timestamp": balances["timestamp"]
+        }
+    except Exception as e:
+        logger.error(f"Failed to get CoinPayments balances: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to get balances: {str(e)}")
+
+@api_router.get("/coinpayments/currency/{currency}")
+async def get_currency_info(currency: str):
+    """Get currency information and configuration"""
+    try:
+        if currency.upper() not in ['DOGE', 'TRX', 'USDC']:
+            raise HTTPException(status_code=400, detail="Currency not supported")
+        
+        currency_info = coinpayments_service.get_currency_info(currency.upper())
+        return {
+            "success": True,
+            "currency": currency_info
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Failed to get currency info: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to get currency info: {str(e)}")
+
+@api_router.post("/webhooks/coinpayments/deposit")
+async def handle_coinpayments_deposit_webhook(request: Request, background_tasks: BackgroundTasks):
+    """Handle CoinPayments deposit IPN webhook"""
+    try:
+        # Get raw body for signature verification
+        body = await request.body()
+        body_str = body.decode('utf-8')
+        
+        # Get signature from headers
+        signature = request.headers.get('HTTP_HMAC', '')
+        
+        # Verify signature
+        if not coinpayments_service.verify_ipn_signature(body_str, signature):
+            raise HTTPException(status_code=401, detail="Invalid signature")
+        
+        # Parse form data
+        form_data = {}
+        for pair in body_str.split('&'):
+            if '=' in pair:
+                key, value = pair.split('=', 1)
+                form_data[key] = value
+        
+        # Process deposit notification
+        deposit_info = await coinpayments_service.process_deposit_notification(form_data)
+        
+        # Update user balance in background
+        background_tasks.add_task(process_deposit_credit, deposit_info)
+        
+        return {"success": True, "message": "Deposit webhook processed"}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"CoinPayments deposit webhook failed: {str(e)}")
+        raise HTTPException(status_code=500, detail="Webhook processing failed")
+
+@api_router.post("/webhooks/coinpayments/withdrawal")
+async def handle_coinpayments_withdrawal_webhook(request: Request, background_tasks: BackgroundTasks):
+    """Handle CoinPayments withdrawal IPN webhook"""
+    try:
+        # Get raw body for signature verification
+        body = await request.body()
+        body_str = body.decode('utf-8')
+        
+        # Get signature from headers
+        signature = request.headers.get('HTTP_HMAC', '')
+        
+        # Verify signature
+        if not coinpayments_service.verify_ipn_signature(body_str, signature):
+            raise HTTPException(status_code=401, detail="Invalid signature")
+        
+        # Parse form data
+        form_data = {}
+        for pair in body_str.split('&'):
+            if '=' in pair:
+                key, value = pair.split('=', 1)
+                form_data[key] = value
+        
+        # Process withdrawal notification
+        withdrawal_info = await coinpayments_service.process_withdrawal_notification(form_data)
+        
+        # Update withdrawal status in background
+        background_tasks.add_task(process_withdrawal_update, withdrawal_info)
+        
+        return {"success": True, "message": "Withdrawal webhook processed"}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"CoinPayments withdrawal webhook failed: {str(e)}")
+        raise HTTPException(status_code=500, detail="Webhook processing failed")
+
+async def process_deposit_credit(deposit_info: Dict[str, Any]):
+    """Background task to credit user account for confirmed deposits"""
+    try:
+        # Only credit when status is fully confirmed (100)
+        if deposit_info["status"] < 100:
+            logger.info(f"Deposit {deposit_info['transaction_id']} not yet confirmed: {deposit_info['status']}")
+            return
+        
+        # Find user by deposit address
+        deposit_address_record = await db.deposit_addresses.find_one({
+            "address": deposit_info["address"],
+            "currency": deposit_info["currency"]
+        })
+        
+        if not deposit_address_record:
+            logger.error(f"No user found for deposit address: {deposit_info['address']}")
+            return
+        
+        user_id = deposit_address_record["user_id"]
+        currency = deposit_info["currency"]
+        amount = Decimal(deposit_info["net_amount"])  # Use net amount after fees
+        
+        # Find user
+        user = await db.users.find_one({"_id": user_id}) or await db.users.find_one({"wallet_address": user_id})
+        if not user:
+            logger.error(f"User not found: {user_id}")
+            return
+        
+        # Credit deposit balance
+        current_balance = user.get("deposit_balance", {}).get(currency, 0)
+        new_balance = current_balance + float(amount)
+        
+        await db.users.update_one(
+            {"_id": user["_id"]},
+            {"$set": {f"deposit_balance.{currency}": new_balance}}
+        )
+        
+        # Record successful deposit
+        deposit_record = {
+            "user_id": user_id,
+            "wallet_address": user.get("wallet_address"),
+            "transaction_id": deposit_info["transaction_id"],
+            "deposit_id": deposit_info["deposit_id"],
+            "currency": currency,
+            "amount": float(amount),
+            "address": deposit_info["address"],
+            "status": "confirmed",
+            "confirmations": deposit_info["confirmations"],
+            "created_at": datetime.utcnow(),
+            "service": "coinpayments"
+        }
+        
+        await db.deposits.insert_one(deposit_record)
+        
+        logger.info(f"Successfully credited {amount} {currency} to user {user_id}")
+        
+    except Exception as e:
+        logger.error(f"Failed to process deposit credit: {str(e)}")
+
+async def process_withdrawal_update(withdrawal_info: Dict[str, Any]):
+    """Background task to update withdrawal status"""
+    try:
+        withdrawal_id = withdrawal_info["withdrawal_id"]
+        
+        # Update withdrawal status
+        await db.withdrawals.update_one(
+            {"withdrawal_id": withdrawal_id},
+            {"$set": {
+                "status": "completed" if withdrawal_info["status"] == 1 else "pending",
+                "transaction_id": withdrawal_info.get("transaction_id"),
+                "updated_at": datetime.utcnow()
+            }}
+        )
+        
+        logger.info(f"Updated withdrawal status: {withdrawal_id}")
+        
+    except Exception as e:
+        logger.error(f"Failed to process withdrawal update: {str(e)}")
+
 # Legacy endpoints
 @api_router.post("/status", response_model=StatusCheck)
 async def create_status_check(input: StatusCheckCreate):
