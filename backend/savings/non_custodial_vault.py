@@ -1,6 +1,6 @@
 """
-Non-Custodial Savings Vault System
-Implements real on-chain token transfers to secure addresses instead of database entries
+Non-Custodial Savings Vault System with CoinPayments Integration
+Implements real blockchain transfers to secure addresses for game losses
 """
 
 import os
@@ -11,6 +11,12 @@ import secrets
 from datetime import datetime, timedelta
 from typing import Dict, Any, Optional, List
 import aiohttp
+from decimal import Decimal
+
+# Import CoinPayments service for real transfers
+import sys
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from services.coinpayments_service import coinpayments_service
 
 class NonCustodialSavingsVault:
     """
