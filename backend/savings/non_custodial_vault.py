@@ -13,10 +13,24 @@ from typing import Dict, Any, Optional, List
 import aiohttp
 from decimal import Decimal
 
-# Import CoinPayments service for real transfers
+# Import CoinPayments service for real transfers (lazy import to avoid env var issues)
 import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from services.coinpayments_service import coinpayments_service
+
+# Lazy import of CoinPayments service
+coinpayments_service = None
+
+def get_coinpayments_service():
+    """Lazy import of CoinPayments service"""
+    global coinpayments_service
+    if coinpayments_service is None:
+        try:
+            from services.coinpayments_service import coinpayments_service as cp_service
+            coinpayments_service = cp_service
+        except Exception as e:
+            print(f"Warning: CoinPayments service not available: {e}")
+            coinpayments_service = None
+    return coinpayments_service
 
 class NonCustodialSavingsVault:
     """
