@@ -316,9 +316,16 @@ class ReviewRequestTester:
 
     async def test_loss_tracker_status(self):
         """Test 4: VERIFY LOSS TRACKER STATUS - Re-confirm loss tracker is working"""
+        if not self.auth_token:
+            self.log_test("Loss Tracker Status", False, "No JWT token available")
+            return
+            
         try:
+            headers = {"Authorization": f"Bearer {self.auth_token}"}
+            
             # Test the savings/loss tracker endpoint
-            async with self.session.get(f"{self.base_url}/savings/{self.test_wallet}") as response:
+            async with self.session.get(f"{self.base_url}/savings/{self.test_wallet}", 
+                                      headers=headers) as response:
                 if response.status == 200:
                     data = await response.json()
                     required_fields = ["success", "total_savings", "stats", "savings_history"]
@@ -349,7 +356,7 @@ class ReviewRequestTester:
                                     "Invalid loss tracker response format", data)
                 elif response.status == 403:
                     self.log_test("Loss Tracker Status", False, 
-                                "Authentication required for loss tracker endpoint")
+                                "Authentication failed for loss tracker endpoint")
                 else:
                     self.log_test("Loss Tracker Status", False, 
                                 f"HTTP {response.status}: {await response.text()}")
