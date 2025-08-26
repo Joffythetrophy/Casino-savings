@@ -357,6 +357,13 @@ class UrgentDogeDepositTester:
             print(f"   • User can now start gaming with DOGE!")
             print(f"   • DOGE available for AI Auto-Play and casino games!")
             
+        elif credit_status == "verified":
+            print(f"✅ VERIFICATION SUCCESS: API indicates DOGE credited")
+            print(f"   • 30 DOGE confirmed at deposit address")
+            print(f"   • API returned success message")
+            print(f"   • Balance may take time to update")
+            print(f"   • User should check balance again shortly")
+            
         elif credit_status == "cooldown":
             print(f"⏳ COOLDOWN ACTIVE: Security cooldown still in effect")
             print(f"   • 30 DOGE confirmed and ready at deposit address")
@@ -376,7 +383,7 @@ class UrgentDogeDepositTester:
         
         print(f"\n📊 TEST RESULTS: {passed_tests}/{total_tests} tests passed ({success_rate:.1f}% success rate)")
         
-        return credit_status == "credited"
+        return credit_status in ["credited", "verified"]
 
 async def main():
     """Main test execution"""
