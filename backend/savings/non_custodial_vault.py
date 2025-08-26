@@ -367,7 +367,7 @@ class NonCustodialSavingsVault:
     async def get_savings_vault_balance(self, user_wallet: str, currency: str) -> Dict[str, Any]:
         """Get real balance from user's non-custodial savings vault"""
         try:
-            savings_address = await self.generate_user_savings_address(user_wallet, currency)
+            savings_address = await self.get_or_create_vault_address(user_wallet, currency)
             
             if currency == "DOGE":
                 # Check real DOGE balance at savings address
