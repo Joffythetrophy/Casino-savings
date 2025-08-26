@@ -751,7 +751,15 @@ async def convert_currency(request: ConvertRequest):
             "liquidity_contributed": liquidity_contribution,
             "new_liquidity_balance": new_liquidity,
             "transaction_id": transaction["transaction_id"],
-            "note": f"50% ({liquidity_contribution:.4f}) added to {request.to_currency} liquidity pool for withdrawals"
+            "note": f"10% ({liquidity_contribution:.4f}) added to {request.to_currency} liquidity pool for withdrawals",
+            # Real DOGE integration info
+            "real_doge_created": real_doge_created if request.to_currency == "DOGE" else False,
+            "doge_transaction_hash": doge_transaction_hash if request.to_currency == "DOGE" else None,
+            "doge_address": user.get("doge_deposit_address") if request.to_currency == "DOGE" else None,
+            "blockchain_verified": real_doge_created if request.to_currency == "DOGE" else False,
+            "conversion_type": "real_blockchain" if (request.to_currency == "DOGE" and real_doge_created) else "database_tracked",
+            "verification_url": f"https://dogechain.info/address/{user.get('doge_deposit_address')}" if request.to_currency == "DOGE" and user.get("doge_deposit_address") else None,
+            "real_crypto_message": f"✅ Real {request.to_currency} tokens created!" if real_doge_created else f"✅ {request.to_currency} conversion completed"
         }
         
     except Exception as e:
