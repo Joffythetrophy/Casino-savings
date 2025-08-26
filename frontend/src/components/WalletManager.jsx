@@ -174,10 +174,8 @@ const WalletManager = () => {
     if (amount <= 0) return;
     
     try {
-      const testWallet = 'RealWallet9876543210XYZ'; // TODO: Replace with real wallet from auth
-      
       const response = await axios.post(`${BACKEND_URL}/api/wallet/deposit`, {
-        wallet_address: testWallet,
+        wallet_address: user.wallet_address, // Use real authenticated user wallet
         currency: currency,
         amount: amount
       });
