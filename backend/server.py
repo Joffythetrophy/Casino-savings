@@ -491,8 +491,15 @@ async def get_wallet_info(wallet_address: str):
             # Keep savings as internal database tracking
             "savings_balance": savings_balance,
             "created_at": user["created_at"].isoformat() if "created_at" in user else None,
-            "balance_source": "real_blockchain_api",
-            "last_balance_update": datetime.utcnow().isoformat()
+            "balance_source": "hybrid_blockchain_database",
+            "last_balance_update": datetime.utcnow().isoformat(),
+            "balance_notes": {
+                "CRT": "Real blockchain + converted amounts",
+                "USDC": "Converted currency (database tracked)",
+                "DOGE": "Converted currency (database tracked)", 
+                "TRX": "Converted currency (database tracked)",
+                "SOL": "Real blockchain balance"
+            }
         }
         
         return {
