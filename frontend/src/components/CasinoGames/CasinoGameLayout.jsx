@@ -6,6 +6,8 @@ import { useToast } from '../../hooks/use-toast';
 import { ArrowLeft, Coins, TrendingUp, TrendingDown } from 'lucide-react';
 import axios from 'axios';
 import MoneyTracker from './MoneyTracker';
+import BigLossTracker from './BigLossTracker';
+import GamingDepositManager from './GamingDepositManager';
 
 // CRT Token Component
 const CRTCoin = ({ size = 'w-8 h-8', className = '' }) => {
