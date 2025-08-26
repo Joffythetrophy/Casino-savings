@@ -174,6 +174,18 @@ const WalletManager = () => {
     if (amount <= 0) return;
     
     try {
+      // Get user from localStorage for real wallet address
+      const savedUser = localStorage.getItem('casino_user');
+      if (!savedUser) {
+        toast({
+          title: "❌ Error",
+          description: "User not logged in",
+          variant: "destructive"
+        });
+        return;
+      }
+      
+      const user = JSON.parse(savedUser);
       const response = await axios.post(`${BACKEND_URL}/api/wallet/deposit`, {
         wallet_address: user.wallet_address, // Use real authenticated user wallet
         currency: currency,
