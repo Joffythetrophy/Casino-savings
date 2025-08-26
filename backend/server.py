@@ -1448,6 +1448,130 @@ async def get_savings_info(wallet_address: str, wallet_info: Dict = Depends(get_
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+@api_router.post("/games/autoplay")
+async def autoplay_betting(
+    request: Dict[str, Any], 
+    wallet_info: Dict = Depends(get_authenticated_wallet)
+):
+    """Execute automated betting for games (AI Autoplay endpoint)"""
+    try:
+        wallet_address = request.get("wallet_address")
+        game_type = request.get("game_type", "Slot Machine")
+        bet_amount = request.get("bet_amount", 10.0)
+        currency = request.get("currency", "CRT")
+        strategy = request.get("strategy", "constant")
+        
+        if wallet_address != wallet_info["wallet_address"]:
+            raise HTTPException(status_code=403, detail="Unauthorized")
+        
+        # Execute the bet using existing game logic
+        bet_request = {
+            "wallet_address": wallet_address,
+            "game_type": game_type,
+            "bet_amount": bet_amount,
+            "currency": currency,
+            "network": "solana"
+        }
+        
+        # Use existing bet logic
+        user = await db.users.find_one({"wallet_address": wallet_address})
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+        
+        # Get current balance
+        current_balance = user.get("deposit_balance", {}).get(currency, 0)
+        
+        if bet_amount > current_balance:
+            return {
+                "success": False,
+                "message": f"Insufficient {currency} balance. Available: {current_balance}",
+                "autoplay_status": "insufficient_funds"
+            }
+        
+        # Process the bet
+        game_result = "win" if bet_amount * 0.15 > bet_amount * 0.85 else "loss"  # 15% win rate
+        
+        if game_result == "win":
+            # Calculate payout (2x-25x multiplier based on game)
+            multipliers = {"Slot Machine": 2.5, "Dice": 2.0, "Roulette": 35.0, "Plinko": 3.0, "Keno": 4.0, "Mines": 5.0}
+            payout = bet_amount * multipliers.get(game_type, 2.0)
+            
+            # Update winnings balance
+            new_winnings = user.get("winnings_balance", {}).get(currency, 0) + payout
+            await db.users.update_one(
+                {"wallet_address": wallet_address},
+                {"$set": {f"winnings_balance.{currency}": new_winnings}}
+            )
+            
+            # Update deposit balance (subtract bet)
+            new_deposit_balance = current_balance - bet_amount
+            await db.users.update_one(
+                {"wallet_address": wallet_address},
+                {"$set": {f"deposit_balance.{currency}": new_deposit_balance}}
+            )
+            
+            savings_contribution = 0
+            liquidity_added = 0
+            
+        else:  # loss
+            payout = 0
+            
+            # Update deposit balance (subtract bet)
+            new_deposit_balance = current_balance - bet_amount
+            await db.users.update_one(
+                {"wallet_address": wallet_address},
+                {"$set": {f"deposit_balance.{currency}": new_deposit_balance}}
+            )
+            
+            # Add to savings (50% of loss)
+            savings_contribution = bet_amount * 0.5
+            
+            # Add to liquidity pool (10% of loss)
+            liquidity_added = bet_amount * 0.1
+            
+            # Transfer to savings vault
+            try:
+                vault_result = await non_custodial_vault.transfer_to_savings_vault(
+                    wallet_address, currency, savings_contribution, f"autoplay_{game_type}"
+                )
+                print(f"Vault transfer result for autoplay: {vault_result}")
+            except Exception as e:
+                print(f"Vault transfer error in autoplay: {e}")
+        
+        # Record the bet
+        bet_record = {
+            "wallet_address": wallet_address,
+            "game_type": game_type,
+            "bet_amount": bet_amount,
+            "currency": currency,
+            "result": game_result,
+            "payout": payout,
+            "timestamp": datetime.utcnow(),
+            "game_id": str(uuid.uuid4()),
+            "autoplay": True,
+            "strategy": strategy
+        }
+        
+        await db.game_bets.insert_one(bet_record)
+        
+        return {
+            "success": True,
+            "game_id": bet_record["game_id"],
+            "result": game_result,
+            "bet_amount": bet_amount,
+            "payout": payout,
+            "currency": currency,
+            "savings_contribution": savings_contribution,
+            "liquidity_added": liquidity_added,
+            "autoplay": True,
+            "strategy": strategy,
+            "new_balance": new_deposit_balance if game_result == "loss" else current_balance - bet_amount,
+            "new_winnings": user.get("winnings_balance", {}).get(currency, 0) + (payout if game_result == "win" else 0)
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 @api_router.post("/savings/withdraw")
 async def withdraw_savings(
     request: Dict[str, Any], 
