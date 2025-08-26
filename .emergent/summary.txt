@@ -1,79 +1,100 @@
 <analysis>
-The AI engineer successfully built the Casino Savings dApp from MVP to a feature-rich application. Initial efforts focused on frontend replication, UI fixes, and integrating core features like a wallet manager, crypto conversion, and smart savings. A significant phase involved moving from mock data to real-time CoinGecko API for prices, implementing user authentication, and creating an internal liquidity pool with dynamic withdrawal limits. The latest work centered on integrating real blockchain capabilities for DOGE, TRON, and Solana (CRT). This included fixing authentication persistence, resolving environment variable issues, and correcting a critical  key mismatch that prevented savings data from displaying. The system was enhanced with manual deposit mechanisms, username login, and liquidity adjustments. The current state leaves off with the user reporting a persistent login failure after the latest changes to the liquidity logic. The previous engineer was just about to debug this.
+The previous AI engineer initiated development of a Casino Savings dApp. This trajectory details progress from core feature integration to robust blockchain capabilities and UI enhancements. Initially, the focus was on frontend replication, wallet management, crypto conversion, and smart savings. Significant work involved moving from mock data to real CoinGecko API, implementing user authentication, an internal liquidity pool, and real blockchain integration for DOGE, TRON, and Solana (CRT). The engineer meticulously addressed login failures, fake balance displays, incorrect CRT addresses, and simulated DOGE deposits. A crucial phase involved implementing an AI auto-play betting system across casino games. Most recently, the engineer tackled a critical bug regarding fake withdrawals. They had just begun implementing real blockchain withdrawals for all supported cryptocurrencies when the trajectory ended. The overall progress shows a complex dApp moving towards a fully decentralized, real-money system.
 </analysis>
 
 <product_requirements>
-The user requested a casino savings dApp, designed for private use without public stats. Core features include a comprehensive **Casino Gameplay** (Keno, Plinko, Roulette, Dice, Mines, Slots) with real betting. A **Real Savings System** tracks game losses and automatically saves them into a savings vault with detailed transaction history, free of mock data. **Advanced Wallet Management** supports separate winnings and savings wallets, deposit/withdrawal, and crypto conversion for CRT, DOGE, TRX, and USDC. A unique smart savings logic saves total session gains. An **Internal Liquidity Pool** allows conversions for gameplay without external liquidity, funded by 10% (later 50%) of savings, with dynamic withdrawal limits. The application needed **Real-Money Blockchain Integration** for DOGE, TRON, and Solana (CRT), transitioning from database-managed balances. User authentication, including a username login, and a manual deposit system to avoid conflicts were also implemented. A future request for an AI auto-play betting system remains pending.
+The dApp is a private casino savings application with no public stats. It features a full suite of Casino Games (Keno, Plinko, Roulette, Dice, Mines, Slots) with real betting. A Real Savings System automatically saves game losses to a non-custodial savings vault with transaction history. Advanced Wallet Management supports winnings and savings wallets, deposits/withdrawals, and crypto conversion for CRT, DOGE, TRX, and USDC. Smart savings logic saves total session gains. An Internal Liquidity Pool, funded by 10% of savings, allows gameplay conversions with dynamic withdrawal limits. Real-Money Blockchain Integration for DOGE, TRON, and Solana (CRT) was paramount, transitioning from database balances. User authentication, including username login, and a manual deposit system were implemented. Pending features include an AI auto-play betting system and later, real blockchain transfers for savings. Critical fixes included login, real DOGE address generation, accurate CRT integration, and ensuring real blockchain withdrawals.
 </product_requirements>
 
 <key_technical_concepts>
 -   **Full-stack Architecture**: React (frontend), FastAPI (backend), MongoDB.
 -   **Blockchain Integration**: Solana, Dogecoin, Tron (BlockCypher, TronGrid, Solana RPC).
 -   **UI/UX**: Shadcn UI, Tailwind CSS.
--   **API Integration**: CoinGecko (real-time crypto prices).
--   **Caching**: Redis.
--   **Authentication**: Custom user authentication, session management, bcrypt hashing.
--   **Custom Business Logic**: Smart Savings, Internal Liquidity Pool.
--   **Development Utilities**: Python-dotenv, Uvicorn, Supervisor.
+-   **API Integration**: CoinGecko.
+-   **Authentication**: Custom user auth, bcrypt hashing.
+-   **Custom Logic**: Smart Savings, Internal Liquidity Pool, AI Auto-Play, Non-Custodial Vault.
 </key_technical_concepts>
 
 <code_architecture>
 
--   ****
-    -   **Summary**: Main React router and application structure.
-    -   **Changes**: Updated conditional rendering of the  to ensure it's always available, wrapping the application with  for consistent session management across routes.
--   ****
-    -   **Summary**: Provides the layout and context for casino games.
-    -   **Changes**: Modified the internal  hook to fetch and manage the authenticated user's wallet data using the correct  key (). Integrated a  function to interact with the backend betting API.
--   ****
-    -   **Summary**: Specific game component for the slot machine.
-    -   **Changes**: Updated  function to utilize the  function provided by 's context, ensuring actual bets are sent to the backend.
--   ****
-    -   **Summary**: Displays the user's savings dashboard.
-    -   **Changes**: Refactored to fetch real savings data from the backend using an  hook. Corrected  key from  to  and fixed environment variable access ( to ) to ensure proper data fetching and display.
--   ****
-    -   **Summary**: Manages user registration and login.
-    -   **Changes**: Updated logic to save user data to  under the key . Enhanced the login form to support both wallet address and username login, including a UI toggle and conditional input fields.
+
 -   ****
     -   **Summary**: Main FastAPI backend, handling API routes, database, and business logic.
-    -   **Changes**:
-        -   **Blockchain Integration**: Expanded to include endpoints for real-time DOGE, TRON, and Solana (CRT) balance checks.
-        -   **Authentication**: Added  and  endpoints. The  endpoint was refactored to use bcrypt hashing and correctly check the  field, aligning with the reset functionality. The  endpoint was updated to accept a username.
-        -   **Wallet & Liquidity**: Modified wallet, deposit, withdrawal, and conversion endpoints for authentication and to interact with the internal liquidity pool. Conversion logic was adjusted to allow conversions for gameplay without liquidity restrictions, while maintaining withdrawal limits. The  function was fixed to correctly update  and contribute 10% (later adjusted to 50%) of losses to the liquidity pool. Added  endpoint to transfer a percentage of savings to liquidity.
-        -   **Deposit System**: Introduced manual deposit endpoints (, ) and deposit monitoring (, , ).
-        -   **Simulations**: Added  and  for testing.
+    -   **Changes**: Expanded with blockchain integrations (DOGE, TRON, Solana balance checks), updated authentication for username login and bcrypt, modified wallet/deposit/withdrawal/conversion endpoints to use real blockchain balances where possible, implemented manual deposit and deposit monitoring, refined liquidity pool contribution to 10%, integrated non-custodial savings vault (simulation), fixed game betting authentication, implemented real DOGE address generation, and started implementing real blockchain withdrawals by calling specific manager methods.
 -   ****
     -   **Summary**: Manages Dogecoin blockchain interactions.
-    -   **Changes**: Updated to use BlockCypher API for real DOGE balance fetching.
+    -   **Changes**: Updated to use BlockCypher API for real DOGE balance fetching, added  method for real withdrawals.
 -   ****
     -   **Summary**: Manages Solana blockchain interactions.
-    -   **Changes**: Updated to use Solana RPC for real CRT token integration, corrected to use the user's actual CRT token mint address ().
+    -   **Changes**: Corrected  usage, added  and  methods for real withdrawals (in progress).
 -   ****
     -   **Summary**: Manages Tron blockchain interactions.
-    -   **Changes**: Updated to use the real TRON API for TRX balance fetching.
+    -   **Changes**: Updated to use real TRON API for TRX balance fetching, added  method for real withdrawals.
+-   ****
+    -   **Summary**: New file for managing non-custodial savings vault functionality.
+    -   **Changes**: Created to include logic for generating deterministic vault addresses and simulating token transfers, with placeholders for real blockchain transfers.
+-   ****
+    -   **Summary**: Main React router and application structure.
+    -   **Changes**: Wrapped application with  for consistent session management.
+-   ****
+    -   **Summary**: Provides the layout and context for casino games.
+    -   **Changes**: Updated  hook to fetch authenticated user data, integrated  function for backend interaction, integrated , , , and  components. Refactored betting panel for multi-currency selection.
+-   ****
+    -   **Summary**: Specific game component for the slot machine.
+    -   **Changes**: Updated  to use  from context, integrated , and updated to properly use selected currency.
+-   ****
+    -   **Summary**: Specific game component for the Dice game.
+    -   **Changes**: Fixed HTML entities, updated to use  from context, integrated , and updated to properly use selected currency.
+-   ****
+    -   **Summary**: Manages user registration and login.
+    -   **Changes**: Updated logic to save user data to  under , enhanced login form, fixed login issue by adding .
+-   ****
+    -   **Summary**: Displays user's wallet balances and manages crypto operations.
+    -   **Changes**: Fixed hardcoded test wallet addresses, updated to use authenticated  for all transaction, withdrawal, and conversion functions.
+-   ****
+    -   **Summary**: New component for AI auto-play betting strategies.
+    -   **Changes**: Created to provide UI for configuring and starting auto-play.
+-   ****
+    -   **Summary**: New component for general money tracking visuals.
+    -   **Changes**: Created to provide enhanced visuals for profit/loss tracking.
+-   ****
+    -   **Summary**: New component for managing gaming-specific deposits.
+    -   **Changes**: Created to provide a separate UI for depositing funds from portfolio to game.
+-   ****
+    -   **Summary**: New component for a large, visual loss tracker.
+    -   **Changes**: Created to provide a prominent display for losses and savings.
 -   ****
     -   **Summary**: Backend environment variables.
-    -   **Changes**: Added , , and the corrected .
+    -   **Changes**: Added , , and corrected .
 -   ****
     -   **Summary**: Python dependencies.
-    -   **Changes**: Added ,  (with corrected version), , and  for password hashing.
+    -   **Changes**: Added , , , , .
 </code_architecture>
 
 <pending_tasks>
--   Implement the AI bets for me automatically / auto play on all game buttons feature.
--   Debug and fix the current Log in is not working bug reported by the user.
--   Further clarify user's intent regarding real doge not fake and fake crt for deposits, potentially setting up full blockchain-backed deposits instead of database credits if desired.
+-   Complete the implementation of real blockchain transfers for Solana (CRT/SPL tokens) in  for withdrawals.
+-   Implement real blockchain transfers for the non-custodial savings vault (currently simulated).
+-   Address any further refinements for visual displays and user experience as per user feedback (e.g., more clear savings details in the savings menu).
 </pending_tasks>
 
 <current_work>
-Immediately before this summary request, the AI engineer was actively engaged in troubleshooting a critical login issue. The user reported Log in is not working and reiterated Log in issues doesnt proceed. This occurred after a series of significant updates to the backend, including:
-1.  **Login System Overhaul**: The  had been updated to correctly handle bcrypt password hashing for user accounts ( with password ) and to support username-based login via the  endpoint.
-2.  **Liquidity Pool Adjustments**: The system was modified to allocate 50% of user savings to the liquidity pool (), and currency conversions were tested, showing the 50% contribution.
-3.  **DOGE Deposit System**: A manual DOGE credit system () was implemented and tested.
+Immediately before this summary request, the AI engineer was engaged in fixing critical issues related to the withdrawal system and ensuring all financial operations were backed by real blockchain transactions, not simulations. The user reported that a previously successful 500 USDC withdrawal to an external wallet did not actually occur. This led to a crucial realization by the AI engineer that the withdrawal system was fake/simulated.
 
-The last recorded actions show the AI checking the supervisor status to confirm the backend was running (which it was), and then planning to test the backend login API directly to debug the reported issue. The system's login functionality, which was previously working with the new  username, seems to have regressed after the latest liquidity and deposit-related changes, or there's a new interaction causing the failure.
+The AI engineer has committed to:
+1.  Refunding the user's 500 USDC balance.
+2.  Resetting USDC and CRT saved amounts as requested.
+3.  Implementing a real blockchain withdrawal system.
+4.  Adding proper blockchain transaction verification before reporting success.
+
+In response, the engineer has already started modifying the backend:
+-   's  function has been updated to call specific blockchain manager methods (, , , ) for each currency.
+-    has been updated with the  method for real DOGE transfers.
+-    has been updated with the  method for real TRX transfers.
+-   The engineer was in the process of adding the Solana-specific methods ( and ) to  when the trajectory ended.
+
+The system is currently in a state where real blockchain withdrawal logic is being actively integrated across multiple cryptocurrency managers to fulfill the user's request for genuine, verifiable transactions.
 </current_work>
 
 <optional_next_step>
-Test the backend login API directly to debug the Log in is not working issue.
+Complete adding the  and  methods to .
 </optional_next_step>

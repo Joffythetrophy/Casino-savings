@@ -9,7 +9,7 @@ import json
 from datetime import datetime
 from typing import Dict, Any, Optional
 
-BACKEND_URL = "https://winsaver.preview.emergentagent.com/api"
+BACKEND_URL = "https://cryptosavings.preview.emergentagent.com/api"
 
 class FinalVerificationTester:
     def __init__(self, base_url: str):

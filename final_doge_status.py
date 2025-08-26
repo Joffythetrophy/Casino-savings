@@ -8,7 +8,7 @@ import aiohttp
 import json
 from datetime import datetime, timedelta
 
-BACKEND_URL = "https://winsaver.preview.emergentagent.com/api"
+BACKEND_URL = "https://cryptosavings.preview.emergentagent.com/api"
 
 async def generate_final_status_report():
     """Generate comprehensive final status report for user"""
