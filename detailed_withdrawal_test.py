@@ -9,7 +9,7 @@ import aiohttp
 import json
 from datetime import datetime
 
-BACKEND_URL = "https://cryptosavings.preview.emergentagent.com/api"
+BACKEND_URL = "https://gamewin-vault.preview.emergentagent.com/api"
 
 class DetailedWithdrawalTester:
     def __init__(self):

@@ -4,7 +4,7 @@ import aiohttp
 import json
 
 async def check_doge_deposit_status():
-    BACKEND_URL = 'https://cryptosavings.preview.emergentagent.com/api'
+    BACKEND_URL = 'https://gamewin-vault.preview.emergentagent.com/api'
     user_wallet = 'DwK4nUM8TKWAxEBKTG6mWA6PBRDHFPA3beLB18pwCekq'
     doge_address = 'DLZccCAopg8SJYdmUWdjEkGq9t7boXMKMe'
     

@@ -66,7 +66,7 @@ async def test_withdrawal_reality():
         print(f"Testing ${small_amount} USDC withdrawal...")
         
         # Call the backend withdrawal API
-        backend_url = "https://cryptosavings.preview.emergentagent.com/api"
+        backend_url = "https://gamewin-vault.preview.emergentagent.com/api"
         
         withdrawal_data = {
             "wallet_address": user_wallet,

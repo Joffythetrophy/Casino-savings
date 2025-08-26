@@ -7,7 +7,7 @@ import asyncio
 import aiohttp
 import json
 
-BACKEND_URL = "https://cryptosavings.preview.emergentagent.com/api"
+BACKEND_URL = "https://gamewin-vault.preview.emergentagent.com/api"
 
 async def debug_doge_response():
     user_wallet_address = "DwK4nUM8TKWAxEBKTG6mWA6PBRDHFPA3beLB18pwCekq"
