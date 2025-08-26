@@ -200,7 +200,7 @@ class NonCustodialSavingsVault:
             return tron_address
         except Exception as e:
             print(f"Error generating TRON savings address: {e}")
-            return self.master_savings_addresses["TRX"]
+            return "fallback_trx_address"
     
     async def _generate_solana_savings_address(self, seed: bytes) -> str:
         """Generate deterministic Solana address from seed"""
