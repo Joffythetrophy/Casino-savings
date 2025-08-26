@@ -175,7 +175,7 @@ class NonCustodialSavingsVault:
             return doge_address
         except Exception as e:
             print(f"Error generating DOGE savings address: {e}")
-            return self.master_savings_addresses["DOGE"]
+            return "fallback_doge_address"
     
     async def _generate_tron_savings_address(self, seed: bytes) -> str:
         """Generate deterministic TRON address from seed"""
