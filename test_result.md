@@ -862,6 +862,21 @@ backend:
           agent: "testing"
           comment: "🎉 URGENT BUG INVESTIGATION COMPLETED SUCCESSFULLY! ✅ COMPREHENSIVE TESTING RESULTS (83.3% success rate - 10/12 tests passed): 1) ⚠️ AUTOPLAY SYSTEM: Backend ready for autoplay (10/10 rapid bets successful) but missing dedicated /api/games/autoplay endpoint - frontend needs autoplay UI implementation. 2) ✅ LOSS TRACKER: WORKING PERFECTLY - 77 losses tracked with 2,204 total saved, real-time tracking functional. 3) ✅ GAMING BALANCE: FUNCTIONAL - User has 523,200 gaming balance, transfer endpoints working properly. 4) ⚠️ WITHDRAWAL SYSTEM: Standard and vault withdrawals functional, but CoinPayments has API key issue (Invalid API public key error). 5) ✅ CURRENCY CONVERSION: WORKING - DOGE→CRT and DOGE→TRX conversions functional with real rates (DOGE→CRT=0.047, DOGE→TRX=0.456). 🎯 FINAL ASSESSMENT: Most reported issues are actually working correctly. User needs: A) Frontend autoplay UI implementation, B) CoinPayments API key fix, C) Verification that backend systems are functioning as expected."
 
+  - task: "URGENT: Real DOGE Withdrawal to CoinGate Address Testing"
+    implemented: true
+    working: false
+    file: "/app/backend/server.py"
+    stuck_count: 1
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: "NA"
+          agent: "testing"
+          comment: "🚨 URGENT REAL MONEY WITHDRAWAL REQUEST: Execute REAL external DOGE withdrawal for user cryptoking (DwK4nUM8TKWAxEBKTG6mWA6PBRDHFPA3beLB18pwCekq) to CoinGate address D85yb56oTYLCNPW7wuwUkevzEFQVSj4fda. Amount: 1000 DOGE test withdrawal. Current balance: 35,982,539.79 DOGE available. Test endpoints: /api/wallet/external-withdraw, /api/coinpayments/withdraw, and other withdrawal mechanisms. Authentication: cryptoking/crt21million."
+        - working: false
+          agent: "testing"
+          comment: "🚨 URGENT DOGE WITHDRAWAL TEST COMPLETED - CRITICAL ISSUES FOUND! ✅ AUTHENTICATION SUCCESS: User cryptoking successfully authenticated with wallet DwK4nUM8TKWAxEBKTG6mWA6PBRDHFPA3beLB18pwCekq and has 35,982,539.80 DOGE available for withdrawal (sufficient for 1000 DOGE request). ✅ COINGATE ADDRESS VALID: Destination address D85yb56oTYLCNPW7wuwUkevzEFQVSj4fda passes DOGE format validation (starts with D, 34 chars, valid format). ❌ CRITICAL WITHDRAWAL FAILURES: 1) CoinPayments API Error: 'Invalid API public key passed' - CoinPayments service configuration broken, 2) Standard Withdrawal Error: 'Invalid DOGE address format' despite CoinGate address being valid DOGE format, 3) Vault System Inaccessible: Cannot retrieve vault addresses for non-custodial withdrawals, 4) External Withdraw Endpoint: Does not exist (/api/wallet/external-withdraw not implemented). 🎯 FINAL ASSESSMENT: 4/7 tests passed (57.1% success rate). User has funds and valid destination but NO WITHDRAWAL METHODS WORKING. Requires immediate fixes to CoinPayments API key and DOGE address validation logic."
+
 metadata:
   created_by: "testing_agent"
   version: "1.0"
