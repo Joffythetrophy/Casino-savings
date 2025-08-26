@@ -54,9 +54,9 @@ class ReviewRequestTester:
         print(f"{status} {test_name}: {details}")
         
     async def authenticate_user(self):
-        """Authenticate with the specific user credentials"""
+        """Authenticate with the specific user credentials and get JWT token"""
         try:
-            # Login with username
+            # Step 1: Login with username to verify user exists
             login_payload = {
                 "username": self.test_username,
                 "password": self.test_password
@@ -66,18 +66,60 @@ class ReviewRequestTester:
                                        json=login_payload) as response:
                 if response.status == 200:
                     data = await response.json()
-                    if data.get("success"):
-                        self.log_test("User Authentication", True, 
-                                    f"Successfully authenticated as {self.test_username}")
-                        return True
-                    else:
+                    if not data.get("success"):
                         self.log_test("User Authentication", False, 
-                                    f"Authentication failed: {data.get('message')}")
+                                    f"Login failed: {data.get('message')}")
                         return False
                 else:
                     self.log_test("User Authentication", False, 
-                                f"HTTP {response.status}: {await response.text()}")
+                                f"Login HTTP {response.status}: {await response.text()}")
                     return False
+            
+            # Step 2: Get wallet authentication challenge
+            challenge_payload = {
+                "wallet_address": self.test_wallet,
+                "network": "solana"
+            }
+            
+            async with self.session.post(f"{self.base_url}/auth/challenge", 
+                                       json=challenge_payload) as response:
+                if response.status == 200:
+                    challenge_data = await response.json()
+                    if not challenge_data.get("success"):
+                        self.log_test("User Authentication", False, 
+                                    f"Challenge failed: {challenge_data}")
+                        return False
+                else:
+                    self.log_test("User Authentication", False, 
+                                f"Challenge HTTP {response.status}: {await response.text()}")
+                    return False
+            
+            # Step 3: Verify with mock signature to get JWT token
+            verify_payload = {
+                "challenge_hash": challenge_data.get("challenge_hash"),
+                "signature": "mock_signature_for_testing_purposes_12345",
+                "wallet_address": self.test_wallet,
+                "network": "solana"
+            }
+            
+            async with self.session.post(f"{self.base_url}/auth/verify", 
+                                       json=verify_payload) as response:
+                if response.status == 200:
+                    verify_data = await response.json()
+                    if verify_data.get("success") and verify_data.get("token"):
+                        self.auth_token = verify_data.get("token")
+                        self.log_test("User Authentication", True, 
+                                    f"Successfully authenticated as {self.test_username} with JWT token")
+                        return True
+                    else:
+                        self.log_test("User Authentication", False, 
+                                    f"JWT verification failed: {verify_data}")
+                        return False
+                else:
+                    self.log_test("User Authentication", False, 
+                                f"JWT verification HTTP {response.status}: {await response.text()}")
+                    return False
+                    
         except Exception as e:
             self.log_test("User Authentication", False, f"Error: {str(e)}")
             return False
