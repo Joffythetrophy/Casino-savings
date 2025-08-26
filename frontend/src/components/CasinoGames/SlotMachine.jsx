@@ -67,8 +67,15 @@ const SlotMachine = ({ onBack }) => {
     return 0;
   };
 
-  const handleSpin = async (betAmount, currency = 'CRT') => {
-    if (spinning || betAmount <= 0) return { success: false, error: "Invalid bet conditions" };
+  const handleSpin = async (betAmount, currency) => {
+    if (spinning || betAmount <= 0 || !currency) {
+      toast({
+        title: "❌ Invalid Bet",
+        description: "Please select a currency and valid bet amount",
+        variant: "destructive"
+      });
+      return { success: false, error: "Invalid bet conditions" };
+    }
     
     setSpinning(true);
     
