@@ -253,11 +253,16 @@ class NonCustodialSavingsVault:
             
             # Check minimum transfer amount
             try:
-                currency_info = coinpayments_service.get_currency_info(currency)
-                min_withdrawal = Decimal(currency_info["min_withdrawal"])
-                
-                if transfer_amount < min_withdrawal:
-                    print(f"Amount {transfer_amount} {currency} below minimum {min_withdrawal}, saving to database")
+                cp_service = get_coinpayments_service()
+                if cp_service:
+                    currency_info = cp_service.get_currency_info(currency)
+                    min_withdrawal = Decimal(currency_info["min_withdrawal"])
+                    
+                    if transfer_amount < min_withdrawal:
+                        print(f"Amount {transfer_amount} {currency} below minimum {min_withdrawal}, saving to database")
+                        return self._create_database_savings_record(user_wallet, currency, amount, bet_id, vault_address)
+                else:
+                    print("CoinPayments service not available, saving to database")
                     return self._create_database_savings_record(user_wallet, currency, amount, bet_id, vault_address)
                     
             except Exception as e:
