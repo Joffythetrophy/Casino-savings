@@ -855,7 +855,7 @@ test_plan:
 backend:
   - task: "URGENT: Critical Balance Fixes Verification for User DwK4nUM8TKWAxEBKTG6mWA6PBRDHFPA3beLB18pwCekq"
     implemented: true
-    working: false
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
