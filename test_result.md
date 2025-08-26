@@ -57,8 +57,8 @@
 ##   test_priority: "high_first"  # or "sequential" or "stuck_first"
 ##
 ## agent_communication:
-##     -agent: "main"  # or "testing" or "user"
-##     -message: "Communication message between agents"
+##     -agent: "main"
+##     -message: "Implementing real blockchain withdrawal methods (send_spl_token, send_crt_token) for Solana and investigating CRT balance display bug where user sees 800K instead of 18 million CRT"
 
 # Protocol Guidelines for Main agent
 #
