@@ -58,7 +58,7 @@
 ##
 ## agent_communication:
 ##     -agent: "main"
-##     -message: "Implementing real blockchain withdrawal methods (send_spl_token, send_crt_token) for Solana and investigating CRT balance display bug where user sees 800K instead of 18 million CRT"
+##     -message: "MAJOR BREAKTHROUGH: Implemented real CoinPayments integration for genuine blockchain transfers! Added real deposit address generation, external withdrawals, and updated non-custodial vault to use CoinPayments API instead of simulations. This solves the core issue - we now have REAL blockchain transfers for DOGE, TRX, and USDC using legitimate CoinPayments service with provided credentials."
 
 # Protocol Guidelines for Main agent
 #
