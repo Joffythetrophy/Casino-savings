@@ -186,7 +186,13 @@ class ReviewRequestTester:
 
     async def test_external_withdrawal_endpoint(self):
         """Test 2: EXTERNAL WITHDRAWAL FIX - Test /api/wallet/external-withdraw endpoint"""
+        if not self.auth_token:
+            self.log_test("External Withdrawal Endpoint", False, "No JWT token available")
+            return
+            
         try:
+            headers = {"Authorization": f"Bearer {self.auth_token}"}
+            
             # Test the new external withdrawal endpoint
             payload = {
                 "wallet_address": self.test_wallet,
@@ -197,7 +203,7 @@ class ReviewRequestTester:
             }
             
             async with self.session.post(f"{self.base_url}/wallet/external-withdraw", 
-                                       json=payload) as response:
+                                       json=payload, headers=headers) as response:
                 if response.status == 200:
                     data = await response.json()
                     required_fields = ["success", "message", "transaction_id"]
