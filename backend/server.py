@@ -629,12 +629,19 @@ async def withdraw_funds(request: WithdrawRequest):
                     )
                 elif currency in ["CRT", "SOL"]:
                     # Real Solana blockchain transaction
-                    blockchain_result = await solana_manager.send_tokens(
-                        from_address=wallet_address,
-                        to_address=destination_address,
-                        amount=amount,
-                        token_type=currency
-                    )
+                    if currency == "CRT":
+                        blockchain_result = await solana_manager.send_crt_token(
+                            from_address=wallet_address,
+                            to_address=destination_address,
+                            amount=amount
+                        )
+                    else:  # SOL
+                        blockchain_result = await solana_manager.send_tokens(
+                            from_address=wallet_address,
+                            to_address=destination_address,
+                            amount=amount,
+                            token_type=currency
+                        )
                 elif currency == "USDC":
                     # Real USDC blockchain transaction (Solana USDC)
                     blockchain_result = await solana_manager.send_usdc(
