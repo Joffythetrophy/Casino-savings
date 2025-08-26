@@ -496,7 +496,7 @@ async def get_wallet_info(wallet_address: str):
             "wallet_address": user["wallet_address"],
             # REAL blockchain balances for deposit and winnings
             "deposit_balance": real_balances,
-            "winnings_balance": {"CRT": 0, "DOGE": 0, "TRX": 0, "SOL": 0},  # Winnings start at 0
+            "winnings_balance": user.get("winnings_balance", {"CRT": 0, "DOGE": 0, "TRX": 0, "USDC": 0}),
             # Keep savings as internal database tracking
             "savings_balance": savings_balance,
             "created_at": user["created_at"].isoformat() if "created_at" in user else None,
