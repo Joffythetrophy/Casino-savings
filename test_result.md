@@ -828,8 +828,10 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Non-Custodial Savings Vault System COMPLETED - All Features Working"
-    - "Real Blockchain Integration Verified"
+    - "URGENT: Critical Fixes Verification for User DwK4nUM8TKWAxEBKTG6mWA6PBRDHFPA3beLB18pwCekq - COMPLETED"
+    - "CRT Balance Display Fix - VERIFIED WORKING"
+    - "500 USDC Refund and Savings Reset - VERIFIED WORKING"
+    - "Real Blockchain Withdrawal Methods - VERIFIED WORKING"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
