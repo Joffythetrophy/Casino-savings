@@ -17,17 +17,17 @@ from passlib.context import CryptContext
 from savings.non_custodial_vault import non_custodial_vault
 from decimal import Decimal
 
+ROOT_DIR = Path(__file__).parent
+load_dotenv(ROOT_DIR / '.env')
+
 # Import blockchain managers
 from blockchain.solana_manager import SolanaManager, SPLTokenManager, CRTTokenManager
 from blockchain.tron_manager import TronManager, TronTransactionManager
 from blockchain.doge_manager import DogeManager, DogeTransactionManager
 from auth.wallet_auth import WalletAuthManager, get_authenticated_wallet, ChallengeRequest, VerifyRequest
 
-# Import CoinPayments service
+# Import CoinPayments service (after loading environment variables)
 from services.coinpayments_service import coinpayments_service
-
-ROOT_DIR = Path(__file__).parent
-load_dotenv(ROOT_DIR / '.env')
 
 # Initialize CoinGecko client for real-time prices
 cg = CoinGeckoAPI()
