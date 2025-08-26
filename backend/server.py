@@ -1572,6 +1572,104 @@ async def autoplay_betting(
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+@api_router.post("/wallet/external-withdraw")
+async def external_withdraw(
+    request: Dict[str, Any], 
+    wallet_info: Dict = Depends(get_authenticated_wallet)
+):
+    """Withdraw funds to external wallet address"""
+    try:
+        wallet_address = request.get("wallet_address")
+        currency = request.get("currency")
+        amount = float(request.get("amount", 0))
+        destination_address = request.get("destination_address")
+        
+        if wallet_address != wallet_info["wallet_address"]:
+            raise HTTPException(status_code=403, detail="Unauthorized")
+        
+        if not all([currency, amount, destination_address]):
+            raise HTTPException(status_code=400, detail="Missing required fields: currency, amount, destination_address")
+        
+        # Find user
+        user = await db.users.find_one({"wallet_address": wallet_address})
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+        
+        # Get total available balance (deposit + winnings)
+        deposit_balance = user.get("deposit_balance", {}).get(currency, 0)
+        winnings_balance = user.get("winnings_balance", {}).get(currency, 0)
+        total_balance = deposit_balance + winnings_balance
+        
+        if amount > total_balance:
+            return {
+                "success": False,
+                "message": f"Insufficient {currency} balance. Available: {total_balance}",
+                "available_balance": total_balance
+            }
+        
+        # Check minimum withdrawal amount
+        min_withdrawal = {"DOGE": 10, "TRX": 10, "USDC": 5, "CRT": 100}.get(currency, 1)
+        if amount < min_withdrawal:
+            return {
+                "success": False,
+                "message": f"Amount below minimum withdrawal: {min_withdrawal} {currency}"
+            }
+        
+        # Deduct from balances (prefer winnings first)
+        remaining_amount = amount
+        new_winnings_balance = winnings_balance
+        new_deposit_balance = deposit_balance
+        
+        if winnings_balance >= remaining_amount:
+            new_winnings_balance = winnings_balance - remaining_amount
+            remaining_amount = 0
+        else:
+            new_winnings_balance = 0
+            remaining_amount -= winnings_balance
+            new_deposit_balance = deposit_balance - remaining_amount
+        
+        # Update user balances
+        await db.users.update_one(
+            {"wallet_address": wallet_address},
+            {"$set": {
+                f"deposit_balance.{currency}": new_deposit_balance,
+                f"winnings_balance.{currency}": new_winnings_balance
+            }}
+        )
+        
+        # Create withdrawal record
+        withdrawal_record = {
+            "wallet_address": wallet_address,
+            "currency": currency,
+            "amount": amount,
+            "destination_address": destination_address,
+            "status": "processing",
+            "created_at": datetime.utcnow(),
+            "withdrawal_type": "external",
+            "transaction_id": str(uuid.uuid4())
+        }
+        
+        result = await db.withdrawals.insert_one(withdrawal_record)
+        
+        return {
+            "success": True,
+            "message": f"External withdrawal of {amount} {currency} initiated",
+            "withdrawal_id": str(result.inserted_id),
+            "transaction_id": withdrawal_record["transaction_id"],
+            "destination_address": destination_address,
+            "status": "processing",
+            "new_balances": {
+                "deposit": new_deposit_balance,
+                "winnings": new_winnings_balance,
+                "total": new_deposit_balance + new_winnings_balance
+            }
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 @api_router.post("/savings/withdraw")
 async def withdraw_savings(
     request: Dict[str, Any], 
