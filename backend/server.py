@@ -643,11 +643,13 @@ async def withdraw_funds(request: WithdrawRequest):
                             token_type=currency
                         )
                 elif currency == "USDC":
-                    # Real USDC blockchain transaction (Solana USDC)
-                    blockchain_result = await solana_manager.send_usdc(
+                    # Real USDC blockchain transaction (Solana SPL token)
+                    usdc_mint = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"  # USDC mint on Solana
+                    blockchain_result = await solana_manager.send_spl_token(
                         from_address=wallet_address,
                         to_address=destination_address,
-                        amount=amount
+                        amount=amount,
+                        token_mint=usdc_mint
                     )
                 else:
                     return {
