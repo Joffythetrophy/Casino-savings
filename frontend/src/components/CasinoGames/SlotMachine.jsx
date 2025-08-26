@@ -67,14 +67,14 @@ const SlotMachine = ({ onBack }) => {
     return 0;
   };
 
-  const handleSpin = async (betAmount) => {
-    if (spinning || betAmount > balance) return { success: false, error: "Invalid bet conditions" };
+  const handleSpin = async (betAmount, currency = 'CRT') => {
+    if (spinning || betAmount <= 0) return { success: false, error: "Invalid bet conditions" };
     
     setSpinning(true);
     
     try {
-      // Place real bet through backend API
-      const betResult = await placeBet('Slot Machine', betAmount);
+      // Place real bet through backend API with selected currency
+      const betResult = await placeBet('Slot Machine', betAmount, currency);
       
       if (!betResult.success) {
         toast({
@@ -106,11 +106,20 @@ const SlotMachine = ({ onBack }) => {
           const isWin = betResult.result === 'win';
           const payout = betResult.payout || 0;
           
+          // Currency symbols for display
+          const currencySymbols = {
+            'USDC': '$',
+            'DOGE': 'Ð', 
+            'TRX': 'T',
+            'CRT': 'C'
+          };
+          const symbol = currencySymbols[currency] || '';
+          
           if (isWin && payout > 0) {
             setLastWin(payout);
             toast({
               title: "🎉 Winner!",
-              description: `You won ${payout.toFixed(2)} CRT!`,
+              description: `You won ${symbol}${payout.toFixed(2)} ${currency}!`,
               duration: 5000
             });
             
@@ -127,7 +136,7 @@ const SlotMachine = ({ onBack }) => {
             
             toast({
               title: "💰 Saved to Vault!",
-              description: `Lost ${betAmount} CRT but saved ${savingsAdded.toFixed(2)} CRT to your vault! (+${liquidityAdded.toFixed(2)} to liquidity)`,
+              description: `Lost ${symbol}${betAmount} ${currency} but saved ${symbol}${savingsAdded.toFixed(2)} ${currency} to your vault! (+${symbol}${liquidityAdded.toFixed(2)} to liquidity)`,
               duration: 5000
             });
             
