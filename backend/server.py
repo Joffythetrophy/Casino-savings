@@ -4005,7 +4005,7 @@ class NOWPaymentsWithdrawalRequest(BaseModel):
     withdrawal_type: str = Field("standard", description="Withdrawal type: standard, winnings, savings")
 
 class MassWithdrawalRequest(BaseModel):
-    currency: str = Field(..., regex="^(DOGE|TRX|USDC)$", description="Currency for all withdrawals")
+    currency: str = Field(..., pattern="^(DOGE|TRX|USDC)$", description="Currency for all withdrawals")
     withdrawals: List[Dict[str, Any]] = Field(..., description="List of withdrawal objects")
     treasury_type: Optional[str] = Field(None, description="Treasury to use")
 
