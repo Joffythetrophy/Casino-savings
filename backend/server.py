@@ -3998,7 +3998,7 @@ from services.nowpayments_service import nowpayments_service
 # Pydantic models for NOWPayments
 class NOWPaymentsWithdrawalRequest(BaseModel):
     user_id: str = Field(..., description="User ID")
-    currency: str = Field(..., regex="^(DOGE|TRX|USDC)$", description="Currency code") 
+    currency: str = Field(..., pattern="^(DOGE|TRX|USDC)$", description="Currency code") 
     amount: Decimal = Field(..., gt=0, description="Withdrawal amount")
     destination_address: str = Field(..., description="External wallet address")
     treasury_type: Optional[str] = Field(None, description="Override treasury selection")
