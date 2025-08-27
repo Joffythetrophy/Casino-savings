@@ -40,4 +40,3 @@ coinpayments-py==0.1.0
 
 # NOWPayments Integration  
 nowpayments-api==1.0.0
-requests==2.31.0
