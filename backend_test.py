@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Casino Savings dApp Backend API Test Suite - Real Money Integration Testing
-Tests wallet management system for real money integration
+Casino Savings dApp Backend API Test Suite - NOWPayments Integration Testing
+Tests NOWPayments real blockchain withdrawal system with 3-treasury routing
 """
 
 import asyncio
@@ -14,6 +14,15 @@ from typing import Dict, Any, Optional
 
 # Get backend URL from frontend env
 BACKEND_URL = "https://gamewin-vault.preview.emergentagent.com/api"
+
+# Test credentials from review request
+TEST_CREDENTIALS = {
+    "username": "cryptoking",
+    "password": "crt21million", 
+    "wallet_address": "DwK4nUM8TKWAxEBKTG6mWA6PBRDHFPA3beLB18pwCekq",
+    "destination_address": "D85yb56oTYLCNPW7wuwUkevzEFQVSj4fda",
+    "test_amount": 10000  # 10,000 DOGE conversion test
+}
 
 class WalletAPITester:
     def __init__(self, base_url: str):
