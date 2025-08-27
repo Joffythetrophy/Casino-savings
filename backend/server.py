@@ -3988,6 +3988,318 @@ async def get_blockchain_transaction_status(txid: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+# Import NOWPayments service
+from services.nowpayments_service import nowpayments_service
+
+# =============================================================================
+# NOWPAYMENTS REAL BLOCKCHAIN WITHDRAWAL ENDPOINTS
+# =============================================================================
+
+# Pydantic models for NOWPayments
+class NOWPaymentsWithdrawalRequest(BaseModel):
+    user_id: str = Field(..., description="User ID")
+    currency: str = Field(..., regex="^(DOGE|TRX|USDC)$", description="Currency code") 
+    amount: Decimal = Field(..., gt=0, description="Withdrawal amount")
+    destination_address: str = Field(..., description="External wallet address")
+    treasury_type: Optional[str] = Field(None, description="Override treasury selection")
+    withdrawal_type: str = Field("standard", description="Withdrawal type: standard, winnings, savings")
+
+class MassWithdrawalRequest(BaseModel):
+    currency: str = Field(..., regex="^(DOGE|TRX|USDC)$", description="Currency for all withdrawals")
+    withdrawals: List[Dict[str, Any]] = Field(..., description="List of withdrawal objects")
+    treasury_type: Optional[str] = Field(None, description="Treasury to use")
+
+@api_router.post("/nowpayments/withdraw")
+async def nowpayments_withdraw(
+    request: NOWPaymentsWithdrawalRequest,
+    wallet_info: Dict = Depends(get_authenticated_wallet)
+):
+    """Execute REAL blockchain withdrawal using NOWPayments (3-Treasury System)"""
+    try:
+        # Verify user authentication
+        user = await db.users.find_one({"wallet_address": wallet_info["wallet_address"]})
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+        
+        # Check user balance (combine all wallet types)
+        deposit_balance = user.get("deposit_balance", {}).get(request.currency, 0)
+        winnings_balance = user.get("winnings_balance", {}).get(request.currency, 0) 
+        savings_balance = user.get("savings_balance", {}).get(request.currency, 0)
+        total_balance = deposit_balance + winnings_balance + savings_balance
+        
+        if float(request.amount) > total_balance:
+            return {
+                "success": False,
+                "message": f"Insufficient {request.currency} balance. Available: {total_balance}",
+                "available_balance": total_balance
+            }
+        
+        # Execute REAL NOWPayments withdrawal
+        payout_result = await nowpayments_service.create_payout(
+            recipient_address=request.destination_address,
+            amount=request.amount,
+            currency=request.currency,
+            user_id=request.user_id,
+            treasury_type=request.treasury_type
+        )
+        
+        if payout_result.get('success'):
+            # Deduct from user balances (prioritize winnings > deposit > savings)
+            remaining_amount = float(request.amount)
+            new_winnings = winnings_balance
+            new_deposit = deposit_balance
+            new_savings = savings_balance
+            
+            # Deduct from winnings first
+            if winnings_balance >= remaining_amount:
+                new_winnings = winnings_balance - remaining_amount
+                remaining_amount = 0
+            else:
+                new_winnings = 0
+                remaining_amount -= winnings_balance
+                
+                # Then from deposit
+                if deposit_balance >= remaining_amount:
+                    new_deposit = deposit_balance - remaining_amount
+                    remaining_amount = 0
+                else:
+                    new_deposit = 0
+                    remaining_amount -= deposit_balance
+                    
+                    # Finally from savings
+                    new_savings = savings_balance - remaining_amount
+            
+            # Update user balances
+            await db.users.update_one(
+                {"wallet_address": wallet_info["wallet_address"]},
+                {"$set": {
+                    f"deposit_balance.{request.currency}": new_deposit,
+                    f"winnings_balance.{request.currency}": new_winnings,
+                    f"savings_balance.{request.currency}": new_savings
+                }}
+            )
+            
+            # Record withdrawal transaction
+            withdrawal_record = {
+                "user_id": request.user_id,
+                "wallet_address": wallet_info["wallet_address"],
+                "payout_id": payout_result.get("payout_id"),
+                "withdrawal_id": payout_result.get("withdrawal_id"),
+                "currency": request.currency,
+                "amount": float(request.amount),
+                "destination_address": request.destination_address,
+                "treasury_used": payout_result.get("treasury_used"),
+                "treasury_name": payout_result.get("treasury_name"),
+                "status": "processing",
+                "blockchain_hash": payout_result.get("blockchain_hash"),
+                "transaction_hash": payout_result.get("transaction_hash"),
+                "verification_url": payout_result.get("verification_url"),
+                "network": payout_result.get("network"),
+                "created_at": datetime.utcnow(),
+                "service": "nowpayments",
+                "withdrawal_type": request.withdrawal_type
+            }
+            
+            result = await db.withdrawals.insert_one(withdrawal_record)
+            withdrawal_record["_id"] = str(result.inserted_id)
+            
+            return {
+                "success": True,
+                "message": f"REAL blockchain withdrawal of {request.amount} {request.currency} initiated",
+                "withdrawal": {
+                    "id": withdrawal_record["_id"],
+                    "payout_id": payout_result.get("payout_id"),
+                    "blockchain_hash": payout_result.get("blockchain_hash"),
+                    "transaction_hash": payout_result.get("transaction_hash"),
+                    "verification_url": payout_result.get("verification_url"),
+                    "currency": request.currency,
+                    "amount": str(request.amount),
+                    "destination_address": request.destination_address,
+                    "treasury_used": payout_result.get("treasury_name"),
+                    "network": payout_result.get("network"),
+                    "status": "processing"
+                },
+                "new_balances": {
+                    "deposit": new_deposit,
+                    "winnings": new_winnings,
+                    "savings": new_savings,
+                    "total": new_deposit + new_winnings + new_savings
+                },
+                "service": "nowpayments",
+                "method": "real_blockchain_withdrawal"
+            }
+            
+        else:
+            return {
+                "success": False,
+                "message": f"NOWPayments withdrawal failed: {payout_result.get('error')}",
+                "error_details": payout_result.get('error'),
+                "service": "nowpayments"
+            }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"NOWPayments withdrawal failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Withdrawal failed: {str(e)}")
+
+@api_router.post("/nowpayments/mass-withdraw")
+async def nowpayments_mass_withdraw(
+    request: MassWithdrawalRequest,
+    wallet_info: Dict = Depends(get_authenticated_wallet)
+):
+    """Execute mass REAL blockchain withdrawals using NOWPayments"""
+    try:
+        # Execute mass payout
+        result = await nowpayments_service.create_mass_payout(
+            withdrawals=request.withdrawals,
+            currency=request.currency,
+            treasury_type=request.treasury_type
+        )
+        
+        if result.get('success'):
+            # Record mass withdrawal
+            mass_record = {
+                "batch_id": result.get("batch_id"),
+                "currency": request.currency,
+                "total_amount": result.get("total_amount"),
+                "withdrawal_count": result.get("withdrawal_count"),
+                "treasury_used": result.get("treasury_name"),
+                "status": "processing",
+                "created_at": datetime.utcnow(),
+                "service": "nowpayments",
+                "method": "mass_payout"
+            }
+            
+            await db.mass_withdrawals.insert_one(mass_record)
+            
+            return {
+                "success": True,
+                "message": f"Mass withdrawal of {result.get('withdrawal_count')} transactions initiated",
+                "batch_info": result,
+                "service": "nowpayments"
+            }
+        else:
+            return {
+                "success": False,
+                "message": f"Mass withdrawal failed: {result.get('error')}",
+                "service": "nowpayments"
+            }
+        
+    except Exception as e:
+        logger.error(f"Mass withdrawal failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.get("/nowpayments/withdrawal-status/{payout_id}")
+async def get_nowpayments_withdrawal_status(payout_id: str):
+    """Get NOWPayments withdrawal status"""
+    try:
+        status = await nowpayments_service.get_payout_status(payout_id)
+        return {
+            "success": True,
+            "status": status
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.get("/nowpayments/currencies")
+async def get_nowpayments_currencies():
+    """Get available NOWPayments currencies"""
+    try:
+        currencies = await nowpayments_service.get_available_currencies()
+        currency_info = {}
+        
+        for currency in currencies:
+            try:
+                currency_info[currency] = nowpayments_service.get_currency_info(currency)
+            except:
+                pass
+        
+        return {
+            "success": True,
+            "currencies": currencies,
+            "currency_details": currency_info
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.get("/nowpayments/treasuries")
+async def get_treasury_info():
+    """Get information about treasury wallets"""
+    try:
+        treasuries = {}
+        for treasury_type in nowpayments_service.TREASURIES.keys():
+            treasuries[treasury_type] = nowpayments_service.get_treasury_info(treasury_type)
+        
+        return {
+            "success": True,
+            "treasuries": treasuries
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.post("/webhooks/nowpayments/payout")
+async def handle_nowpayments_payout_webhook(request: Request, background_tasks: BackgroundTasks):
+    """Handle NOWPayments payout status webhooks (IPN)"""
+    try:
+        # Get raw body for signature verification
+        body = await request.body()
+        body_str = body.decode('utf-8')
+        
+        # Get signature from headers
+        signature = request.headers.get('x-nowpayments-sig', '')
+        
+        # Verify signature
+        if not nowpayments_service.verify_ipn_signature(body_str, signature):
+            raise HTTPException(status_code=401, detail="Invalid signature")
+        
+        # Parse JSON data
+        ipn_data = json.loads(body_str)
+        
+        # Process notification
+        notification_info = await nowpayments_service.process_ipn_notification(ipn_data)
+        
+        # Update withdrawal status in background
+        background_tasks.add_task(process_nowpayments_status_update, notification_info)
+        
+        return {"success": True, "message": "Payout webhook processed"}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"NOWPayments payout webhook failed: {str(e)}")
+        raise HTTPException(status_code=500, detail="Webhook processing failed")
+
+async def process_nowpayments_status_update(notification_info: Dict[str, Any]):
+    """Background task to update withdrawal status from NOWPayments IPN"""
+    try:
+        payout_id = notification_info.get("payout_id")
+        status = notification_info.get("status")
+        tx_hash = notification_info.get("hash")
+        
+        if not payout_id:
+            return
+        
+        # Update withdrawal status
+        update_data = {
+            "status": "completed" if status == "finished" else status,
+            "updated_at": datetime.utcnow()
+        }
+        
+        if tx_hash:
+            update_data["blockchain_hash"] = tx_hash
+            update_data["transaction_hash"] = tx_hash
+        
+        await db.withdrawals.update_one(
+            {"payout_id": payout_id},
+            {"$set": update_data}
+        )
+        
+        logger.info(f"Updated NOWPayments withdrawal status: {payout_id} -> {status}")
+        
+    except Exception as e:
+        logger.error(f"Failed to process NOWPayments status update: {str(e)}")
+
 # Legacy endpoints
 @api_router.post("/status", response_model=StatusCheck)
 async def create_status_check(input: StatusCheckCreate):
