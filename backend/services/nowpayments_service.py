@@ -152,8 +152,8 @@ class NOWPaymentsService:
             result = await self._make_request('GET', '/currencies')
             currencies = result.get('currencies', [])
             
-            # Filter for supported currencies
-            supported = [curr for curr in currencies if curr in self.CURRENCIES.keys()]
+            # Filter for supported currencies (convert to uppercase for comparison)
+            supported = [curr.upper() for curr in currencies if curr.upper() in self.CURRENCIES.keys()]
             return supported
             
         except Exception as e:
