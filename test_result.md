@@ -1075,12 +1075,12 @@ metadata:
 
 test_plan:
   current_focus:
-    - "FINAL VERIFICATION COMPLETED - CRT Balance Issue Remains Critical"
-    - "All User-Requested Fixes Testing Complete (5/6 success criteria met)"
+    - "URGENT: Gaming Balance Menu Confusion Fix Testing"
+    - "DOGE Balance Display Simplification Required"
   stuck_tasks:
-    - "CRITICAL: CRT Balance Synchronization Issue - User Cannot Access 21M CRT"
+    - "Balance Display Simplicity - Too Many Currencies and Balance Types"
   test_all: false
-  test_priority: "stuck_first"
+  test_priority: "high_first"
 
 backend:
   - task: "REVIEW REQUEST: Test Autoplay Fix - /api/games/autoplay endpoint"
