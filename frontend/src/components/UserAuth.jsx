@@ -28,20 +28,29 @@ export const useAuth = () => {
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [authToken, setAuthToken] = useState(null);
   const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
   // Check for existing session on app start
   useEffect(() => {
     const savedUser = localStorage.getItem('casino_user');
     const savedToken = localStorage.getItem('auth_token');
+    
+    console.log('AuthProvider initializing:', { savedUser: !!savedUser, savedToken: !!savedToken });
+    
     if (savedUser && savedToken) {
       try {
         const userData = JSON.parse(savedUser);
         userData.auth_token = savedToken; // Include token in user data
         setUser(userData);
+        setAuthToken(savedToken);
+        console.log('AuthProvider: User and token restored successfully');
       } catch (e) {
+        console.error('AuthProvider: Error restoring session:', e);
         localStorage.removeItem('casino_user');
         localStorage.removeItem('auth_token');
+        setUser(null);
+        setAuthToken(null);
       }
     }
     setLoading(false);
