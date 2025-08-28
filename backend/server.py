@@ -1966,13 +1966,18 @@ async def login_with_username(request: UsernameLoginRequest):
         if not password_valid:
             return {"success": False, "message": "Invalid password"}
         
+        # Generate JWT token for authenticated user
+        jwt_token = auth_manager.create_jwt_token(user["wallet_address"], "multi-chain")
+        
         return {
             "success": True,
             "message": "Login successful",
             "user_id": user["user_id"],
             "username": user["username"],
             "wallet_address": user["wallet_address"],
-            "created_at": user["created_at"].isoformat()
+            "created_at": user["created_at"].isoformat(),
+            "token": jwt_token,
+            "expires_in": 86400  # 24 hours
         }
         
     except Exception as e:
