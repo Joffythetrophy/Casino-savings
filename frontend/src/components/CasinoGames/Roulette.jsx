@@ -108,7 +108,7 @@ const Roulette = ({ onBack }) => {
     return { totalWin, winningBets };
   };
 
-  const spin = async () => {
+  const spinWheel = async () => {
     if (spinning || Object.keys(bets).length === 0) return;
 
     setSpinning(true);
