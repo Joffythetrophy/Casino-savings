@@ -478,6 +478,146 @@ class BlockchainIntegrationTester:
                     
         except Exception as e:
             self.log_test("Production Readiness", False, f"❌ Exception: {str(e)}")
+
+    async def run_blockchain_integration_tests(self):
+        """Run complete blockchain integration test suite"""
+        print("🚀 FINAL BLOCKCHAIN INTEGRATION TEST - REAL CRYPTOCURRENCY WITHDRAWALS")
+        print(f"🔗 Testing against: {self.base_url}")
+        print(f"👤 User: {self.test_username}")
+        print(f"💰 Target: ${self.target_doge_amount * 0.304:.0f} USD DOGE payment to {self.target_doge_address}")
+        print("=" * 100)
+        
+        await self.setup_session()
+        
+        try:
+            # Step 1: Authentication
+            auth_success = await self.authenticate_user()
+            if not auth_success:
+                print("❌ Cannot proceed - authentication failed")
+                return False
+            
+            # Step 2: Get current balances
+            balances = await self.get_user_balances()
+            if not balances:
+                print("❌ Cannot proceed - balance verification failed")
+                return False
+            
+            # Check if user has sufficient DOGE for the $1000 payment
+            doge_balance = balances.get("DOGE", {}).get("total", 0)
+            required_doge = self.target_doge_amount
+            
+            if doge_balance < required_doge:
+                print(f"⚠️ WARNING: User has {doge_balance:,.0f} DOGE but needs {required_doge:,.0f} DOGE for $1000 payment")
+            else:
+                print(f"✅ User has sufficient DOGE: {doge_balance:,.0f} DOGE (needs {required_doge:,.0f})")
+            
+            # Step 3: Test blockchain manager integration
+            await self.test_blockchain_manager_integration()
+            
+            # Step 4: Execute REAL $1000 DOGE payment
+            doge_success = await self.test_real_doge_withdrawal_1000usd()
+            
+            # Step 5: Test treasury withdrawals
+            treasury_success = await self.test_treasury_withdrawals()
+            
+            # Step 6: Test production readiness
+            await self.test_production_readiness()
+            
+            print("=" * 100)
+            self.print_integration_summary()
+            
+            return doge_success or treasury_success  # Success if either works
+            
+        finally:
+            await self.cleanup_session()
+
+    def print_integration_summary(self):
+        """Print comprehensive integration test summary"""
+        total_tests = len(self.test_results)
+        passed_tests = sum(1 for result in self.test_results if result["status"] == "✅ PASS")
+        failed_tests = total_tests - passed_tests
+        
+        print(f"\n🎯 BLOCKCHAIN INTEGRATION TEST SUMMARY:")
+        print(f"📊 Total Tests: {total_tests}")
+        print(f"✅ Passed: {passed_tests}")
+        print(f"❌ Failed: {failed_tests}")
+        print(f"📈 Success Rate: {(passed_tests/total_tests*100):.1f}%")
+        
+        # Categorize critical components
+        components = {
+            "Authentication": False,
+            "Balance Verification": False,
+            "Real DOGE Payment": False,
+            "Treasury Withdrawals": False,
+            "Blockchain Manager": False,
+            "Production Readiness": False
+        }
+        
+        for result in self.test_results:
+            test_name = result["test"]
+            if result["status"] == "✅ PASS":
+                if "Authentication" in test_name:
+                    components["Authentication"] = True
+                elif "Balance" in test_name:
+                    components["Balance Verification"] = True
+                elif "DOGE Payment" in test_name or "Alternative DOGE" in test_name:
+                    components["Real DOGE Payment"] = True
+                elif "Treasury" in test_name and "Withdrawal" in test_name:
+                    components["Treasury Withdrawals"] = True
+                elif "Blockchain Manager" in test_name or "Multi-Currency" in test_name:
+                    components["Blockchain Manager"] = True
+                elif "Production" in test_name or "Security" in test_name:
+                    components["Production Readiness"] = True
+        
+        print(f"\n🔧 INTEGRATION COMPONENTS STATUS:")
+        for component, working in components.items():
+            status_icon = "✅" if working else "❌"
+            print(f"{status_icon} {component}: {'OPERATIONAL' if working else 'NEEDS ATTENTION'}")
+        
+        # Check for real blockchain transactions
+        real_transactions = [r for r in self.test_results if "transaction_hash" in str(r.get("data", "")) or "Hash:" in r.get("message", "")]
+        if real_transactions:
+            print(f"\n💎 REAL BLOCKCHAIN TRANSACTIONS EXECUTED:")
+            for result in real_transactions:
+                if result["status"] == "✅ PASS":
+                    print(f"   🔗 {result['test']}: {result['message']}")
+        
+        # Final assessment
+        critical_components = ["Authentication", "Real DOGE Payment", "Blockchain Manager"]
+        critical_working = sum(1 for comp in critical_components if components[comp])
+        
+        print(f"\n🎯 FINAL ASSESSMENT:")
+        if critical_working == len(critical_components):
+            print(f"✅ BLOCKCHAIN INTEGRATION COMPLETE! All critical components operational.")
+            print(f"🚀 System ready for real cryptocurrency transactions.")
+        elif critical_working >= 2:
+            print(f"⚠️ BLOCKCHAIN INTEGRATION MOSTLY COMPLETE ({critical_working}/{len(critical_components)} critical components working)")
+            print(f"🔧 Minor fixes needed for full production readiness.")
+        else:
+            print(f"❌ BLOCKCHAIN INTEGRATION INCOMPLETE ({critical_working}/{len(critical_components)} critical components working)")
+            print(f"🚨 Major fixes required before production deployment.")
+        
+        # Print failed tests for debugging
+        if failed_tests > 0:
+            print(f"\n❌ FAILED TESTS REQUIRING ATTENTION:")
+            for result in self.test_results:
+                if result["status"] == "❌ FAIL":
+                    print(f"   • {result['test']}: {result['message']}")
+
+async def main():
+    """Main test execution function"""
+    tester = BlockchainIntegrationTester()
+    success = await tester.run_blockchain_integration_tests()
+    
+    if success:
+        print(f"\n🎉 BLOCKCHAIN INTEGRATION TESTS COMPLETED SUCCESSFULLY!")
+        sys.exit(0)
+    else:
+        print(f"\n⚠️ BLOCKCHAIN INTEGRATION TESTS COMPLETED WITH ISSUES")
+        sys.exit(1)
+
+if __name__ == "__main__":
+    asyncio.run(main())
     
     async def cleanup_session(self):
         """Cleanup HTTP session"""
