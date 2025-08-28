@@ -404,7 +404,7 @@ backend:
     implemented: true
     working: false
     file: "/app/solana-program/casino-treasury/src/lib.rs"
-    stuck_count: 1
+    stuck_count: 2
     priority: "high"
     needs_retesting: false
     status_history:
@@ -417,6 +417,9 @@ backend:
         - working: false
           agent: "testing"
           comment: "🚨 CRITICAL FRONTEND INTEGRATION FAILURE - SMART CONTRACT TREASURY UI MISSING! ❌ COMPREHENSIVE TESTING RESULTS (0/6 frontend requirements failed): 1) ❌ Smart Contract Treasury Interface: NO treasury-specific UI components found in frontend - users cannot access treasury withdrawal options. 2) ❌ Treasury Status Display: NO treasury health monitoring, balance limits, or status information displayed to users. 3) ❌ Treasury-Backed USDC Withdrawal Flow: NO smart contract withdrawal interface - only standard external withdrawal exists (not treasury-backed). 4) ❌ Treasury Management UI (Admin): NO admin treasury controls, funding interface, or emergency pause/resume buttons in frontend. 5) ❌ Transaction History Integration: NO smart contract transaction records or blockchain signatures displayed in UI. 6) ❌ Green Tiger Theme Integration: Treasury features missing entirely, so no theme integration possible. 🎯 ROOT CAUSE: Backend treasury system fully implemented and working, but frontend has ZERO treasury integration. Users authenticated successfully (cryptoking/crt21million) but cannot access any treasury features through UI. Standard wallet interface exists with external withdrawal, but no treasury-backed options. 🚨 URGENT ACTION REQUIRED: Implement complete Smart Contract Treasury frontend integration including treasury status dashboard, smart contract withdrawal interface, admin controls, and transaction history display."
+        - working: false
+          agent: "testing"
+          comment: "🚨 CRITICAL SMART CONTRACT TREASURY FRONTEND TESTING COMPLETED - AUTHENTICATION & ROUTING ISSUES FOUND! ❌ COMPREHENSIVE TESTING RESULTS (3/8 requirements partially met): 1) ✅ Treasury Navigation: Treasury button (🐅 Treasury) found in header navigation with proper green tiger theme styling. 2) ✅ Green Tiger Theme Integration: Confirmed 17 tiger branding elements (🐅), 12 green theme elements, and 2 glow effects throughout the interface. 3) ✅ User Authentication: Successfully authenticated user 'cryptoking' with wallet address DwK4nUM8TKWAxEBKTG6mWA6PBRDHFPA3beLB18pwCekq visible in header. 4) ❌ CRITICAL ISSUE - Treasury Dashboard Loading: Treasury navigation exists but clicking leads to blank/loading state, treasury dashboard components not rendering properly. 5) ❌ Treasury-Backed Withdrawal Interface: Cannot access withdrawal forms due to dashboard loading issues. 6) ❌ Multi-Currency Treasury Features: Multi-currency support (USDC, SOL, USDT, DOGE, TRX) not accessible due to routing problems. 7) ❌ Admin Controls: Admin features for cryptoking user not accessible due to dashboard issues. 8) ❌ Wallet Manager Integration: Authentication state not maintained when navigating to /wallet route, showing 'Authentication Required' instead of treasury integration buttons. 🎯 ROOT CAUSE: Frontend treasury components exist (SmartContractTreasuryDashboard.jsx, MultiCurrencyTreasuryManager.jsx) but have authentication state persistence issues and routing problems preventing proper loading. The treasury route exists but components fail to render authenticated content. 🚨 URGENT FIXES NEEDED: 1) Fix authentication state persistence across routes, 2) Debug treasury dashboard component loading issues, 3) Ensure proper JWT token handling for treasury routes."
 
   - task: "Personal DOGE Address Integration with NOWPayments - Final Test"
     implemented: true
