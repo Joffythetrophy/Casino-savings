@@ -1012,15 +1012,11 @@ metadata:
 test_plan:
   current_focus:
     - "CRITICAL: CRT Balance Synchronization Issue - User Cannot Access 21M CRT"
-    - "User Reported Issues - Critical Gaming Functionality - TESTED"
-    - "Real-time Balance Updates - VERIFIED WORKING"
-    - "Multi-Currency Gameplay - VERIFIED WORKING"
-    - "Autoplay Functionality - VERIFIED WORKING (ALL 6 GAMES)"
-    - "Real-time Stats Tracking - VERIFIED WORKING"
+    - "User-Requested Fixes Comprehensive Testing - COMPLETED (84.2% success)"
   stuck_tasks:
     - "CRITICAL: CRT Balance Synchronization Issue - User Cannot Access 21M CRT"
   test_all: false
-  test_priority: "high_first"
+  test_priority: "stuck_first"
 
 backend:
   - task: "REVIEW REQUEST: Test Autoplay Fix - /api/games/autoplay endpoint"
