@@ -8,6 +8,9 @@ import CasinoLobby from "./components/CasinoLobby";
 import SavingsPage from "./components/SavingsPage";
 import TradingPage from "./components/TradingPage";
 import WalletManager from "./components/WalletManager";
+import PremiumDashboard from "./components/PremiumDashboard";
+import AdminControlPanel from "./components/AdminControlPanel";
+import ConversionHistoryTracker from "./components/ConversionHistoryTracker";
 import { AuthProvider, useAuth, AuthModal } from "./components/UserAuth";
 
 function AppContent() {
