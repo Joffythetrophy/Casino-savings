@@ -135,6 +135,54 @@ class NOWPaymentsWithdrawalTester:
         except Exception as e:
             self.log_test("🚀 REAL BLOCKCHAIN WITHDRAWAL", False, f"Error: {str(e)}")
 
+    async def test_mass_payout_functionality(self):
+        """Test mass payout functionality"""
+        try:
+            print(f"📦 Testing mass payout functionality")
+            
+            # Test mass payout with smaller amount
+            mass_payout_payload = {
+                "payouts": [
+                    {
+                        "wallet_address": TEST_DATA["casino_wallet"],
+                        "currency": "DOGE",
+                        "amount": 50,  # Smaller amount for mass payout
+                        "destination_address": TEST_DATA["whitelisted_doge_address"]
+                    }
+                ]
+            }
+            
+            async with self.session.post(f"{self.base_url}/nowpayments/mass-payout", 
+                                       json=mass_payout_payload) as response:
+                response_text = await response.text()
+                
+                if response.status == 200:
+                    try:
+                        data = json.loads(response_text)
+                        if data.get("success"):
+                            processed_payouts = data.get("processed_payouts", [])
+                            total_amount = data.get("total_amount", 0)
+                            
+                            self.log_test("Mass Payout Functionality", True, 
+                                        f"✅ Mass payout successful! Processed: {len(processed_payouts)} payouts, Total: {total_amount} DOGE", data)
+                        else:
+                            error_msg = data.get("error", "Unknown error")
+                            self.log_test("Mass Payout Functionality", False, 
+                                        f"❌ Mass payout failed: {error_msg}", data)
+                    except json.JSONDecodeError:
+                        self.log_test("Mass Payout Functionality", False, 
+                                    f"❌ Invalid JSON response: {response_text}")
+                        
+                elif response.status == 404:
+                    self.log_test("Mass Payout Functionality", False, 
+                                f"❌ Mass payout endpoint not implemented (404)")
+                else:
+                    self.log_test("Mass Payout Functionality", False, 
+                                f"❌ HTTP {response.status}: {response_text}")
+                    
+        except Exception as e:
+            self.log_test("Mass Payout Functionality", False, f"Error: {str(e)}")
+
     async def test_regular_withdrawal_with_external_address(self):
         """Test regular withdrawal with external address"""
         try:
@@ -143,7 +191,7 @@ class NOWPaymentsWithdrawalTester:
                 "wallet_type": "deposit",
                 "currency": "DOGE",
                 "amount": TEST_DATA["test_amount"],
-                "destination_address": TEST_DATA["personal_wallet"]
+                "destination_address": TEST_DATA["whitelisted_doge_address"]
             }
             
             async with self.session.post(f"{self.base_url}/wallet/withdraw", 
@@ -154,7 +202,7 @@ class NOWPaymentsWithdrawalTester:
                     
                     if "invalid doge address" in error_msg.lower():
                         self.log_test("Regular Withdrawal - Address Validation", False, 
-                                    f"❌ DOGE address validation bug: {error_msg} (Address {TEST_DATA['personal_wallet']} is valid mainnet DOGE)", data)
+                                    f"❌ DOGE address validation bug: {error_msg} (Address {TEST_DATA['whitelisted_doge_address']} is valid mainnet DOGE)", data)
                     elif "insufficient" in error_msg.lower():
                         self.log_test("Regular Withdrawal - Balance Check", True, 
                                     f"✅ Withdrawal balance check working: {error_msg}", data)
@@ -162,8 +210,13 @@ class NOWPaymentsWithdrawalTester:
                         self.log_test("Regular Withdrawal - Blockchain Integration", True, 
                                     f"✅ Blockchain integration attempted: {error_msg}", data)
                     elif data.get("success"):
-                        self.log_test("Regular Withdrawal - Success", True, 
-                                    f"✅ Withdrawal successful: {data.get('message')}", data)
+                        blockchain_hash = data.get("blockchain_transaction_hash")
+                        if blockchain_hash:
+                            self.log_test("Regular Withdrawal - Success", True, 
+                                        f"✅ Real blockchain withdrawal successful! Hash: {blockchain_hash}", data)
+                        else:
+                            self.log_test("Regular Withdrawal - Success", True, 
+                                        f"✅ Withdrawal successful: {data.get('message')}", data)
                     else:
                         self.log_test("Regular Withdrawal - Error", False, 
                                     f"Withdrawal error: {error_msg}", data)
