@@ -214,6 +214,7 @@ class DOGETreasuryWithdrawalTester:
                 return False
             
             withdrawal_data = {
+                "wallet_address": self.test_wallet,  # Added required field
                 "currency": "DOGE",
                 "amount": self.payment_amount,
                 "destination_address": self.destination_address,
