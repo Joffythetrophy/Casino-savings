@@ -368,10 +368,11 @@ const SmartContractTreasuryDashboard = ({ user, authToken }) => {
             </div>
 
             {/* Navigation Tabs */}
-            <div className="flex space-x-4 mb-6">
+            <div className="flex space-x-4 mb-6 overflow-x-auto">
                 {[
                     { id: 'overview', label: '📊 Overview', icon: Activity },
                     { id: 'withdraw', label: '💸 Withdraw', icon: ArrowUpRight },
+                    { id: 'multicurrency', label: '💱 Multi-Currency', icon: DollarSign },
                     { id: 'transactions', label: '📜 History', icon: Clock },
                     { id: 'admin', label: '⚙️ Admin', icon: Settings }
                 ].map(tab => (
