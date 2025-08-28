@@ -1,24 +1,35 @@
 #!/usr/bin/env python3
 """
-Final Verification Test - Confirm all urgent corrections and test blockchain withdrawal readiness
+FINAL VERIFICATION: All User-Requested Fixes Testing
+Tests all 6 user-requested fixes to ensure they are working properly
 """
 
 import asyncio
 import aiohttp
 import json
+import sys
 from datetime import datetime
 from typing import Dict, Any, Optional
 
 BACKEND_URL = "https://cryptoplay-8.preview.emergentagent.com/api"
 
+# Test credentials from review request
+TEST_CREDENTIALS = {
+    "username": "cryptoking",
+    "password": "crt21million", 
+    "wallet_address": "DwK4nUM8TKWAxEBKTG6mWA6PBRDHFPA3beLB18pwCekq"
+}
+
 class FinalVerificationTester:
     def __init__(self, base_url: str):
         self.base_url = base_url
         self.session: Optional[aiohttp.ClientSession] = None
-        self.target_wallet = "DwK4nUM8TKWAxEBKTG6mWA6PBRDHFPA3beLB18pwCekq"
-        self.target_username = "cryptoking"
-        self.target_password = "crt21million"
+        self.target_wallet = TEST_CREDENTIALS["wallet_address"]
+        self.target_username = TEST_CREDENTIALS["username"]
+        self.target_password = TEST_CREDENTIALS["password"]
         self.test_results = []
+        self.success_count = 0
+        self.total_tests = 0
         
     async def __aenter__(self):
         self.session = aiohttp.ClientSession()
