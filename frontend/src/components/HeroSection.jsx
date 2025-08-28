@@ -15,9 +15,14 @@ const HeroSection = () => {
         </h2>
         
         {/* Description */}
-        <p className="text-lg md:text-xl text-casino-green-100 leading-relaxed max-w-2xl mx-auto">
+        <p className="text-lg md:text-xl text-casino-green-100 leading-relaxed max-w-2xl mx-auto mb-12">
           Join the hunt in our premium casino where every play builds your treasure. Tiger-powered gaming with smart savings technology.
         </p>
+        
+        {/* CTA Button */}
+        <button className="btn-primary px-12 py-4 text-xl font-bold rounded-xl shadow-lg glow-green transform hover:scale-105 transition-all duration-300">
+          🐅 Start Hunting Fortune 🐅
+        </button>
         
         {/* Decorative elements */}
         <div className="absolute top-1/2 left-10 w-20 h-20 bg-casino-green-400/20 rounded-full blur-xl pulse-green"></div>
