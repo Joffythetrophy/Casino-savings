@@ -151,7 +151,8 @@ class AuthenticatedNOWPaymentsTester:
                 "currency": "DOGE",
                 "amount": TEST_CREDENTIALS["test_amount"],
                 "destination_address": TEST_CREDENTIALS["destination_address"],
-                "treasury_type": "treasury_2_liquidity"
+                "treasury_type": "treasury_2_liquidity",
+                "user_id": "cryptoking_test_user"
             }
             
             print(f"🚨 TESTING AUTHENTICATED WITHDRAWAL: {TEST_CREDENTIALS['test_amount']} DOGE")
