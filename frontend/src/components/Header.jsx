@@ -10,19 +10,19 @@ const Header = ({ isWalletConnected }) => {
   const isActive = (path) => location.pathname === path;
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-black/20 backdrop-blur-md border-b border-white/10">
+    <header className="fixed top-0 left-0 right-0 z-50 nav-green border-b border-casino-green-500/30">
       <div className="max-w-7xl mx-auto px-6 py-4">
         <div className="flex items-center justify-between">
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-3 group">
-            <div className="w-10 h-10 bg-gradient-to-r from-yellow-400 to-yellow-600 rounded-full flex items-center justify-center transform group-hover:scale-110 transition-transform duration-300">
-              <Coins className="w-6 h-6 text-black" />
+            <div className="w-10 h-10 bg-gradient-to-r from-casino-green-400 to-emerald-casino-500 rounded-full flex items-center justify-center transform group-hover:scale-110 transition-transform duration-300 glow-green">
+              <span className="text-2xl">🐅</span>
             </div>
             <div>
-              <h1 className="text-xl font-bold bg-gradient-to-r from-gold-400 via-yellow-500 to-gold-600 bg-clip-text text-transparent">
-                💎 JOFFY CASINO SAVER 💎
+              <h1 className="text-xl font-bold bg-gradient-to-r from-casino-green-400 via-emerald-casino-400 to-casino-green-500 bg-clip-text text-transparent">
+                🐅 CRT TIGER CASINO 🐅
               </h1>
-              <p className="text-xs text-gray-400">Million-Dollar Casino Empire</p>
+              <p className="text-xs text-casino-green-300">Hunt the Fortune</p>
             </div>
           </Link>
 
