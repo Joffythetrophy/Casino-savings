@@ -301,55 +301,51 @@ class NOWPaymentsCustodyTester:
     async def test_ipn_verification(self):
         """Test 7: Test IPN webhook signature validation"""
         try:
-            # Test IPN signature validation
+            # Test the IPN webhook endpoint directly (simulating NOWPayments callback)
             test_payload = '{"payout_id":"test123","status":"finished","amount":"50","currency":"doge"}'
             
-            # Generate valid signature
+            # Generate valid signature using the IPN secret
             valid_signature = hmac.new(
                 NEW_CREDENTIALS["ipn_secret"].encode('utf-8'),
                 test_payload.encode('utf-8'),
                 hashlib.sha512
             ).hexdigest()
             
-            # Test valid signature
-            ipn_test_payload = {
-                "payload": test_payload,
-                "signature": valid_signature
+            # Test webhook endpoint with valid signature
+            headers = {
+                "x-nowpayments-sig": valid_signature,
+                "Content-Type": "application/json"
             }
             
-            async with self.session.post(f"{self.base_url}/nowpayments/verify-ipn", 
-                                       json=ipn_test_payload) as response:
+            async with self.session.post(f"{self.base_url}/webhooks/nowpayments/payout", 
+                                       data=test_payload, headers=headers) as response:
                 if response.status == 200:
                     data = await response.json()
-                    if data.get("valid") == True:
-                        # Test invalid signature
-                        invalid_ipn_payload = {
-                            "payload": test_payload,
-                            "signature": "invalid_signature_12345"
+                    if data.get("success"):
+                        # Test with invalid signature
+                        invalid_headers = {
+                            "x-nowpayments-sig": "invalid_signature_12345",
+                            "Content-Type": "application/json"
                         }
                         
-                        async with self.session.post(f"{self.base_url}/nowpayments/verify-ipn", 
-                                                   json=invalid_ipn_payload) as invalid_response:
-                            if invalid_response.status == 200:
-                                invalid_data = await invalid_response.json()
-                                if invalid_data.get("valid") == False:
-                                    self.log_test("IPN Verification", True, 
-                                                "IPN signature validation working correctly", 
-                                                {"valid_signature": True, "invalid_signature": False})
-                                    return True
-                                else:
-                                    self.log_test("IPN Verification", False, 
-                                                "Invalid signature not properly rejected", invalid_data)
+                        async with self.session.post(f"{self.base_url}/webhooks/nowpayments/payout", 
+                                                   data=test_payload, headers=invalid_headers) as invalid_response:
+                            if invalid_response.status == 400:  # Should reject invalid signature
+                                self.log_test("IPN Verification", True, 
+                                            f"IPN signature validation working: valid accepted, invalid rejected", 
+                                            {"valid_response": data, "invalid_rejected": True})
+                                return True
                             else:
+                                invalid_data = await invalid_response.json()
                                 self.log_test("IPN Verification", False, 
-                                            f"Invalid signature test failed: HTTP {invalid_response.status}")
+                                            f"Invalid signature not properly rejected: HTTP {invalid_response.status}", invalid_data)
                     else:
                         self.log_test("IPN Verification", False, 
-                                    "Valid signature not accepted", data)
+                                    f"Valid signature not accepted: {data}", data)
                 else:
                     error_text = await response.text()
                     self.log_test("IPN Verification", False, 
-                                f"HTTP {response.status}: {error_text}")
+                                f"IPN webhook test failed: HTTP {response.status}: {error_text}")
         except Exception as e:
             self.log_test("IPN Verification", False, f"Error: {str(e)}")
         return False
