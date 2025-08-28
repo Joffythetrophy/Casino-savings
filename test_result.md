@@ -1147,11 +1147,11 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Smart Contract Treasury System for USDC Withdrawals"
+    - "REAL BLOCKCHAIN INTEGRATION SYSTEM - Comprehensive Cryptocurrency Transaction Testing"
   stuck_tasks:
-    - "Smart Contract Treasury System for USDC Withdrawals"
+    - "REAL BLOCKCHAIN INTEGRATION SYSTEM - Comprehensive Cryptocurrency Transaction Testing"
   test_all: false
-  test_priority: "stuck_first"
+  test_priority: "high_first"
 
 backend:
   - task: "URGENT: Gaming Balance Menu Confusion Fix"
