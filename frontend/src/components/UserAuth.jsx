@@ -116,6 +116,7 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     setUser(null);
     localStorage.removeItem('casino_user');
+    localStorage.removeItem('auth_token'); // Clear JWT token
   };
 
   return (
