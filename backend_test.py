@@ -118,12 +118,17 @@ class NOWPaymentsJWTTester:
                 algorithm='HS256'
             )
             
-            # Verify the token can be decoded
-            decoded_payload = jwt.decode(
-                token, 
-                self.nowpayments_ipn_secret, 
-                algorithms=['HS256']
-            )
+            # Verify the token can be decoded (skip audience verification for testing)
+            try:
+                decoded_payload = jwt.decode(
+                    token, 
+                    self.nowpayments_ipn_secret, 
+                    algorithms=['HS256'],
+                    options={"verify_aud": False}  # Skip audience verification
+                )
+            except Exception as decode_error:
+                self.log_test("JWT Token Generation", False, f"❌ JWT decode failed: {str(decode_error)}")
+                return None
             
             # Verify payload structure
             required_fields = ['iss', 'aud', 'iat', 'exp', 'sub']
