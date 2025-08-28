@@ -98,32 +98,35 @@ const CleanCasinoInterface = ({ userBalance }) => {
                         </p>
                         
                         {/* Donation Widget */}
-                        <div className="flex justify-center">
+                        <div className="flex justify-center border-2 border-casino-green-500/50 rounded-lg p-4 bg-casino-green-950/30">
                             <iframe 
                                 src="https://nowpayments.io/embeds/donation-widget?api_key=smart-savings-dapp" 
                                 width="300" 
                                 height="500" 
                                 frameBorder="0" 
                                 scrolling="no" 
-                                style={{overflow: 'hidden'}}
+                                style={{overflow: 'hidden', borderRadius: '8px'}}
                                 title="Donation Widget"
                             />
                         </div>
                         
-                        <p className="text-sm text-gray-400 mt-4">
-                            Target: 226,244 DOGE ($50,000 USD)
+                        <p className="text-sm text-casino-green-300 mt-4">
+                            Target: 226,244 DOGE ($50,000 USD) 🐅
                         </p>
                     </div>
                 </CardContent>
             </Card>
 
-            {/* Simple Instructions */}
+            {/* Simple Instructions - Green Theme */}
             <div className="text-center mt-8">
-                <div className="bg-blue-900/20 p-4 rounded-lg border border-blue-500/30">
-                    <h4 className="text-white font-bold mb-2">How to Play:</h4>
-                    <p className="text-sm text-gray-300">
-                        1. Click any game above → 2. Game opens → 3. Start playing with your DOGE balance
+                <div className="card-green p-6 rounded-xl border border-casino-green-500/40">
+                    <h4 className="text-casino-green-300 font-bold mb-3 text-lg">🎯 How to Play:</h4>
+                    <p className="text-sm text-casino-green-200">
+                        🐅 <strong>1.</strong> Click any game above → <strong>2.</strong> Game opens → <strong>3.</strong> Hunt big wins with your DOGE balance!
                     </p>
+                    <div className="mt-3 text-xs text-casino-green-400">
+                        🏆 May the Tiger bring you fortune! 🏆
+                    </div>
                 </div>
             </div>
         </div>
