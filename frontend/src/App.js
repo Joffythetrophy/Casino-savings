@@ -95,7 +95,7 @@ function AppContent() {
           </>
         ) : (
           <Routes>
-            <Route path="/" element={<StreamlinedGamingDashboard onNavigate={(section) => window.location.href = `/${section}`} onGameSelect={(gameId) => window.location.href = `/games`} />} />
+            <Route path="/" element={<MillionaireCasinoInterface onNavigate={(section) => window.location.href = `/${section}`} onGameSelect={(gameId) => window.location.href = `/games`} />} />
             <Route path="/games" element={<MillionaireCasinoInterface onNavigate={(section) => window.location.href = `/${section}`} onGameSelect={(gameId) => window.location.href = `/games`} />} />
             <Route path="/savings" element={<SavingsPage />} />
             <Route path="/trading" element={<TradingPage />} />
