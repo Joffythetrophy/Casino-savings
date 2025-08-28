@@ -68,12 +68,24 @@ const Header = ({ isWalletConnected }) => {
               to="/wallet" 
               className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-all duration-300 ${
                 isActive('/wallet') 
-                  ? 'bg-gold-500 text-black font-medium' 
-                  : 'text-gray-300 hover:text-gold-400 hover:bg-white/10'
+                  ? 'bg-casino-green-500 text-white font-medium glow-green' 
+                  : 'text-casino-green-200 hover:text-casino-green-400 hover:bg-casino-green-800/30'
               }`}
             >
               <Wallet className="w-4 h-4" />
               <span>Wallet</span>
+            </Link>
+            
+            <Link 
+              to="/treasury" 
+              className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-all duration-300 ${
+                isActive('/treasury') 
+                  ? 'bg-casino-green-500 text-white font-medium glow-green' 
+                  : 'text-casino-green-200 hover:text-casino-green-400 hover:bg-casino-green-800/30'
+              }`}
+            >
+              <Shield className="w-4 h-4" />
+              <span>🐅 Treasury</span>
             </Link>
             
             <Link 
