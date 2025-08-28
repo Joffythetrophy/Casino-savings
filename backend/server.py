@@ -1881,13 +1881,18 @@ async def register_user(request: RegisterRequest):
         
         result = await db.users.insert_one(user_data)
         
+        # Generate JWT token for new user
+        jwt_token = auth_manager.create_jwt_token(request.wallet_address, "multi-chain")
+        
         return {
             "success": True,
             "message": "User registered successfully",
             "user_id": user_data["user_id"],
             "username": username,
             "wallet_address": request.wallet_address,
-            "created_at": user_data["created_at"].isoformat()
+            "created_at": user_data["created_at"].isoformat(),
+            "token": jwt_token,
+            "expires_in": 86400  # 24 hours
         }
         
     except Exception as e:
