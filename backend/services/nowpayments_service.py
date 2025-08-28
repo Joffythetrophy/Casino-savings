@@ -274,8 +274,8 @@ class NOWPaymentsService:
                 ]
             }
             
-            # Execute payout
-            result = await self._make_request('POST', '/payout', payout_data)
+            # Execute payout with JWT authentication
+            result = await self._make_request('POST', '/payout', payout_data, require_jwt=True)
             
             # Extract payout information
             payout_info = {
