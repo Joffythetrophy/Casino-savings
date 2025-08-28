@@ -38,6 +38,7 @@ class NOWPaymentsCustodyTester:
         self.base_url = base_url
         self.session: Optional[aiohttp.ClientSession] = None
         self.test_results = []
+        self.auth_token: Optional[str] = None
         
     async def __aenter__(self):
         self.session = aiohttp.ClientSession()
