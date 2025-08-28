@@ -10,6 +10,8 @@ from typing import List, Dict, Any, Optional
 import uuid
 from datetime import datetime, timedelta
 import asyncio
+import aiohttp
+import subprocess
 import json
 from pycoingecko import CoinGeckoAPI
 import redis
