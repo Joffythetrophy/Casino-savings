@@ -76,6 +76,10 @@ class NOWPaymentsCustodyTester:
                     if (data.get("success") and 
                         data.get("username") == TEST_USER["username"] and
                         data.get("wallet_address") == TEST_USER["wallet_address"]):
+                        
+                        # Now get JWT token for API access
+                        await self.get_jwt_token()
+                        
                         self.log_test("User Authentication", True, 
                                     f"User {TEST_USER['username']} authenticated successfully", data)
                         return True
@@ -88,6 +92,39 @@ class NOWPaymentsCustodyTester:
                                 f"HTTP {response.status}: {error_text}")
         except Exception as e:
             self.log_test("User Authentication", False, f"Error: {str(e)}")
+        return False
+    
+    async def get_jwt_token(self):
+        """Get JWT token for API authentication"""
+        try:
+            # Step 1: Generate challenge
+            challenge_payload = {
+                "wallet_address": TEST_USER["wallet_address"],
+                "network": "solana"
+            }
+            
+            async with self.session.post(f"{self.base_url}/auth/challenge", 
+                                       json=challenge_payload) as response:
+                if response.status == 200:
+                    challenge_data = await response.json()
+                    if challenge_data.get("success"):
+                        # Step 2: Verify with mock signature (demo mode)
+                        verify_payload = {
+                            "challenge_hash": challenge_data.get("challenge_hash"),
+                            "signature": "mock_signature_for_nowpayments_test",
+                            "wallet_address": TEST_USER["wallet_address"],
+                            "network": "solana"
+                        }
+                        
+                        async with self.session.post(f"{self.base_url}/auth/verify", 
+                                                   json=verify_payload) as verify_response:
+                            if verify_response.status == 200:
+                                verify_data = await verify_response.json()
+                                if verify_data.get("success"):
+                                    self.auth_token = verify_data.get("token")
+                                    return True
+        except Exception as e:
+            print(f"JWT token generation failed: {e}")
         return False
     
     async def test_user_balance_verification(self):
