@@ -238,12 +238,7 @@ class DogeUsdcConversionTester:
                         rates = data.get("rates", {})
                         
                         # Look for DOGE to USDC rate
-                        doge_usdc_rate = None
-                        for rate_pair, rate_info in rates.items():
-                            if "DOGE" in rate_pair and "USDC" in rate_pair:
-                                if rate_pair == "DOGE_USDC":
-                                    doge_usdc_rate = rate_info.get("rate")
-                                    break
+                        doge_usdc_rate = rates.get("DOGE_USDC")
                         
                         if doge_usdc_rate:
                             # Calculate potential USDC from current DOGE
