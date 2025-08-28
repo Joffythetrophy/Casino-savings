@@ -403,13 +403,14 @@ class DOGETreasuryWithdrawalTester:
                 self.log_test("Internal Wallet Transfer", False, "❌ No authentication token available")
                 return False
             
-            # Transfer from savings to deposit for easier withdrawal
+            # Transfer from winnings and savings to deposit for easier withdrawal
+            # First try winnings to deposit
             transfer_data = {
                 "wallet_address": self.test_wallet,
-                "from_wallet_type": "savings",
+                "from_wallet_type": "winnings",
                 "to_wallet_type": "deposit", 
                 "currency": "DOGE",
-                "amount": self.payment_amount
+                "amount": 159.25  # Available winnings amount
             }
             
             headers = {"Authorization": f"Bearer {self.auth_token}"}
@@ -424,8 +425,26 @@ class DOGETreasuryWithdrawalTester:
                         transaction_id = data.get("transaction_id")
                         
                         self.log_test("Internal Wallet Transfer", True, 
-                                    f"✅ Internal transfer successful! Transaction ID: {transaction_id}", 
-                                    {"transaction_id": transaction_id, "amount": self.payment_amount, "from": "savings", "to": "deposit"})
+                                    f"✅ Internal transfer successful! Moved 159.25 DOGE from winnings to deposit. Transaction ID: {transaction_id}", 
+                                    {"transaction_id": transaction_id, "amount": 159.25, "from": "winnings", "to": "deposit"})
+                        
+                        # Now try to transfer from savings to deposit
+                        transfer_data2 = {
+                            "wallet_address": self.test_wallet,
+                            "from_wallet_type": "savings",
+                            "to_wallet_type": "deposit", 
+                            "currency": "DOGE",
+                            "amount": 1062.40  # Available savings amount
+                        }
+                        
+                        async with self.session.post(f"{self.base_url}/wallet/transfer", 
+                                                   json=transfer_data2, 
+                                                   headers=headers) as response2:
+                            data2 = await response2.json()
+                            
+                            if data2.get("success"):
+                                print(f"✅ Additional transfer: Moved 1,062.40 DOGE from savings to deposit")
+                            
                         return True
                     else:
                         error_msg = data.get("message", "Unknown error")
