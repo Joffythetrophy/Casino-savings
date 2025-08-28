@@ -481,6 +481,17 @@ const WalletManager = () => {
         {/* External Withdrawal Section - Moved to Bottom for Better Visibility */}
         {(type === 'winnings' || type === 'savings') && (
           <div className="mt-6 space-y-4">
+            {/* Treasury Smart Contract Withdrawal - Premium Option */}
+            <div className="flex justify-center mb-4">
+              <Button
+                onClick={() => navigate('/treasury')}
+                className="w-full bg-gradient-to-r from-casino-green-500 to-emerald-casino-600 hover:from-casino-green-600 hover:to-emerald-casino-700 text-white font-bold py-3 px-6 glow-green shadow-lg"
+              >
+                <Shield className="w-5 h-5 mr-2" />
+                🐅 Smart Contract Treasury Withdrawal 🐅
+              </Button>
+            </div>
+            
             {/* External Withdrawal Toggle - Now at Bottom */}
             <div className="flex justify-center">
               <Button
