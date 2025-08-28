@@ -93,7 +93,8 @@ function AppContent() {
           </>
         ) : (
           <Routes>
-            <Route path="/" element={
+            <Route path="/" element={<PremiumDashboard onNavigate={(section) => window.location.href = `/${section}`} />} />
+            <Route path="/games" element={
               <>
                 <HeroSection />
                 <CasinoLobby />
@@ -102,6 +103,9 @@ function AppContent() {
             <Route path="/savings" element={<SavingsPage />} />
             <Route path="/trading" element={<TradingPage />} />
             <Route path="/wallet" element={<WalletManager />} />
+            <Route path="/dashboard" element={<PremiumDashboard onNavigate={(section) => window.location.href = `/${section}`} />} />
+            <Route path="/admin" element={<AdminControlPanel />} />
+            <Route path="/history" element={<ConversionHistoryTracker />} />
           </Routes>
         )}
       </Router>
