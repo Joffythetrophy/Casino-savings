@@ -421,6 +421,8 @@ class USDCTokenManager:
                 
         except Exception as e:
             return {"success": False, "valid": False, "error": str(e)}
+
+class CRTTokenManager:
     def __init__(self, solana_manager: SolanaManager, spl_manager: SPLTokenManager):
         self.solana = solana_manager
         self.spl = spl_manager
