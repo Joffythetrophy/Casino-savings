@@ -1,41 +1,32 @@
 #!/usr/bin/env python3
 """
-FINAL COMPREHENSIVE NOWPayments Integration Test
-Tests all requirements from review request with complete credentials
+FINAL URGENT: NOWPayments Real Treasury Withdrawal Test
+Complete test with correct payload structure and authentication
 """
 
 import asyncio
 import aiohttp
 import json
-import hmac
-import hashlib
 from datetime import datetime
-from typing import Dict, Any
 
 BACKEND_URL = "https://cryptoplay-8.preview.emergentagent.com/api"
 
-# Complete credentials from review request
-CREDENTIALS = {
-    "api_key": "VGX32FH-V9G4T4Y-GRJDH33-SF0CWGP",
-    "public_key": "80887455-9f0c-4ad1-92ea-ee78511ced2b",
-    "ipn_secret": "JrjLnNYQV8vz6ee8uTW4rI8lMGsSYhGF",
-    "environment": "Production"
-}
-
-TEST_USER = {
+# Test credentials from review request
+TEST_CREDENTIALS = {
     "username": "cryptoking",
-    "password": "crt21million",
-    "wallet": "DwK4nUM8TKWAxEBKTG6mWA6PBRDHFPA3beLB18pwCekq",
-    "target_amount": 10000,
-    "destination": "D85yb56oTYLCNPW7wuwUkevzEFQVSj4fda",
-    "expected_balance": 34831540
+    "password": "crt21million", 
+    "casino_wallet": "DwK4nUM8TKWAxEBKTG6mWA6PBRDHFPA3beLB18pwCekq",
+    "treasury_wallet": "DLbWLzxq2mxE3Adzn9MFKQ6EBP8gTE5po8",
+    "test_amount": 1000  # 1,000 DOGE safe test amount
 }
 
-class FinalNOWPaymentsTest:
-    def __init__(self):
+class FinalNOWPaymentsTester:
+    def __init__(self, base_url: str):
+        self.base_url = base_url
         self.session = None
-        self.jwt_token = None
-        self.results = []
+        self.auth_token = None
+        self.user_id = None
+        self.test_results = []
         
     async def __aenter__(self):
         self.session = aiohttp.ClientSession()
@@ -45,490 +36,324 @@ class FinalNOWPaymentsTest:
         if self.session:
             await self.session.close()
     
-    def log_result(self, test_name: str, success: bool, details: str, data: Any = None):
-        """Log test result"""
+    def log_test(self, test_name: str, success: bool, details: str = "", response_data=None):
         result = {
             "test": test_name,
             "success": success,
             "details": details,
-            "data": data,
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.utcnow().isoformat(),
+            "response_data": response_data
         }
-        self.results.append(result)
-        status = "✅" if success else "❌"
+        self.test_results.append(result)
+        status = "✅ PASS" if success else "❌ FAIL"
         print(f"{status} {test_name}: {details}")
-        return success
-    
-    async def authenticate(self):
-        """Complete authentication flow"""
-        try:
-            # Step 1: User login
-            login_payload = {
-                "username": TEST_USER["username"],
-                "password": TEST_USER["password"]
-            }
-            
-            async with self.session.post(f"{BACKEND_URL}/auth/login-username", json=login_payload) as response:
-                if response.status != 200:
-                    return self.log_result("Authentication", False, f"Login failed: HTTP {response.status}")
-                
-                login_data = await response.json()
-                if not login_data.get("success"):
-                    return self.log_result("Authentication", False, f"Login failed: {login_data.get('message')}")
-            
-            # Step 2: Wallet challenge
-            challenge_payload = {
-                "wallet_address": TEST_USER["wallet"],
-                "network": "solana"
-            }
-            
-            async with self.session.post(f"{BACKEND_URL}/auth/challenge", json=challenge_payload) as response:
-                if response.status != 200:
-                    return self.log_result("Authentication", False, f"Challenge failed: HTTP {response.status}")
-                
-                challenge_data = await response.json()
-                if not challenge_data.get("success"):
-                    return self.log_result("Authentication", False, f"Challenge failed: {challenge_data}")
-                
-                challenge_hash = challenge_data.get("challenge_hash")
-            
-            # Step 3: JWT verification
-            verify_payload = {
-                "challenge_hash": challenge_hash,
-                "signature": "mock_signature_final_test",
-                "wallet_address": TEST_USER["wallet"],
-                "network": "solana"
-            }
-            
-            async with self.session.post(f"{BACKEND_URL}/auth/verify", json=verify_payload) as response:
-                if response.status != 200:
-                    return self.log_result("Authentication", False, f"Verification failed: HTTP {response.status}")
-                
-                verify_data = await response.json()
-                if not verify_data.get("success"):
-                    return self.log_result("Authentication", False, f"Verification failed: {verify_data}")
-                
-                self.jwt_token = verify_data.get("token")
-                return self.log_result("Authentication", True, f"Complete authentication successful for {TEST_USER['username']}")
-                
-        except Exception as e:
-            return self.log_result("Authentication", False, f"Error: {str(e)}")
-    
-    async def test_1_complete_nowpayments_integration(self):
-        """Test 1: Complete NOWPayments Integration with full credentials"""
-        try:
-            # Test direct NOWPayments API
-            headers = {'x-api-key': CREDENTIALS["api_key"], 'Content-Type': 'application/json'}
-            
-            async with self.session.get("https://api.nowpayments.io/v1/status", headers=headers) as response:
-                if response.status == 200:
-                    data = await response.json()
-                    if data.get("message") == "OK":
-                        api_success = True
-                    else:
-                        api_success = False
-                else:
-                    api_success = False
-            
-            # Test backend integration
-            async with self.session.get(f"{BACKEND_URL}/nowpayments/currencies") as response:
-                backend_success = response.status == 200
-            
-            # Test credentials format
-            creds_valid = (
-                len(CREDENTIALS["api_key"]) > 20 and
-                len(CREDENTIALS["public_key"]) == 36 and
-                len(CREDENTIALS["ipn_secret"]) == 32
-            )
-            
-            overall_success = api_success and backend_success and creds_valid
-            
-            return self.log_result(
-                "Complete NOWPayments Integration",
-                overall_success,
-                f"API: {api_success}, Backend: {backend_success}, Credentials: {creds_valid}",
-                {"api_key": CREDENTIALS["api_key"][:10] + "...", "environment": CREDENTIALS["environment"]}
-            )
-            
-        except Exception as e:
-            return self.log_result("Complete NOWPayments Integration", False, f"Error: {str(e)}")
-    
-    async def test_2_ipn_webhook_verification(self):
-        """Test 2: IPN Webhook Verification with complete IPN key"""
-        try:
-            # Test payload
-            test_payload = json.dumps({
-                "payout_id": "test_12345",
-                "status": "finished",
-                "currency": "DOGE",
-                "amount": str(TEST_USER["target_amount"]),
-                "hash": "test_blockchain_hash",
-                "address": TEST_USER["destination"]
-            })
-            
-            # Generate signature with complete 32-char key
-            signature = hmac.new(
-                CREDENTIALS["ipn_secret"].encode('utf-8'),
-                test_payload.encode('utf-8'),
-                hashlib.sha512
-            ).hexdigest()
-            
-            # Test signature verification
-            expected_signature = hmac.new(
-                CREDENTIALS["ipn_secret"].encode('utf-8'),
-                test_payload.encode('utf-8'),
-                hashlib.sha512
-            ).hexdigest()
-            
-            signature_valid = hmac.compare_digest(signature, expected_signature)
-            
-            # Test with invalid signature
-            invalid_signature = "invalid_signature_test"
-            invalid_check = not hmac.compare_digest(invalid_signature, expected_signature)
-            
-            success = signature_valid and invalid_check
-            
-            return self.log_result(
-                "IPN Webhook Verification",
-                success,
-                f"32-char key signature validation: Valid={signature_valid}, Invalid rejected={invalid_check}",
-                {"key_length": len(CREDENTIALS["ipn_secret"]), "signature_sample": signature[:16] + "..."}
-            )
-            
-        except Exception as e:
-            return self.log_result("IPN Webhook Verification", False, f"Error: {str(e)}")
-    
-    async def test_3_real_conversion_test(self):
-        """Test 3: Real 10,000 DOGE Conversion Test"""
-        if not self.jwt_token:
-            return self.log_result("Real Conversion Test", False, "No JWT token available")
         
+    async def authenticate_and_get_user_id(self):
+        """Authenticate user and get user_id"""
         try:
-            headers = {"Authorization": f"Bearer {self.jwt_token}"}
-            
-            # Test withdrawal endpoint
-            withdrawal_payload = {
-                "user_id": TEST_USER["username"],
-                "currency": "DOGE",
-                "amount": str(TEST_USER["target_amount"]),
-                "destination_address": TEST_USER["destination"],
-                "withdrawal_type": "standard"
+            # Step 1: Login to get user data
+            login_payload = {
+                "username": TEST_CREDENTIALS["username"],
+                "password": TEST_CREDENTIALS["password"]
             }
             
-            async with self.session.post(f"{BACKEND_URL}/nowpayments/withdraw", 
-                                       json=withdrawal_payload, headers=headers) as response:
+            async with self.session.post(f"{self.base_url}/auth/login-username", 
+                                       json=login_payload) as response:
                 if response.status == 200:
                     data = await response.json()
                     if data.get("success"):
-                        return self.log_result(
-                            "Real Conversion Test",
-                            True,
-                            f"10,000 DOGE conversion successful: {data.get('message')}",
-                            {"payout_id": data.get("withdrawal", {}).get("payout_id")}
-                        )
-                    elif "Insufficient" in data.get("message", ""):
-                        return self.log_result(
-                            "Real Conversion Test",
-                            True,
-                            f"Conversion blocked by balance check (expected): {data.get('message')}"
-                        )
-                    elif "NOWPayments API request failed: 401" in data.get("message", ""):
-                        return self.log_result(
-                            "Real Conversion Test",
-                            True,
-                            "NOWPayments payout permissions need activation - system ready for activation",
-                            {"error_type": "payout_permission_required", "api_response": "401 Unauthorized"}
-                        )
-                    else:
-                        return self.log_result(
-                            "Real Conversion Test",
-                            False,
-                            f"Unexpected response: {data.get('message')}"
-                        )
-                else:
-                    return self.log_result(
-                        "Real Conversion Test",
-                        False,
-                        f"HTTP {response.status}: {await response.text()}"
-                    )
-                    
-        except Exception as e:
-            return self.log_result("Real Conversion Test", False, f"Error: {str(e)}")
-    
-    async def test_4_treasury_system(self):
-        """Test 4: Treasury System with 3-treasury routing"""
-        try:
-            async with self.session.get(f"{BACKEND_URL}/nowpayments/treasuries") as response:
-                if response.status == 200:
-                    data = await response.json()
-                    if data.get("success"):
-                        treasuries = data.get("treasuries", {})
+                        self.user_id = data.get("user_id")
                         
-                        # Check for 3 treasuries
-                        expected = ["treasury_1_savings", "treasury_2_liquidity", "treasury_3_winnings"]
-                        found = [t for t in expected if t in treasuries]
+                        # Step 2: Get JWT token for authenticated endpoints
+                        challenge_payload = {
+                            "wallet_address": TEST_CREDENTIALS["casino_wallet"],
+                            "network": "solana"
+                        }
                         
-                        if len(found) == 3:
-                            # Verify each treasury supports DOGE
-                            doge_support = []
-                            for treasury_key in found:
-                                treasury = treasuries[treasury_key]
-                                if "DOGE" in treasury.get("currencies", []):
-                                    doge_support.append(treasury.get("name"))
-                            
-                            success = len(doge_support) == 3
-                            return self.log_result(
-                                "Treasury System",
-                                success,
-                                f"3-Treasury routing configured: {doge_support}",
-                                {"treasuries": found, "doge_support": len(doge_support)}
-                            )
-                        else:
-                            return self.log_result(
-                                "Treasury System",
-                                False,
-                                f"Incomplete treasury system: {found}"
-                            )
+                        async with self.session.post(f"{self.base_url}/auth/challenge", 
+                                                   json=challenge_payload) as challenge_response:
+                            if challenge_response.status == 200:
+                                challenge_data = await challenge_response.json()
+                                
+                                verify_payload = {
+                                    "challenge_hash": challenge_data.get("challenge_hash"),
+                                    "signature": "mock_signature_for_testing",
+                                    "wallet_address": TEST_CREDENTIALS["casino_wallet"],
+                                    "network": "solana"
+                                }
+                                
+                                async with self.session.post(f"{self.base_url}/auth/verify", 
+                                                           json=verify_payload) as verify_response:
+                                    if verify_response.status == 200:
+                                        verify_data = await verify_response.json()
+                                        if verify_data.get("success"):
+                                            self.auth_token = verify_data.get("token")
+                        
+                        self.log_test("Authentication & User ID", True, 
+                                    f"User authenticated - ID: {self.user_id}, JWT: {'Yes' if self.auth_token else 'No'}", data)
+                        return True
                     else:
-                        return self.log_result("Treasury System", False, "Failed to get treasury data")
+                        self.log_test("Authentication & User ID", False, 
+                                    f"Login failed: {data.get('message')}", data)
                 else:
-                    return self.log_result("Treasury System", False, f"HTTP {response.status}")
-                    
+                    error_text = await response.text()
+                    self.log_test("Authentication & User ID", False, 
+                                f"HTTP {response.status}: {error_text}")
         except Exception as e:
-            return self.log_result("Treasury System", False, f"Error: {str(e)}")
+            self.log_test("Authentication & User ID", False, f"Error: {str(e)}")
+        return False
     
-    async def test_5_balance_integration(self):
-        """Test 5: Balance Integration (34,831,540 DOGE available)"""
+    async def test_balance_verification(self):
+        """Verify user has sufficient balance"""
         try:
-            async with self.session.get(f"{BACKEND_URL}/wallet/{TEST_USER['wallet']}") as response:
+            wallet_address = TEST_CREDENTIALS["casino_wallet"]
+            
+            async with self.session.get(f"{self.base_url}/wallet/{wallet_address}") as response:
                 if response.status == 200:
                     data = await response.json()
-                    if data.get("success"):
-                        wallet = data.get("wallet", {})
+                    if data.get("success") and "wallet" in data:
+                        wallet = data["wallet"]
                         deposit_balance = wallet.get("deposit_balance", {})
                         doge_balance = deposit_balance.get("DOGE", 0)
                         
-                        # Check if balance matches expected
-                        expected = TEST_USER["expected_balance"]
-                        variance = abs(doge_balance - expected) / expected if expected > 0 else 1
+                        test_amount = TEST_CREDENTIALS["test_amount"]
                         
-                        if variance < 0.01:  # Within 1%
-                            return self.log_result(
-                                "Balance Integration",
-                                True,
-                                f"DOGE balance confirmed: {doge_balance:,.0f} (expected: {expected:,.0f})",
-                                {"balance": doge_balance, "variance": f"{variance*100:.2f}%"}
-                            )
+                        if doge_balance >= test_amount:
+                            self.log_test("Balance Verification", True, 
+                                        f"Sufficient balance: {doge_balance:,.0f} DOGE (need {test_amount})", data)
                         else:
-                            return self.log_result(
-                                "Balance Integration",
-                                False,
-                                f"Balance mismatch: {doge_balance:,.0f} vs {expected:,.0f}"
-                            )
+                            self.log_test("Balance Verification", False, 
+                                        f"Insufficient balance: {doge_balance:,.0f} DOGE (need {test_amount})", data)
                     else:
-                        return self.log_result("Balance Integration", False, "Failed to get wallet data")
+                        self.log_test("Balance Verification", False, 
+                                    "Failed to retrieve wallet information", data)
                 else:
-                    return self.log_result("Balance Integration", False, f"HTTP {response.status}")
-                    
+                    error_text = await response.text()
+                    self.log_test("Balance Verification", False, 
+                                f"HTTP {response.status}: {error_text}")
         except Exception as e:
-            return self.log_result("Balance Integration", False, f"Error: {str(e)}")
+            self.log_test("Balance Verification", False, f"Error: {str(e)}")
     
-    async def test_6_error_handling(self):
-        """Test 6: Error Handling and payout permission requirements"""
-        if not self.jwt_token:
-            return self.log_result("Error Handling", False, "No JWT token available")
-        
+    async def test_nowpayments_withdrawal_complete(self):
+        """Test complete NOWPayments withdrawal with correct payload"""
         try:
-            headers = {"Authorization": f"Bearer {self.jwt_token}"}
-            error_tests = []
-            
-            # Test 1: Invalid currency
-            invalid_currency = {
-                "user_id": TEST_USER["username"],
-                "currency": "INVALID",
-                "amount": "100",
-                "destination_address": TEST_USER["destination"]
-            }
-            
-            async with self.session.post(f"{BACKEND_URL}/nowpayments/withdraw", 
-                                       json=invalid_currency, headers=headers) as response:
-                if response.status in [400, 422]:
-                    error_tests.append("invalid_currency_rejected")
-                elif response.status == 200:
-                    data = await response.json()
-                    if not data.get("success"):
-                        error_tests.append("invalid_currency_rejected")
-            
-            # Test 2: Excessive amount
-            excessive_amount = {
-                "user_id": TEST_USER["username"],
+            if not self.user_id:
+                self.log_test("NOWPayments Complete Withdrawal", False, 
+                            "No user_id available - authentication failed")
+                return
+                
+            headers = {"Content-Type": "application/json"}
+            if self.auth_token:
+                headers["Authorization"] = f"Bearer {self.auth_token}"
+                
+            # Correct payload structure based on NOWPaymentsWithdrawalRequest
+            withdrawal_payload = {
+                "user_id": self.user_id,
                 "currency": "DOGE",
-                "amount": "999999999",
-                "destination_address": TEST_USER["destination"]
+                "amount": TEST_CREDENTIALS["test_amount"],
+                "destination_address": TEST_CREDENTIALS["treasury_wallet"],
+                "treasury_type": "treasury_2_liquidity",  # Main treasury
+                "withdrawal_type": "standard"
             }
             
-            async with self.session.post(f"{BACKEND_URL}/nowpayments/withdraw", 
-                                       json=excessive_amount, headers=headers) as response:
+            print(f"🔄 Attempting withdrawal: {withdrawal_payload}")
+            
+            async with self.session.post(f"{self.base_url}/nowpayments/withdraw", 
+                                       json=withdrawal_payload, 
+                                       headers=headers) as response:
+                response_text = await response.text()
+                
                 if response.status == 200:
-                    data = await response.json()
-                    if not data.get("success") and "Insufficient" in data.get("message", ""):
-                        error_tests.append("excessive_amount_blocked")
-            
-            # Test 3: Payout permission check
-            valid_small_amount = {
-                "user_id": TEST_USER["username"],
-                "currency": "DOGE",
-                "amount": "1",
-                "destination_address": TEST_USER["destination"]
-            }
-            
-            async with self.session.post(f"{BACKEND_URL}/nowpayments/withdraw", 
-                                       json=valid_small_amount, headers=headers) as response:
-                if response.status == 200:
-                    data = await response.json()
-                    if "401" in data.get("message", "") or "Unauthorized" in data.get("message", ""):
-                        error_tests.append("payout_permission_detected")
-            
-            success = len(error_tests) >= 2  # At least 2 error handling tests passed
-            
-            return self.log_result(
-                "Error Handling",
-                success,
-                f"Error handling tests: {error_tests}",
-                {"tests_passed": error_tests, "payout_activation_needed": "payout_permission_detected" in error_tests}
-            )
-            
+                    try:
+                        data = json.loads(response_text)
+                        if data.get("success"):
+                            payout_id = data.get("payout_id")
+                            transaction_hash = data.get("blockchain_hash")
+                            amount = data.get("amount")
+                            self.log_test("NOWPayments Complete Withdrawal", True, 
+                                        f"🎉 WITHDRAWAL SUCCESSFUL! Payout ID: {payout_id}, Amount: {amount} DOGE, Hash: {transaction_hash}", data)
+                        else:
+                            error_msg = data.get("message", "Unknown error")
+                            if "401" in error_msg or "unauthorized" in error_msg.lower():
+                                self.log_test("NOWPayments Complete Withdrawal", False, 
+                                            f"❌ UNAUTHORIZED: {error_msg}", data)
+                            elif "payout permission" in error_msg.lower() or "bearer jwt" in error_msg.lower():
+                                self.log_test("NOWPayments Complete Withdrawal", False, 
+                                            f"❌ PAYOUT PERMISSIONS NOT ACTIVATED: {error_msg}", data)
+                            else:
+                                self.log_test("NOWPayments Complete Withdrawal", False, 
+                                            f"Withdrawal failed: {error_msg}", data)
+                    except json.JSONDecodeError:
+                        self.log_test("NOWPayments Complete Withdrawal", False, 
+                                    f"Invalid JSON response: {response_text}")
+                elif response.status == 401:
+                    self.log_test("NOWPayments Complete Withdrawal", False, 
+                                f"❌ 401 UNAUTHORIZED - Payout permissions not activated: {response_text}")
+                elif response.status == 403:
+                    self.log_test("NOWPayments Complete Withdrawal", False, 
+                                f"❌ 403 FORBIDDEN - Authentication required: {response_text}")
+                elif response.status == 422:
+                    self.log_test("NOWPayments Complete Withdrawal", False, 
+                                f"❌ 422 VALIDATION ERROR - Payload issue: {response_text}")
+                else:
+                    self.log_test("NOWPayments Complete Withdrawal", False, 
+                                f"HTTP {response.status}: {response_text}")
         except Exception as e:
-            return self.log_result("Error Handling", False, f"Error: {str(e)}")
+            self.log_test("NOWPayments Complete Withdrawal", False, f"Error: {str(e)}")
     
-    def generate_final_report(self):
-        """Generate comprehensive final report"""
-        total_tests = len(self.results)
-        passed_tests = sum(1 for r in self.results if r["success"])
+    async def test_direct_nowpayments_api(self):
+        """Test direct NOWPayments API to verify credentials"""
+        try:
+            # Test NOWPayments API directly
+            nowpayments_url = "https://api.nowpayments.io/v1/payout"
+            headers = {
+                "x-api-key": "FSVPHG1-1TK4MDZ-MKC4TTV-MW1MAXX",
+                "Content-Type": "application/json"
+            }
+            
+            payout_payload = {
+                "withdrawals": [
+                    {
+                        "address": TEST_CREDENTIALS["treasury_wallet"],
+                        "currency": "doge",
+                        "amount": TEST_CREDENTIALS["test_amount"]
+                    }
+                ]
+            }
+            
+            async with self.session.post(nowpayments_url, 
+                                       json=payout_payload, 
+                                       headers=headers) as response:
+                response_text = await response.text()
+                
+                if response.status == 200:
+                    try:
+                        data = json.loads(response_text)
+                        if "id" in data:
+                            self.log_test("Direct NOWPayments API", True, 
+                                        f"🎉 DIRECT API SUCCESS! Payout ID: {data.get('id')}", data)
+                        else:
+                            self.log_test("Direct NOWPayments API", False, 
+                                        f"Unexpected response format", data)
+                    except json.JSONDecodeError:
+                        self.log_test("Direct NOWPayments API", False, 
+                                    f"Invalid JSON: {response_text}")
+                elif response.status == 401:
+                    if "Bearer JWTtoken is required" in response_text:
+                        self.log_test("Direct NOWPayments API", False, 
+                                    f"❌ PAYOUT PERMISSIONS NOT ACTIVATED - Bearer JWT required: {response_text}")
+                    else:
+                        self.log_test("Direct NOWPayments API", False, 
+                                    f"❌ API key not authorized for payouts: {response_text}")
+                else:
+                    self.log_test("Direct NOWPayments API", False, 
+                                f"HTTP {response.status}: {response_text}")
+        except Exception as e:
+            self.log_test("Direct NOWPayments API", False, f"Error: {str(e)}")
+    
+    async def test_balance_after_attempts(self):
+        """Check balance after withdrawal attempts"""
+        try:
+            wallet_address = TEST_CREDENTIALS["casino_wallet"]
+            
+            async with self.session.get(f"{self.base_url}/wallet/{wallet_address}") as response:
+                if response.status == 200:
+                    data = await response.json()
+                    if data.get("success") and "wallet" in data:
+                        wallet = data["wallet"]
+                        deposit_balance = wallet.get("deposit_balance", {})
+                        doge_balance = deposit_balance.get("DOGE", 0)
+                        
+                        self.log_test("Balance After Attempts", True, 
+                                    f"Final balance: {doge_balance:,.0f} DOGE", data)
+                    else:
+                        self.log_test("Balance After Attempts", False, 
+                                    "Failed to retrieve wallet information", data)
+                else:
+                    error_text = await response.text()
+                    self.log_test("Balance After Attempts", False, 
+                                f"HTTP {response.status}: {error_text}")
+        except Exception as e:
+            self.log_test("Balance After Attempts", False, f"Error: {str(e)}")
+    
+    def print_final_summary(self):
+        """Print comprehensive final summary"""
+        print("\n" + "="*80)
+        print("🚨 FINAL URGENT: NOWPayments Real Treasury Withdrawal Test Results")
+        print("="*80)
+        
+        total_tests = len(self.test_results)
+        passed_tests = sum(1 for result in self.test_results if result["success"])
         success_rate = (passed_tests / total_tests * 100) if total_tests > 0 else 0
         
-        print("\n" + "="*80)
-        print("🎯 FINAL COMPREHENSIVE NOWPayments INTEGRATION TEST REPORT")
-        print("="*80)
+        print(f"📊 FINAL RESULTS: {passed_tests}/{total_tests} tests passed ({success_rate:.1f}% success)")
         
-        print(f"📊 OVERALL RESULTS: {passed_tests}/{total_tests} tests passed ({success_rate:.1f}%)")
+        # Check for successful withdrawals
+        withdrawal_success = any("WITHDRAWAL SUCCESSFUL" in r["details"] or "DIRECT API SUCCESS" in r["details"] 
+                               for r in self.test_results)
         
-        print("\n🔑 CREDENTIALS VERIFICATION:")
-        print(f"✅ API Key: {CREDENTIALS['api_key']} (Production)")
-        print(f"✅ Public Key: {CREDENTIALS['public_key']} (UUID format)")
-        print(f"✅ IPN Secret: {len(CREDENTIALS['ipn_secret'])} characters (Complete)")
-        print(f"✅ Environment: {CREDENTIALS['environment']}")
-        
-        print("\n📋 TEST RESULTS:")
-        for result in self.results:
-            status = "✅" if result["success"] else "❌"
-            print(f"{status} {result['test']}: {result['details']}")
-        
-        print(f"\n🎮 TEST SCENARIO SUMMARY:")
-        print(f"👤 User: {TEST_USER['username']}")
-        print(f"💰 Target Amount: {TEST_USER['target_amount']:,} DOGE")
-        print(f"📍 Destination: {TEST_USER['destination']}")
-        print(f"💳 Wallet: {TEST_USER['wallet']}")
-        print(f"💵 Expected Balance: {TEST_USER['expected_balance']:,} DOGE")
-        
-        print("\n🎯 SUCCESS CRITERIA EVALUATION:")
-        
-        criteria_met = []
-        for result in self.results:
-            if "Complete NOWPayments Integration" in result["test"] and result["success"]:
-                criteria_met.append("✅ Complete NOWPayments Integration")
-            elif "IPN Webhook Verification" in result["test"] and result["success"]:
-                criteria_met.append("✅ IPN Webhook Verification")
-            elif "Real Conversion Test" in result["test"] and result["success"]:
-                criteria_met.append("✅ Real Conversion Test")
-            elif "Treasury System" in result["test"] and result["success"]:
-                criteria_met.append("✅ Treasury System")
-            elif "Balance Integration" in result["test"] and result["success"]:
-                criteria_met.append("✅ Balance Integration")
-            elif "Error Handling" in result["test"] and result["success"]:
-                criteria_met.append("✅ Error Handling")
-        
-        for criterion in criteria_met:
-            print(criterion)
-        
-        # Check for payout activation message
-        payout_activation_needed = False
-        for result in self.results:
-            if "payout_permission" in str(result.get("data", {})) or "401" in result["details"]:
-                payout_activation_needed = True
-                break
-        
-        print(f"\n🏆 FINAL ASSESSMENT:")
-        if success_rate >= 80:
-            print("🎉 NOWPayments INTEGRATION READY!")
-            print("✅ All critical systems operational")
-            print("✅ Complete credentials configured")
-            print("✅ IPN signature validation working")
-            print("✅ 3-Treasury system configured")
-            print("✅ Balance integration confirmed")
-            
-            if payout_activation_needed:
-                print("\n⚠️  PAYOUT ACTIVATION REQUIRED:")
-                print("🔧 NOWPayments account needs payout permissions activated")
-                print("📞 Contact NOWPayments support to activate payout functionality")
-                print("✅ System is ready for activation - no code changes needed")
-            else:
-                print("✅ Ready for live blockchain transactions!")
-                
-        elif success_rate >= 60:
-            print("⚠️  NOWPayments INTEGRATION PARTIALLY READY")
-            print("🔧 Some components need attention")
+        print("\n🎯 CRITICAL ASSESSMENT:")
+        if withdrawal_success:
+            print("🎉 BREAKTHROUGH: NOWPayments withdrawals are NOW WORKING!")
+            print("   ✅ User can proceed with real treasury withdrawals")
+            print("   ✅ Payout permissions have been activated")
         else:
-            print("❌ NOWPayments INTEGRATION NOT READY")
-            print("🚨 Critical issues need resolution")
+            # Check specific failure reasons
+            payout_permission_issues = [r for r in self.test_results 
+                                      if "PAYOUT PERMISSIONS NOT ACTIVATED" in r["details"] 
+                                      or "Bearer JWT" in r["details"]]
+            
+            if payout_permission_issues:
+                print("⏳ PAYOUT PERMISSIONS STILL PENDING:")
+                print("   ❌ NOWPayments support has not yet activated payout permissions")
+                print("   ❌ API key FSVPHG1-1TK4MDZ-MKC4TTV-MW1MAXX needs payout activation")
+                print("   📞 Contact NOWPayments support to complete activation")
+            else:
+                print("🔧 TECHNICAL ISSUES DETECTED:")
+                print("   ❌ System configuration or validation problems")
+                print("   🔍 Manual investigation required")
+        
+        print("\n🔍 DETAILED TEST RESULTS:")
+        for i, result in enumerate(self.test_results, 1):
+            status = "✅" if result["success"] else "❌"
+            print(f"{i:2d}. {status} {result['test']}")
+            print(f"     {result['details']}")
+        
+        print("\n🎯 FINAL RECOMMENDATION:")
+        if withdrawal_success:
+            print("✅ PROCEED: Real treasury withdrawals are operational!")
+        else:
+            print("⏳ WAIT: Contact NOWPayments support to activate payout permissions")
+            print("   API Key: FSVPHG1-1TK4MDZ-MKC4TTV-MW1MAXX")
+            print("   Request: Activate payout/withdrawal permissions")
         
         print("="*80)
-        
-        return {
-            "total_tests": total_tests,
-            "passed_tests": passed_tests,
-            "success_rate": success_rate,
-            "payout_activation_needed": payout_activation_needed,
-            "ready_for_production": success_rate >= 80
-        }
 
-async def run_final_nowpayments_test():
-    """Run the final comprehensive NOWPayments test"""
-    print("🚀 FINAL COMPREHENSIVE NOWPayments INTEGRATION TEST")
-    print("="*80)
-    print("🎯 Testing complete NOWPayments integration with full credentials")
-    print("💰 Real blockchain withdrawals with 3-treasury routing")
-    print("🔐 Complete IPN key configuration and signature validation")
-    print("🎮 Live casino integration with real user balance")
-    print("="*80)
+async def main():
+    """Run final comprehensive NOWPayments test"""
+    print("🚨 FINAL URGENT: Complete NOWPayments Treasury Withdrawal Test")
+    print("Testing if payout permissions are finally activated for real withdrawals...")
+    print()
     
-    async with FinalNOWPaymentsTest() as tester:
-        # Authenticate first
-        await tester.authenticate()
+    async with FinalNOWPaymentsTester(BACKEND_URL) as tester:
+        # Step 1: Authenticate and get user ID
+        authenticated = await tester.authenticate_and_get_user_id()
         
-        # Run all critical tests
-        await tester.test_1_complete_nowpayments_integration()
-        await tester.test_2_ipn_webhook_verification()
-        await tester.test_3_real_conversion_test()
-        await tester.test_4_treasury_system()
-        await tester.test_5_balance_integration()
-        await tester.test_6_error_handling()
+        if authenticated:
+            # Step 2: Verify balance
+            await tester.test_balance_verification()
+            
+            # Step 3: Test NOWPayments withdrawal with correct payload
+            await tester.test_nowpayments_withdrawal_complete()
+            
+            # Step 4: Test direct NOWPayments API
+            await tester.test_direct_nowpayments_api()
+            
+            # Step 5: Check final balance
+            await tester.test_balance_after_attempts()
         
-        # Generate final report
-        summary = tester.generate_final_report()
-        
-        return summary
+        # Print comprehensive summary
+        tester.print_final_summary()
 
 if __name__ == "__main__":
-    try:
-        summary = asyncio.run(run_final_nowpayments_test())
-        
-        if summary["ready_for_production"]:
-            print("\n🎉 SUCCESS: NOWPayments integration ready for live blockchain transactions!")
-            if summary["payout_activation_needed"]:
-                print("📞 Next step: Activate payout permissions with NOWPayments")
-        else:
-            print("\n⚠️  Integration needs attention before going live")
-            
-    except Exception as e:
-        print(f"\n💥 Test failed: {str(e)}")
+    asyncio.run(main())
