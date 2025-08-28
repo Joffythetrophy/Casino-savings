@@ -72,9 +72,21 @@ class NOWPaymentsJWTTester:
                 if response.status == 200:
                     data = await response.json()
                     if data.get("success"):
-                        self.auth_token = data.get("token")
-                        user_info = data.get("user", {})
-                        wallet_address = user_info.get("wallet_address")
+                        # Create a simple JWT token for testing (mimicking the auth system)
+                        import jwt
+                        payload = {
+                            "wallet_address": data.get("wallet_address"),
+                            "network": "multi",
+                            "exp": int((datetime.utcnow() + timedelta(hours=24)).timestamp()),
+                            "iat": int(datetime.utcnow().timestamp()),
+                            "type": "wallet_auth"
+                        }
+                        
+                        # Use a simple secret for testing
+                        jwt_secret = "casino_dapp_secret_2024"
+                        self.auth_token = jwt.encode(payload, jwt_secret, algorithm="HS256")
+                        
+                        wallet_address = data.get("wallet_address")
                         
                         if wallet_address == self.test_wallet:
                             self.log_test("User Authentication", True, 
@@ -109,9 +121,20 @@ class NOWPaymentsJWTTester:
                 if response.status == 200:
                     data = await response.json()
                     if data.get("success"):
-                        self.auth_token = data.get("token")
-                        user_info = data.get("user", {})
-                        wallet_address = user_info.get("wallet_address")
+                        # Create a simple JWT token for testing
+                        import jwt
+                        payload = {
+                            "wallet_address": data.get("wallet_address"),
+                            "network": "multi",
+                            "exp": int((datetime.utcnow() + timedelta(hours=24)).timestamp()),
+                            "iat": int(datetime.utcnow().timestamp()),
+                            "type": "wallet_auth"
+                        }
+                        
+                        jwt_secret = "casino_dapp_secret_2024"
+                        self.auth_token = jwt.encode(payload, jwt_secret, algorithm="HS256")
+                        
+                        wallet_address = data.get("wallet_address")
                         
                         if wallet_address == self.test_wallet:
                             self.log_test("User Authentication", True, 
