@@ -113,12 +113,48 @@ class NOWPaymentsService:
             
         logger.info(f"NOWPayments service initialized ({'sandbox' if self.sandbox else 'production'} mode)")
     
-    def _get_headers(self) -> Dict[str, str]:
+    def _generate_jwt_token(self) -> str:
+        """Generate JWT token for NOWPayments payout authentication"""
+        try:
+            # JWT payload for NOWPayments
+            payload = {
+                'iss': self.api_key,  # Issuer (API key)
+                'aud': 'nowpayments',  # Audience
+                'iat': int(datetime.utcnow().timestamp()),  # Issued at
+                'exp': int((datetime.utcnow() + timedelta(minutes=30)).timestamp()),  # Expires in 30 minutes
+                'sub': 'payout'  # Subject (payout operations)
+            }
+            
+            # Sign JWT using the API key as secret
+            # NOWPayments typically uses the API key or IPN secret for signing
+            secret = self.ipn_secret if self.ipn_secret else self.api_key
+            
+            token = jwt.encode(
+                payload, 
+                secret, 
+                algorithm='HS256'
+            )
+            
+            logger.info("JWT token generated successfully for NOWPayments payout")
+            return token
+            
+        except Exception as e:
+            logger.error(f"JWT token generation failed: {str(e)}")
+            raise Exception(f"Failed to generate JWT token: {str(e)}")
+    
+    def _get_headers(self, include_jwt: bool = False) -> Dict[str, str]:
         """Get API headers with authentication"""
-        return {
+        headers = {
             'x-api-key': self.api_key,
             'Content-Type': 'application/json'
         }
+        
+        # Include JWT token for payout operations
+        if include_jwt:
+            jwt_token = self._generate_jwt_token()
+            headers['Authorization'] = f'Bearer {jwt_token}'
+        
+        return headers
     
     async def _make_request(self, method: str, endpoint: str, data: Dict = None) -> Dict[str, Any]:
         """Make authenticated API request to NOWPayments"""
