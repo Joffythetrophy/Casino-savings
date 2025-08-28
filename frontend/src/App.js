@@ -11,6 +11,7 @@ import WalletManager from "./components/WalletManager";
 import PremiumDashboard from "./components/PremiumDashboard";
 import AdminControlPanel from "./components/AdminControlPanel";
 import ConversionHistoryTracker from "./components/ConversionHistoryTracker";
+import StreamlinedGamingDashboard from "./components/StreamlinedGamingDashboard";
 import { AuthProvider, useAuth, AuthModal } from "./components/UserAuth";
 
 function AppContent() {
