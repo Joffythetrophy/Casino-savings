@@ -91,10 +91,16 @@ export const AuthProvider = ({ children }) => {
         const userData = {
           wallet_address: walletAddress,
           user_id: response.data.user_id,
-          created_at: response.data.created_at
+          username: response.data.username,
+          created_at: response.data.created_at,
+          auth_token: response.data.token
         };
         setUser(userData);
         localStorage.setItem('casino_user', JSON.stringify(userData));
+        // Store JWT token separately for API calls
+        if (response.data.token) {
+          localStorage.setItem('auth_token', response.data.token);
+        }
         return { success: true };
       } else {
         return { success: false, error: response.data.message };
