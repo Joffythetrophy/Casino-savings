@@ -49,6 +49,10 @@ class FinalVerificationTester:
             "response_data": response_data
         }
         self.test_results.append(result)
+        self.total_tests += 1
+        if success:
+            self.success_count += 1
+            
         status = "✅ PASS" if success else "❌ FAIL"
         print(f"{status} {test_name}: {details}")
 
