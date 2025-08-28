@@ -79,49 +79,61 @@ class NOWPaymentsWithdrawalTester:
         return False
 
     async def test_nowpayments_withdrawal_direct(self):
-        """Test direct NOWPayments withdrawal"""
+        """🚀 CRITICAL TEST: Real blockchain withdrawal to whitelisted address"""
         try:
+            print(f"🚀 CRITICAL TEST: Real blockchain withdrawal!")
+            print(f"   From: {TEST_DATA['casino_wallet']}")
+            print(f"   To: {TEST_DATA['whitelisted_doge_address']} (WHITELISTED!)")
+            print(f"   Amount: {TEST_DATA['test_amount']} DOGE")
+            
             # Test NOWPayments withdrawal endpoint
             withdrawal_payload = {
                 "wallet_address": TEST_DATA["casino_wallet"],
                 "currency": "DOGE",
                 "amount": TEST_DATA["test_amount"],
-                "destination_address": TEST_DATA["personal_wallet"]
+                "destination_address": TEST_DATA["whitelisted_doge_address"]
             }
             
             async with self.session.post(f"{self.base_url}/nowpayments/withdraw", 
                                        json=withdrawal_payload) as response:
+                response_text = await response.text()
+                
                 if response.status == 200:
-                    data = await response.json()
-                    if data.get("success"):
-                        self.log_test("NOWPayments Direct Withdrawal", True, 
-                                    f"✅ Withdrawal successful: {data.get('message')}", data)
-                    else:
-                        error_msg = data.get("message", "") or data.get("error", "")
-                        if "payout" in error_msg.lower() or "whitelist" in error_msg.lower():
-                            self.log_test("NOWPayments Direct Withdrawal", True, 
-                                        f"✅ EXPECTED: Withdrawal blocked by whitelisting - {error_msg}", data)
+                    try:
+                        data = json.loads(response_text)
+                        if data.get("success"):
+                            transaction_id = data.get("transaction_id", "")
+                            payout_id = data.get("payout_id", "")
+                            status = data.get("status", "")
+                            
+                            self.log_test("🚀 REAL BLOCKCHAIN WITHDRAWAL", True, 
+                                        f"✅ SUCCESS! Real withdrawal initiated! TX: {transaction_id}, Payout: {payout_id}, Status: {status}", data)
                         else:
-                            self.log_test("NOWPayments Direct Withdrawal", False, 
-                                        f"Unexpected withdrawal error: {error_msg}", data)
+                            error_msg = data.get("error", data.get("message", "Unknown error"))
+                            
+                            # Check if it's still the 401 error (whitelisting not complete)
+                            if "401" in str(error_msg) or "Bearer JWTtoken" in str(error_msg):
+                                self.log_test("🚀 REAL BLOCKCHAIN WITHDRAWAL", False, 
+                                            f"❌ STILL 401 ERROR: Payout permissions not yet activated! Error: {error_msg}", data)
+                            else:
+                                self.log_test("🚀 REAL BLOCKCHAIN WITHDRAWAL", False, 
+                                            f"❌ Withdrawal failed: {error_msg}", data)
+                    except json.JSONDecodeError:
+                        self.log_test("🚀 REAL BLOCKCHAIN WITHDRAWAL", False, 
+                                    f"❌ Invalid JSON response: {response_text}")
+                        
                 elif response.status == 401:
-                    data = await response.json()
-                    error_msg = data.get("detail", "")
-                    if "authorization" in error_msg.lower() or "bearer" in error_msg.lower():
-                        self.log_test("NOWPayments Direct Withdrawal", True, 
-                                    f"✅ EXPECTED: Payout permissions not activated - {error_msg}", data)
-                    else:
-                        self.log_test("NOWPayments Direct Withdrawal", False, 
-                                    f"Unexpected 401 error: {error_msg}", data)
+                    self.log_test("🚀 REAL BLOCKCHAIN WITHDRAWAL", False, 
+                                f"❌ 401 UNAUTHORIZED: Payout permissions still not activated! Response: {response_text}")
                 elif response.status == 404:
-                    self.log_test("NOWPayments Direct Withdrawal", False, 
-                                "NOWPayments withdrawal endpoint not implemented")
+                    self.log_test("🚀 REAL BLOCKCHAIN WITHDRAWAL", False, 
+                                f"❌ 404 NOT FOUND: NOWPayments withdrawal endpoint not implemented!")
                 else:
-                    self.log_test("NOWPayments Direct Withdrawal", False, 
-                                f"HTTP {response.status}: {await response.text()}")
+                    self.log_test("🚀 REAL BLOCKCHAIN WITHDRAWAL", False, 
+                                f"❌ HTTP {response.status}: {response_text}")
                     
         except Exception as e:
-            self.log_test("NOWPayments Direct Withdrawal", False, f"Error: {str(e)}")
+            self.log_test("🚀 REAL BLOCKCHAIN WITHDRAWAL", False, f"Error: {str(e)}")
 
     async def test_regular_withdrawal_with_external_address(self):
         """Test regular withdrawal with external address"""
