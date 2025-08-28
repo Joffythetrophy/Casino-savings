@@ -461,7 +461,130 @@ class DOGETreasuryWithdrawalTester:
             self.log_test("Internal Wallet Transfer", False, f"❌ Exception: {str(e)}")
             return False
     
-    async def verify_transaction_completion(self):
+    async def test_doge_address_validation(self):
+        """Test DOGE address validation"""
+        try:
+            print(f"🔍 Testing DOGE Address Validation")
+            
+            # Test the destination address format
+            address = self.destination_address
+            
+            # Basic DOGE address validation
+            is_valid_format = (
+                len(address) == 34 and 
+                address.startswith('D') and 
+                all(c in '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz' for c in address)
+            )
+            
+            if is_valid_format:
+                self.log_test("DOGE Address Validation", True, 
+                            f"✅ DOGE address {address} passes basic format validation (34 chars, starts with D, base58)", 
+                            {"address": address, "length": len(address), "format": "valid"})
+                return True
+            else:
+                self.log_test("DOGE Address Validation", False, 
+                            f"❌ DOGE address {address} fails format validation", 
+                            {"address": address, "length": len(address), "starts_with_D": address.startswith('D')})
+                return False
+                
+        except Exception as e:
+            self.log_test("DOGE Address Validation", False, f"❌ Exception: {str(e)}")
+            return False
+    
+    async def test_conversion_to_usdc_then_withdraw(self):
+        """Test converting DOGE to USDC then withdrawing USDC (alternative approach)"""
+        try:
+            print(f"💱 Testing DOGE to USDC Conversion + USDC Withdrawal (Alternative)")
+            
+            if not self.auth_token:
+                self.log_test("DOGE to USDC Conversion", False, "❌ No authentication token available")
+                return False
+            
+            # Convert 3,291 DOGE to USDC (rate ~0.236)
+            usdc_amount = self.payment_amount * 0.236  # ~777 USDC
+            
+            conversion_data = {
+                "wallet_address": self.test_wallet,
+                "from_currency": "DOGE",
+                "to_currency": "USDC",
+                "amount": self.payment_amount
+            }
+            
+            headers = {"Authorization": f"Bearer {self.auth_token}"}
+            
+            async with self.session.post(f"{self.base_url}/wallet/convert", 
+                                       json=conversion_data, 
+                                       headers=headers) as response:
+                data = await response.json()
+                
+                if response.status == 200:
+                    if data.get("success"):
+                        converted_amount = data.get("converted_amount", 0)
+                        
+                        self.log_test("DOGE to USDC Conversion", True, 
+                                    f"✅ Converted {self.payment_amount} DOGE to {converted_amount:.2f} USDC successfully", 
+                                    {"doge_amount": self.payment_amount, "usdc_amount": converted_amount, "rate": data.get("rate")})
+                        
+                        # Now try to withdraw the USDC (this might work better than DOGE)
+                        return await self.test_usdc_withdrawal(converted_amount)
+                    else:
+                        error_msg = data.get("message", "Unknown error")
+                        self.log_test("DOGE to USDC Conversion", False, 
+                                    f"❌ DOGE to USDC conversion failed: {error_msg}", data)
+                        return False
+                else:
+                    error_text = await response.text()
+                    self.log_test("DOGE to USDC Conversion", False, 
+                                f"❌ HTTP {response.status}: {error_text}")
+                    return False
+                    
+        except Exception as e:
+            self.log_test("DOGE to USDC Conversion", False, f"❌ Exception: {str(e)}")
+            return False
+    
+    async def test_usdc_withdrawal(self, usdc_amount):
+        """Test USDC withdrawal after conversion"""
+        try:
+            print(f"💵 Testing USDC Withdrawal ({usdc_amount:.2f} USDC)")
+            
+            # Try USDC withdrawal to a USDC address (might be more supported)
+            withdrawal_data = {
+                "wallet_address": self.test_wallet,
+                "wallet_type": "deposit",
+                "currency": "USDC",
+                "amount": usdc_amount,
+                "destination_address": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"  # USDC mint address as fallback
+            }
+            
+            headers = {"Authorization": f"Bearer {self.auth_token}"}
+            
+            async with self.session.post(f"{self.base_url}/wallet/withdraw", 
+                                       json=withdrawal_data, 
+                                       headers=headers) as response:
+                data = await response.json()
+                
+                if response.status == 200:
+                    if data.get("success"):
+                        transaction_hash = data.get("blockchain_transaction_hash")
+                        
+                        self.log_test("USDC Withdrawal", True, 
+                                    f"✅ USDC withdrawal successful! Transaction hash: {transaction_hash}", 
+                                    {"usdc_amount": usdc_amount, "transaction_hash": transaction_hash})
+                        return True
+                    else:
+                        error_msg = data.get("message", "Unknown error")
+                        self.log_test("USDC Withdrawal", False, 
+                                    f"❌ USDC withdrawal failed: {error_msg}", data)
+                        return False
+                else:
+                    error_text = await response.text()
+                    self.log_test("USDC Withdrawal", False, 
+                                f"❌ HTTP {response.status}: {error_text}")
+                    return False
+                    
+        except Exception as e:
+            self.log_test("USDC Withdrawal", False, f"❌ Exception: {str(e)}")
+            return False
         """Verify the DOGE transaction was completed and recorded"""
         try:
             print(f"✅ Verifying transaction completion")
