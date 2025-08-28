@@ -326,9 +326,9 @@ async def main():
     print("to REAL blockchain withdrawals using NOWPayments.")
     print()
     
-    # Your destination addresses (update with your real addresses)
+    # Your destination addresses (updated with user's personal DOGE address)
     destination_addresses = {
-        "DOGE": "D85yb56oTYLCNPW7wuwUkevzEFQVSj4fda",  # Your provided CoinGate address
+        "DOGE": "DLbWLzxq2mxE3Adzn9MFKQ6EBP8gTE5po8",  # User's personal DOGE address
         "TRX": "TYourTRXaddressHere123456789",          # Add your TRX address
         "USDC": "0xYourUSDCaddressHere123456789",       # Add your USDC address (ERC-20 or TRC-20)
     }
