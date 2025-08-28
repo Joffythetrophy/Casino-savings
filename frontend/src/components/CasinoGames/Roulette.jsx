@@ -229,7 +229,57 @@ const Roulette = ({ onBack }) => {
   };
 
   return (
-    <CasinoGameLayout title="Roulette" onBack={onBack} stats={stats}>
+    <CasinoGameLayout 
+      title="CRT Roulette" 
+      onBack={onBack}
+      stats={stats}
+      rightSidebar={
+        <div className="space-y-4">
+          {/* Currency & Bet Controls */}
+          <div className="bg-gray-800/50 p-4 rounded-lg">
+            <h3 className="text-lg font-bold text-yellow-400 mb-3">Quick Actions</h3>
+            
+            <Button
+              onClick={repeatLastBet}
+              className="w-full mb-2 bg-blue-600 hover:bg-blue-700 text-white"
+              disabled={spinning || !lastBet}
+            >
+              🔄 Repeat Last Bet
+            </Button>
+            
+            <Button
+              onClick={() => setBets({})}
+              className="w-full bg-red-600 hover:bg-red-700 text-white"
+              disabled={spinning}
+            >
+              🗑️ Clear All Bets
+            </Button>
+          </div>
+
+          {/* AutoPlay Panel */}
+          <AutoPlayPanel 
+            onAutoPlay={handleAutoPlay}
+            gameSpecificSettings={
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-300">Auto-Bet Type</label>
+                <select 
+                  value={autoPlaySettings.autoBetType}
+                  onChange={(e) => setAutoPlaySettings(prev => ({ ...prev, autoBetType: e.target.value }))}
+                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white"
+                >
+                  <option value="red">Red (1:1)</option>
+                  <option value="black">Black (1:1)</option>
+                  <option value="odd">Odd (1:1)</option>
+                  <option value="even">Even (1:1)</option>
+                  <option value="low">Low 1-18 (1:1)</option>
+                  <option value="high">High 19-36 (1:1)</option>
+                </select>
+              </div>
+            }
+          />
+        </div>
+      }
+    >
       <div className="space-y-6">
         {/* Roulette Wheel */}
         <Card className="p-8 bg-gradient-to-br from-green-900 to-green-800 border-2 border-yellow-400/30">
