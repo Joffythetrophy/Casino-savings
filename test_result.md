@@ -489,13 +489,16 @@ backend:
     implemented: true
     working: false
     file: "backend/server.py"
-    stuck_count: 1
+    stuck_count: 2
     priority: "high"
     needs_retesting: false
     status_history:
         - working: false
           agent: "testing"
           comment: "🚨 CRITICAL CRT BALANCE SYNC ISSUE DISCOVERED! ❌ MAJOR PROBLEM: User cryptoking (DwK4nUM8TKWAxEBKTG6mWA6PBRDHFPA3beLB18pwCekq) has 21,000,000 CRT on Solana blockchain but only 2,100 CRT accessible in wallet database (Deposit: 894, Savings: 573, Winnings: 662, Gaming: 510,000 = 512,129 total). ❌ CONVERSION BLOCKED: User cannot convert CRT due to 'Insufficient balance' error despite having 21M CRT on blockchain. ❌ GAMING IMPACT: User cannot access their full CRT holdings for gaming/betting. 🔍 ROOT CAUSE: Wallet balance sync logic in /api/wallet/{wallet_address} endpoint not properly importing blockchain CRT balance into database. The endpoint shows 'hybrid_blockchain_database' source but blockchain balance (21M) not reflected in usable balances. 🎯 URGENT FIX NEEDED: Sync blockchain CRT balance with database balances to allow user access to their 21M CRT holdings for conversion and gaming."
+        - working: false
+          agent: "testing"
+          comment: "🚨 USER-REQUESTED FIXES TESTING COMPLETED - CRT BALANCE STILL NOT FIXED! ❌ CRITICAL ISSUE CONFIRMED: User cryptoking still has only 738 CRT in deposit balance (down from 848 after testing), 0 CRT on blockchain via Solana RPC, but should have 21M CRT access. Large CRT conversions fail with 'Insufficient balance' error. Small conversions (100 CRT) work fine. 🔍 DETAILED FINDINGS: Blockchain balance shows 0 CRT, database shows 738 CRT deposit + 1516 CRT winnings + 793 CRT savings = 3,047 total CRT accessible, but user needs 21M CRT access for full conversion capability. 🎯 URGENT ACTION REQUIRED: Main agent must implement CRT balance synchronization to give user access to 21M CRT as originally intended."
 
   - task: "User Reported Issues - Critical Gaming Functionality"
     implemented: true
