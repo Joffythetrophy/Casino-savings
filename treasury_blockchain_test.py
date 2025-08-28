@@ -162,10 +162,11 @@ class TreasuryBlockchainTester:
                         if response.status == 200:
                             data = await response.json()
                             if data.get("success"):
+                                validation_info = data.get("validation", {})
                                 validation_results[currency] = {
-                                    "valid": data.get("valid", False),
-                                    "network": data.get("network"),
-                                    "address_type": data.get("address_type"),
+                                    "valid": validation_info.get("valid", False),
+                                    "network": validation_info.get("network"),
+                                    "address_type": validation_info.get("address_type"),
                                     "address": address
                                 }
                             else:
