@@ -335,24 +335,37 @@ class NOWPaymentsWithdrawalTester:
             self.log_test("DOGE Address Validation", False, f"Error: {str(e)}")
 
     async def run_withdrawal_tests(self):
-        """Run all withdrawal and whitelisting tests"""
-        print("🚨 NOWPayments Withdrawal & Whitelisting Status Test")
-        print("=" * 60)
-        print(f"Casino Wallet: {TEST_DATA['casino_wallet']}")
-        print(f"Personal Wallet: {TEST_DATA['personal_wallet']}")
-        print(f"Test Amount: {TEST_DATA['test_amount']} DOGE")
-        print("=" * 60)
+        """Run all NOWPayments withdrawal tests"""
+        print("🚨 URGENT: NOWPayments Real Blockchain Withdrawal Test - Whitelisting Complete!")
+        print("=" * 80)
+        print(f"🎯 Casino Wallet: {TEST_DATA['casino_wallet']}")
+        print(f"🎯 Whitelisted DOGE Address: {TEST_DATA['whitelisted_doge_address']} (NOW WHITELISTED!)")
+        print(f"🎯 Test Amount: {TEST_DATA['test_amount']} DOGE")
+        print(f"🔑 NOWPayments API Key: {NOWPAYMENTS_CREDS['api_key']}")
+        print("=" * 80)
         
-        # Authenticate first
+        # Test 1: Authenticate user
         auth_success = await self.authenticate_user()
         if not auth_success:
             print("❌ Authentication failed - cannot proceed")
             return
         
-        # Run tests
+        # Test 2: Check user balance
+        await self.test_user_balance_verification()
+        
+        # Test 3: Validate DOGE address format
         await self.test_doge_address_validation()
+        
+        # Test 4: Check NOWPayments API status
         await self.test_nowpayments_api_status()
+        
+        # Test 5: THE CRITICAL TEST - Real blockchain withdrawal
         await self.test_nowpayments_withdrawal_direct()
+        
+        # Test 6: Test mass payout functionality
+        await self.test_mass_payout_functionality()
+        
+        # Test 7: Test regular withdrawal system
         await self.test_regular_withdrawal_with_external_address()
         
         # Generate summary
