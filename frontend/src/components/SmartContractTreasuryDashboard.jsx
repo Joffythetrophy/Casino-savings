@@ -552,6 +552,129 @@ const SmartContractTreasuryDashboard = ({ user, authToken }) => {
                 </Card>
             )}
 
+            {activeTab === 'multicurrency' && (
+                <div className="space-y-6">
+                    {/* Multi-Currency Treasury Overview */}
+                    <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                        {supportedCurrencies.map(currency => (
+                            <Card key={currency.symbol} className="card-green">
+                                <CardContent className="p-4 text-center">
+                                    <div className="text-2xl mb-2">{currency.icon}</div>
+                                    <h3 className="font-bold text-casino-green-100">{currency.symbol}</h3>
+                                    <p className="text-sm text-casino-green-300">{currency.name}</p>
+                                    <div className="mt-2">
+                                        <Badge variant="outline" className="text-xs border-casino-green-500/50 text-casino-green-300">
+                                            Ready
+                                        </Badge>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        ))}
+                    </div>
+
+                    {/* Multi-Currency Withdrawal Interface */}
+                    <Card className="card-green max-w-2xl mx-auto">
+                        <CardHeader>
+                            <CardTitle className="text-casino-green-400">🐅 Multi-Currency Smart Withdrawal</CardTitle>
+                            <p className="text-casino-green-200">Withdraw across multiple blockchains with smart contract backing</p>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-casino-green-300 mb-2">Currency</label>
+                                    <Select value={withdrawalForm.currency} onValueChange={(value) => setWithdrawalForm({...withdrawalForm, currency: value})}>
+                                        <SelectTrigger className="input-green">
+                                            <SelectValue />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {supportedCurrencies.map(currency => (
+                                                <SelectItem key={currency.symbol} value={currency.symbol}>
+                                                    {currency.icon} {currency.symbol} - {currency.name}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-casino-green-300 mb-2">Withdrawal Type</label>
+                                    <Select value={withdrawalForm.withdrawalType} onValueChange={(value) => setWithdrawalForm({...withdrawalForm, withdrawalType: value})}>
+                                        <SelectTrigger className="input-green">
+                                            <SelectValue />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {withdrawalTypes.map(type => (
+                                                <SelectItem key={type.value} value={type.value}>
+                                                    {type.label}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-casino-green-300 mb-2">Amount ({withdrawalForm.currency})</label>
+                                <Input
+                                    type="number"
+                                    placeholder="Enter amount"
+                                    value={withdrawalForm.amount}
+                                    onChange={(e) => setWithdrawalForm({...withdrawalForm, amount: e.target.value})}
+                                    className="input-green"
+                                />
+                                <p className="text-xs text-casino-green-400 mt-1">
+                                    Treasury-backed with cross-chain support
+                                </p>
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-casino-green-300 mb-2">
+                                    Destination Address ({withdrawalForm.currency === 'SOL' || withdrawalForm.currency === 'USDC' || withdrawalForm.currency === 'USDT' ? 'Solana' : withdrawalForm.currency === 'DOGE' ? 'Dogecoin' : 'TRON'})
+                                </label>
+                                <Input
+                                    type="text"
+                                    placeholder={`Enter ${withdrawalForm.currency === 'SOL' || withdrawalForm.currency === 'USDC' || withdrawalForm.currency === 'USDT' ? 'Solana' : withdrawalForm.currency === 'DOGE' ? 'Dogecoin' : 'TRON'} address`}
+                                    value={withdrawalForm.destinationAddress}
+                                    onChange={(e) => setWithdrawalForm({...withdrawalForm, destinationAddress: e.target.value})}
+                                    className="input-green font-mono text-sm"
+                                />
+                            </div>
+
+                            <Button
+                                onClick={handleSmartWithdrawal}
+                                disabled={loading || !withdrawalForm.amount || !withdrawalForm.destinationAddress}
+                                className="w-full btn-primary py-3 text-lg glow-green"
+                            >
+                                {loading ? (
+                                    <div className="flex items-center space-x-2">
+                                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                                        <span>Processing Multi-Currency Withdrawal...</span>
+                                    </div>
+                                ) : (
+                                    <>
+                                        <Shield className="w-5 h-5 mr-2" />
+                                        Execute Multi-Currency Smart Contract Withdrawal
+                                    </>
+                                )}
+                            </Button>
+
+                            {/* Multi-Currency Info */}
+                            <div className="mt-4 p-4 rounded-lg bg-casino-green-900/20 border border-casino-green-500/30">
+                                <h4 className="font-bold text-casino-green-300 mb-2">🐅 Multi-Currency Features:</h4>
+                                <div className="grid grid-cols-2 gap-2 text-sm text-casino-green-200">
+                                    <div>✅ Cross-chain compatibility</div>
+                                    <div>✅ Unified treasury backing</div>
+                                    <div>✅ Multi-signature security</div>
+                                    <div>✅ Real-time rate optimization</div>
+                                    <div>✅ Automatic network detection</div>
+                                    <div>✅ Emergency pause protection</div>
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+                </div>
+            )}
+
             {activeTab === 'transactions' && (
                 <Card className="card-green">
                     <CardHeader>
