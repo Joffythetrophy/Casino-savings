@@ -1,17 +1,26 @@
 {
-  "name": "backend",
+  "name": "casino-treasury-backend",
   "version": "1.0.0",
-  "main": "index.js",
+  "description": "Smart Contract Treasury Backend with Real Blockchain Integration",
+  "main": "server.py",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "install-blockchain": "npm install @solana/web3.js @solana/spl-token axios crypto",
+    "test-blockchain": "node test-blockchain.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
   "dependencies": {
-    "@project-serum/anchor": "^0.26.0",
-    "@solana/spl-token": "^0.4.13",
-    "@solana/web3.js": "^1.98.4"
-  }
+    "@solana/web3.js": "^1.87.6",
+    "@solana/spl-token": "^0.3.9",
+    "axios": "^1.6.2",
+    "crypto": "^1.0.1"
+  },
+  "keywords": [
+    "blockchain",
+    "solana",
+    "dogecoin",
+    "tron",
+    "cryptocurrency",
+    "treasury"
+  ],
+  "author": "CRT Casino Treasury System",
+  "license": "MIT"
 }
