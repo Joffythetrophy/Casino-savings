@@ -10,7 +10,7 @@ import json
 import time
 from datetime import datetime
 
-BACKEND_URL = "https://gamewin-vault.preview.emergentagent.com/api"
+BACKEND_URL = "https://cryptoplay-8.preview.emergentagent.com/api"
 
 class ComprehensiveAutoPlayTest:
     def __init__(self):
