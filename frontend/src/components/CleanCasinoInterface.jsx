@@ -42,59 +42,59 @@ const CleanCasinoInterface = ({ userBalance }) => {
     if (currentGame) {
         const GameComponent = currentGame.component;
         return (
-            <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-black">
+            <div className="min-h-screen bg-gradient-to-br from-casino-green-900 via-emerald-casino-800 to-casino-green-950">
                 <GameComponent onBack={handleBackToLobby} />
             </div>
         );
     }
 
     return (
-        <div className="w-full max-w-4xl mx-auto p-6 bg-gradient-to-br from-slate-900 via-purple-900 to-black min-h-screen">
+        <div className="w-full max-w-4xl mx-auto p-6 min-h-screen">
             {/* Simple Header */}
             <div className="text-center mb-8">
-                <h1 className="text-4xl font-bold text-gold-400 mb-4">
-                    💎 CASINO 💎
+                <h1 className="text-5xl font-bold text-casino-green-400 mb-4 glow-green">
+                    🐅 CRT CASINO 🐅
                 </h1>
                 
                 {/* SIMPLE BALANCE - NO CONFUSION */}
-                <div className="bg-black/50 p-6 rounded-lg border border-gold-400/30 mb-6">
-                    <div className="text-2xl font-bold text-white mb-2">
+                <div className="card-green p-6 rounded-xl border border-casino-green-500/50 mb-6 glow-green">
+                    <div className="text-3xl font-bold text-casino-green-100 mb-2">
                         {dogeBalance.toLocaleString()} DOGE
                     </div>
-                    <div className="text-lg text-gray-300">
+                    <div className="text-xl text-casino-green-200">
                         ${balanceUSD.toLocaleString()} USD
                     </div>
-                    <div className="text-sm text-green-400 mt-2">
-                        ✅ Ready to Play
+                    <div className="text-sm text-casino-green-400 mt-2 pulse-green">
+                        ✅ Ready to Hunt Big Wins
                     </div>
                 </div>
             </div>
 
-            {/* Games Grid - Simple */}
+            {/* Games Grid - Green Theme */}
             <div className="grid grid-cols-3 gap-4 mb-8">
                 {games.map((game) => (
                     <Button
                         key={game.id}
                         onClick={() => handleGameClick(game.id)}
-                        className="h-24 bg-gradient-to-br from-slate-700 to-slate-800 hover:from-gold-600 hover:to-gold-700 border border-slate-600 hover:border-gold-400 transition-all"
+                        className="h-28 game-card-green text-casino-green-100 hover:text-white shadow-lg hover:shadow-casino-green-500/50"
                     >
                         <div className="text-center">
-                            <div className="text-3xl mb-1">{game.icon}</div>
+                            <div className="text-4xl mb-2">{game.icon}</div>
                             <div className="text-sm font-bold">{game.name}</div>
                         </div>
                     </Button>
                 ))}
             </div>
 
-            {/* Donation Widget - Clean */}
-            <Card className="bg-black/30 border-green-500/30">
+            {/* Donation Widget - Green Theme */}
+            <Card className="card-green border-casino-green-500/40 glow-green">
                 <CardContent className="p-6">
                     <div className="text-center">
-                        <h3 className="text-xl font-bold text-green-400 mb-4">
-                            💰 $50K DOGE Donation
+                        <h3 className="text-xl font-bold text-casino-green-400 mb-4">
+                            🐅 $50K DOGE Tiger Fund 🐅
                         </h3>
-                        <p className="text-gray-300 mb-4">
-                            Donate to: <span className="text-gold-400 text-sm">D85yb56oTYLCNPW7wuwUkevzEFQVSj4fda</span>
+                        <p className="text-casino-green-200 mb-4">
+                            Donate to: <span className="text-casino-green-400 text-sm font-mono">D85yb56oTYLCNPW7wuwUkevzEFQVSj4fda</span>
                         </p>
                         
                         {/* Donation Widget */}
