@@ -203,7 +203,7 @@ const Roulette = ({ onBack }) => {
       // Trigger spin automatically
       setTimeout(() => {
         if (autoPlaySettings.isAutoPlaying) {
-          spin();
+          spinWheel();
         }
       }, 100);
       
