@@ -400,9 +400,9 @@ frontend:
 backend:
   - task: "Smart Contract Treasury System for USDC Withdrawals"
     implemented: true
-    working: true
+    working: false
     file: "/app/solana-program/casino-treasury/src/lib.rs"
-    stuck_count: 0
+    stuck_count: 1
     priority: "high"
     needs_retesting: false
     status_history:
@@ -412,6 +412,9 @@ backend:
         - working: true
           agent: "testing"
           comment: "🎉 SMART CONTRACT TREASURY SYSTEM TESTING COMPLETED SUCCESSFULLY! ✅ ALL SUCCESS CRITERIA MET (8/8 tests passed, 100% success rate): 1) ✅ User Authentication: Successfully authenticated user 'cryptoking' with wallet DwK4nUM8TKWAxEBKTG6mWA6PBRDHFPA3beLB18pwCekq using JWT token via wallet auth flow (/api/auth/challenge and /api/auth/verify). 2) ✅ Treasury Status Endpoint: /api/treasury/status endpoint accessible and properly protected by authentication, returns expected structure with treasury info and withdrawal limits. 3) ✅ User Balance Verification: USDC balances accessible - Deposit: 0.0, Winnings: 204.73, Savings: 770.0, Total: 974.73 USDC available for withdrawals. 4) ✅ Smart Contract Withdrawal Endpoint: /api/treasury/smart-withdraw endpoint accessible, properly validates requests, handles treasury initialization requirements. 5) ✅ Treasury Funding Endpoint: /api/treasury/fund endpoint accessible with proper admin access controls. 6) ✅ Emergency Pause Control: /api/treasury/emergency-pause endpoint accessible with admin authentication. 7) ✅ Emergency Resume Control: /api/treasury/emergency-resume endpoint accessible with admin authentication. 8) ✅ Transaction Recording: Transaction history system working correctly with authentication protection. 🎯 SYSTEM ARCHITECTURE VERIFIED: All treasury endpoints implemented and accessible, JWT authentication working, admin access controls in place, proper error handling for treasury manager dependencies. The smart contract treasury system is ready for production deployment once Solana smart contract dependencies are configured."
+        - working: false
+          agent: "testing"
+          comment: "🚨 CRITICAL FRONTEND INTEGRATION FAILURE - SMART CONTRACT TREASURY UI MISSING! ❌ COMPREHENSIVE TESTING RESULTS (0/6 frontend requirements failed): 1) ❌ Smart Contract Treasury Interface: NO treasury-specific UI components found in frontend - users cannot access treasury withdrawal options. 2) ❌ Treasury Status Display: NO treasury health monitoring, balance limits, or status information displayed to users. 3) ❌ Treasury-Backed USDC Withdrawal Flow: NO smart contract withdrawal interface - only standard external withdrawal exists (not treasury-backed). 4) ❌ Treasury Management UI (Admin): NO admin treasury controls, funding interface, or emergency pause/resume buttons in frontend. 5) ❌ Transaction History Integration: NO smart contract transaction records or blockchain signatures displayed in UI. 6) ❌ Green Tiger Theme Integration: Treasury features missing entirely, so no theme integration possible. 🎯 ROOT CAUSE: Backend treasury system fully implemented and working, but frontend has ZERO treasury integration. Users authenticated successfully (cryptoking/crt21million) but cannot access any treasury features through UI. Standard wallet interface exists with external withdrawal, but no treasury-backed options. 🚨 URGENT ACTION REQUIRED: Implement complete Smart Contract Treasury frontend integration including treasury status dashboard, smart contract withdrawal interface, admin controls, and transaction history display."
 
   - task: "Personal DOGE Address Integration with NOWPayments - Final Test"
     implemented: true
