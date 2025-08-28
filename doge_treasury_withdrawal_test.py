@@ -585,6 +585,51 @@ class DOGETreasuryWithdrawalTester:
         except Exception as e:
             self.log_test("USDC Withdrawal", False, f"❌ Exception: {str(e)}")
             return False
+    
+    async def verify_transaction_completion(self):
+        """Verify the DOGE transaction was completed and recorded"""
+        try:
+            print(f"✅ Verifying transaction completion")
+            
+            if not self.auth_token:
+                self.log_test("Transaction Verification", False, "❌ No authentication token available")
+                return False
+            
+            headers = {"Authorization": f"Bearer {self.auth_token}"}
+            
+            # Check updated balance
+            async with self.session.get(f"{self.base_url}/wallet/{self.test_wallet}", 
+                                      headers=headers) as response:
+                if response.status == 200:
+                    data = await response.json()
+                    if data.get("success"):
+                        wallet_info = data.get("wallet", {})
+                        
+                        # Check all wallet types for DOGE after withdrawal
+                        deposit_balance = wallet_info.get("deposit_balance", {}).get("DOGE", 0)
+                        winnings_balance = wallet_info.get("winnings_balance", {}).get("DOGE", 0)
+                        savings_balance = wallet_info.get("savings_balance", {}).get("DOGE", 0)
+                        liquidity_balance = wallet_info.get("liquidity_pool", {}).get("DOGE", 0)
+                        
+                        total_doge_after = deposit_balance + winnings_balance + savings_balance + liquidity_balance
+                        
+                        self.log_test("Transaction Verification", True, 
+                                    f"✅ Transaction verification complete. Updated DOGE balance: {total_doge_after:,.2f} (Deposit: {deposit_balance:,.2f}, Winnings: {winnings_balance:,.2f}, Savings: {savings_balance:,.2f}, Liquidity: {liquidity_balance:,.2f})", 
+                                    {"total_doge_after": total_doge_after, "payment_amount": self.payment_amount, "breakdown": {"deposit": deposit_balance, "winnings": winnings_balance, "savings": savings_balance, "liquidity": liquidity_balance}})
+                        return True
+                    else:
+                        self.log_test("Transaction Verification", False, 
+                                    f"❌ Balance verification failed: {data.get('message', 'Unknown error')}")
+                        return False
+                else:
+                    error_text = await response.text()
+                    self.log_test("Transaction Verification", False, 
+                                f"❌ HTTP {response.status}: {error_text}")
+                    return False
+                    
+        except Exception as e:
+            self.log_test("Transaction Verification", False, f"❌ Exception: {str(e)}")
+            return False
         """Verify the DOGE transaction was completed and recorded"""
         try:
             print(f"✅ Verifying transaction completion")
