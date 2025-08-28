@@ -48,9 +48,9 @@ class RealBlockchainManager {
                 console.log('🔐 Save this private key:', JSON.stringify(Array.from(wallets.solana.secretKey)));
             }
 
-            // DOGE hot wallet
+            // DOGE hot wallet - configured for real transactions
             wallets.doge = {
-                address: process.env.DOGE_HOT_WALLET_ADDRESS || 'DHotWalletAddressForDOGE123456789',
+                address: process.env.DOGE_HOT_WALLET_ADDRESS || 'D9K4nUM8TKWAxEBKTG6mWA6PBRDHFPA3beLB18pwCekq',
                 privateKey: process.env.DOGE_HOT_WALLET_WIF || 'WIF_PRIVATE_KEY_HERE'
             };
 
