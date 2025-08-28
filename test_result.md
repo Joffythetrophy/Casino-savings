@@ -505,6 +505,9 @@ backend:
         - working: false
           agent: "testing"
           comment: "🚨 USER-REQUESTED FIXES TESTING COMPLETED - CRT BALANCE STILL NOT FIXED! ❌ CRITICAL ISSUE CONFIRMED: User cryptoking still has only 738 CRT in deposit balance (down from 848 after testing), 0 CRT on blockchain via Solana RPC, but should have 21M CRT access. Large CRT conversions fail with 'Insufficient balance' error. Small conversions (100 CRT) work fine. 🔍 DETAILED FINDINGS: Blockchain balance shows 0 CRT, database shows 738 CRT deposit + 1516 CRT winnings + 793 CRT savings = 3,047 total CRT accessible, but user needs 21M CRT access for full conversion capability. 🎯 URGENT ACTION REQUIRED: Main agent must implement CRT balance synchronization to give user access to 21M CRT as originally intended."
+        - working: false
+          agent: "testing"
+          comment: "🚨 COMPREHENSIVE CRT VERIFICATION COMPLETED - BALANCE DISCREPANCY CONFIRMED! ❌ CRITICAL FINDINGS: User has 21,000,000 CRT on blockchain (source: database_gaming_balance) but only 2,921 CRT accessible in wallet database (Deposit: 504, Winnings: 1,572, Savings: 845). Total across all wallets shows 11.7M CRT in liquidity pool but user cannot access for conversions. Large CRT conversion (1M CRT) fails with 'Insufficient balance' error. 🔍 ROOT CAUSE ANALYSIS: Backend endpoint /api/wallet/balance/CRT returns 21M CRT but /api/wallet/{wallet_address} shows limited database access. The balance synchronization between blockchain source and usable database balances is broken. 🎯 URGENT: Main agent must fix CRT balance sync to provide user with 21M CRT conversion access as originally designed."
 
   - task: "User Reported Issues - Critical Gaming Functionality"
     implemented: true
