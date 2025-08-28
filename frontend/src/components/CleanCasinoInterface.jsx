@@ -100,7 +100,7 @@ const CleanCasinoInterface = ({ userBalance }) => {
                         {/* Donation Widget */}
                         <div className="flex justify-center">
                             <iframe 
-                                src="https://nowpayments.io/embeds/donation-widget?api_key=f9a7e8ba-2573-4da2-9f4f-3e0ffd748212" 
+                                src="https://nowpayments.io/embeds/donation-widget?api_key=smart-savings-dapp" 
                                 width="300" 
                                 height="500" 
                                 frameBorder="0" 

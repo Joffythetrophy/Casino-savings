@@ -17,7 +17,7 @@ from datetime import datetime
 from typing import Dict, Any, Optional
 
 # Backend URL from frontend env
-BACKEND_URL = "https://cryptoplay-8.preview.emergentagent.com/api"
+BACKEND_URL = "https://smart-savings-dapp.preview.emergentagent.com/api"
 
 # Test credentials from review request
 TEST_CREDENTIALS = {

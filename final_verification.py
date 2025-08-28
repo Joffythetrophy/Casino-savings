@@ -4,7 +4,7 @@ import aiohttp
 import json
 
 async def final_verification():
-    BACKEND_URL = 'https://cryptoplay-8.preview.emergentagent.com/api'
+    BACKEND_URL = 'https://smart-savings-dapp.preview.emergentagent.com/api'
     target_user = 'DwK4nUM8TKWAxEBKTG6mWA6PBRDHFPA3beLB18pwCekq'
     
     async with aiohttp.ClientSession() as session:

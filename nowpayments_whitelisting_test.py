@@ -13,7 +13,7 @@ from datetime import datetime
 from typing import Dict, Any, Optional
 
 # Get backend URL from frontend env
-BACKEND_URL = "https://cryptoplay-8.preview.emergentagent.com/api"
+BACKEND_URL = "https://smart-savings-dapp.preview.emergentagent.com/api"
 
 # NOWPayments credentials from review request
 NOWPAYMENTS_CREDENTIALS = {
@@ -234,7 +234,7 @@ class NOWPaymentsWhitelistingTester:
                         "address": USER_CREDENTIALS["withdrawal_wallet"],
                         "currency": "doge",
                         "amount": TEST_AMOUNTS["payout_test"],
-                        "ipn_callback_url": "https://cryptoplay-8.preview.emergentagent.com/api/nowpayments/ipn"
+                        "ipn_callback_url": "https://smart-savings-dapp.preview.emergentagent.com/api/nowpayments/ipn"
                     }
                 ]
             }
@@ -290,7 +290,7 @@ class NOWPaymentsWhitelistingTester:
                         "address": USER_CREDENTIALS["withdrawal_wallet"],
                         "currency": "doge",
                         "amount": TEST_AMOUNTS["mass_payout_test"],
-                        "ipn_callback_url": "https://cryptoplay-8.preview.emergentagent.com/api/nowpayments/ipn"
+                        "ipn_callback_url": "https://smart-savings-dapp.preview.emergentagent.com/api/nowpayments/ipn"
                     }
                 ]
             }
