@@ -272,6 +272,8 @@ class NOWPaymentsCustodyTester:
                                        json=withdrawal_payload, headers=headers) as response:
                 
                 response_text = await response.text()
+                print(f"DEBUG: Response status: {response.status}")
+                print(f"DEBUG: Response text: {response_text[:500]}...")
                 
                 if response.status == 200:
                     try:
