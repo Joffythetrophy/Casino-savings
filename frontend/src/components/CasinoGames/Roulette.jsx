@@ -428,7 +428,7 @@ const Roulette = ({ onBack }) => {
           {/* Controls */}
           <div className="flex justify-center space-x-4">
             <Button
-              onClick={spin}
+              onClick={spinWheel}
               disabled={spinning || Object.keys(bets).length === 0}
               className="bg-gradient-to-r from-yellow-400 to-yellow-600 text-black font-bold hover:from-yellow-300 hover:to-yellow-500 px-8 py-3"
             >
