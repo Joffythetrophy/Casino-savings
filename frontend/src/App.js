@@ -14,6 +14,7 @@ import ConversionHistoryTracker from "./components/ConversionHistoryTracker";
 import StreamlinedGamingDashboard from "./components/StreamlinedGamingDashboard";
 import MillionaireCasinoInterface from "./components/MillionaireCasinoInterface";
 import SimplifiedCasinoInterface from "./components/SimplifiedCasinoInterface";
+import CleanCasinoInterface from "./components/CleanCasinoInterface";
 import { AuthProvider, useAuth, AuthModal } from "./components/UserAuth";
 
 function AppContent() {
