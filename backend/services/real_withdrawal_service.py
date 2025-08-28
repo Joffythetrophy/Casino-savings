@@ -205,10 +205,36 @@ class RealWithdrawalService:
                 stdout_text = stdout.decode().strip()
                 if stdout_text:
                     try:
-                        result = json.loads(stdout_text)
-                        return result
+                        # Extract JSON from output (filter out console.log messages)
+                        lines = stdout_text.split('\n')
+                        json_line = None
+                        
+                        # Look for the last line that looks like JSON
+                        for line in reversed(lines):
+                            line = line.strip()
+                            if line.startswith('{') and line.endswith('}'):
+                                json_line = line
+                                break
+                        
+                        if json_line:
+                            result = json.loads(json_line)
+                            return result
+                        else:
+                            # Fallback: try to parse the entire output
+                            result = json.loads(stdout_text)
+                            return result
                     except json.JSONDecodeError as e:
                         logger.error(f"JSON decode error: {e}, Raw output: {stdout_text}")
+                        # Try to extract JSON from the error message if it contains valid JSON
+                        try:
+                            # Look for JSON pattern in the text
+                            import re
+                            json_match = re.search(r'\{[^{}]*"valid"[^{}]*\}', stdout_text)
+                            if json_match:
+                                result = json.loads(json_match.group())
+                                return result
+                        except:
+                            pass
                         return {"success": False, "error": f"Invalid JSON: {stdout_text}"}
                 else:
                     return {"success": False, "error": "Empty response from blockchain manager"}
