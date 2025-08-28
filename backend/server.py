@@ -4324,6 +4324,172 @@ async def process_nowpayments_status_update(notification_info: Dict[str, Any]):
     except Exception as e:
         logger.error(f"Failed to process NOWPayments status update: {str(e)}")
 
+# SOLANA USDC WITHDRAWAL ENDPOINTS
+# =============================================================================
+
+class USDCWithdrawalRequest(BaseModel):
+    wallet_address: str = Field(..., description="User's wallet address")
+    amount: float = Field(..., gt=0, description="USDC amount to withdraw")
+    destination_address: str = Field(..., description="Solana address to send USDC to")
+    wallet_type: str = Field("deposit", description="Source wallet type: deposit, winnings, or savings")
+
+@api_router.post("/usdc/withdraw")
+async def withdraw_usdc_direct(
+    request: USDCWithdrawalRequest,
+    wallet_info: Dict = Depends(get_authenticated_wallet)
+):
+    """Execute direct USDC withdrawal via Solana blockchain"""
+    try:
+        # Verify user authentication
+        if request.wallet_address != wallet_info["wallet_address"]:
+            raise HTTPException(status_code=403, detail="Unauthorized")
+        
+        # Find user in database
+        user = await db.users.find_one({"wallet_address": request.wallet_address})
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+        
+        # Check user USDC balance in specified wallet
+        wallet_balance = user.get(f"{request.wallet_type}_balance", {}).get("USDC", 0)
+        
+        if request.amount > wallet_balance:
+            return {
+                "success": False,
+                "message": f"Insufficient USDC balance in {request.wallet_type} wallet. Available: {wallet_balance} USDC",
+                "available_balance": wallet_balance,
+                "requested_amount": request.amount
+            }
+        
+        # Validate destination address
+        address_validation = await usdc_manager.validate_usdc_address(request.destination_address)
+        if not address_validation.get("valid"):
+            return {
+                "success": False,
+                "message": f"Invalid Solana address: {address_validation.get('error')}",
+                "destination_address": request.destination_address
+            }
+        
+        # Execute USDC transfer via Solana
+        # Using casino hot wallet as source (in production, this would be properly secured)
+        casino_hot_wallet = "DwK4nUM8TKWAxEBKTG6mWA6PBRDHFPA3beLB18pwCekq"  # Example
+        
+        transfer_result = await usdc_manager.send_usdc(
+            from_address=casino_hot_wallet,
+            to_address=request.destination_address,
+            amount=request.amount
+        )
+        
+        if transfer_result.get("success"):
+            # Deduct from user balance
+            new_balance = wallet_balance - request.amount
+            balance_field = f"{request.wallet_type}_balance.USDC"
+            
+            await db.users.update_one(
+                {"wallet_address": request.wallet_address},
+                {"$set": {balance_field: new_balance}}
+            )
+            
+            # Record transaction
+            transaction_id = str(uuid.uuid4())
+            transaction_record = {
+                "transaction_id": transaction_id,
+                "user_wallet": request.wallet_address,
+                "type": "usdc_withdrawal",
+                "currency": "USDC",
+                "amount": request.amount,
+                "destination_address": request.destination_address,
+                "wallet_type": request.wallet_type,
+                "blockchain": "Solana",
+                "transaction_hash": transfer_result.get("transaction_hash"),
+                "status": "completed",
+                "created_at": datetime.utcnow(),
+                "service": "solana_direct",
+                "network_fee": transfer_result.get("fee_estimate", 0.001)
+            }
+            
+            await db.transactions.insert_one(transaction_record)
+            
+            return {
+                "success": True,
+                "message": f"Successfully withdrew {request.amount} USDC via Solana",
+                "transaction": {
+                    "id": transaction_id,
+                    "amount": request.amount,
+                    "currency": "USDC",
+                    "destination_address": request.destination_address,
+                    "transaction_hash": transfer_result.get("transaction_hash"),
+                    "explorer_url": transfer_result.get("explorer_url"),
+                    "network": "Solana",
+                    "fee": transfer_result.get("fee_estimate", 0.001)
+                },
+                "new_balance": new_balance,
+                "blockchain_confirmed": True,
+                "method": "solana_spl_transfer"
+            }
+        else:
+            return {
+                "success": False,
+                "message": f"USDC transfer failed: {transfer_result.get('error')}",
+                "error_details": transfer_result.get("error")
+            }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"USDC withdrawal failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"USDC withdrawal failed: {str(e)}")
+
+@api_router.get("/usdc/balance/{wallet_address}")
+async def get_usdc_balance(
+    wallet_address: str,
+    wallet_info: Dict = Depends(get_authenticated_wallet)
+):
+    """Get USDC balance for wallet address"""
+    try:
+        if wallet_address != wallet_info["wallet_address"]:
+            raise HTTPException(status_code=403, detail="Unauthorized")
+        
+        # Get real USDC balance from Solana blockchain
+        balance_result = await usdc_manager.get_usdc_balance(wallet_address)
+        
+        if balance_result.get("success"):
+            return {
+                "success": True,
+                "wallet_address": wallet_address,
+                "usdc_balance": balance_result.get("usdc_balance", 0.0),
+                "usd_value": balance_result.get("usd_value", 0.0),
+                "mint_address": balance_result.get("mint_address"),
+                "network": "Solana",
+                "last_updated": balance_result.get("last_updated")
+            }
+        else:
+            return {
+                "success": False,
+                "message": "Failed to get USDC balance",
+                "error": balance_result.get("error")
+            }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.post("/usdc/validate-address")
+async def validate_usdc_address(request: Dict[str, str]):
+    """Validate Solana address for USDC transfers"""
+    try:
+        address = request.get("address")
+        if not address:
+            raise HTTPException(status_code=400, detail="Address is required")
+        
+        validation_result = await usdc_manager.validate_usdc_address(address)
+        return validation_result
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 # Legacy endpoints
 @api_router.post("/status", response_model=StatusCheck)
 async def create_status_check(input: StatusCheckCreate):
