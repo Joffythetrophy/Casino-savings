@@ -226,12 +226,13 @@ class TreasuryBlockchainTester:
                         if response.status == 200:
                             data = await response.json()
                             if data.get("success"):
+                                balance_info = data.get("balance", {})
                                 balance_results[currency] = {
-                                    "balance": data.get("balance", 0),
+                                    "balance": balance_info.get("balance", 0),
                                     "currency": currency,
                                     "address": address,
-                                    "network": data.get("network"),
-                                    "accessible": True
+                                    "network": balance_info.get("network"),
+                                    "accessible": balance_info.get("success", False)
                                 }
                             else:
                                 balance_results[currency] = {
