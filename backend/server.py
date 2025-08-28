@@ -4896,6 +4896,217 @@ async def emergency_resume_treasury(
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+# REAL BLOCKCHAIN WITHDRAWAL ENDPOINTS
+# =============================================================================
+
+class RealBlockchainWithdrawalRequest(BaseModel):
+    wallet_address: str = Field(..., description="User's wallet address")
+    amount: float = Field(..., gt=0, description="Amount to withdraw")
+    destination_address: str = Field(..., description="Destination blockchain address")
+    currency: str = Field(..., description="Currency: SOL, USDC, CRT, DOGE, TRX")
+    withdrawal_type: str = Field("external", description="Withdrawal type")
+
+@api_router.post("/blockchain/real-withdraw")
+async def execute_real_blockchain_withdrawal(
+    request: RealBlockchainWithdrawalRequest,
+    wallet_info: Dict = Depends(get_authenticated_wallet)
+):
+    """Execute REAL cryptocurrency withdrawal via blockchain networks"""
+    try:
+        # Verify user authentication
+        if request.wallet_address != wallet_info["wallet_address"]:
+            raise HTTPException(status_code=403, detail="Unauthorized")
+        
+        # Find user in database
+        user = await db.users.find_one({"wallet_address": request.wallet_address})
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+        
+        # Check user balance for the requested currency
+        currency = request.currency.upper()
+        
+        # Determine which wallet to use (try all wallet types)
+        total_balance = 0
+        wallet_balances = {}
+        
+        for wallet_type in ["deposit_balance", "winnings_balance", "savings_balance", "liquidity_pool"]:
+            wallet_balance = user.get(wallet_type, {}).get(currency, 0)
+            wallet_balances[wallet_type] = wallet_balance
+            total_balance += wallet_balance
+        
+        if request.amount > total_balance:
+            return {
+                "success": False,
+                "message": f"Insufficient {currency} balance. Available: {total_balance:,.6f}, Requested: {request.amount:,.6f}",
+                "available_balance": total_balance,
+                "wallet_breakdown": wallet_balances
+            }
+        
+        # Execute real blockchain withdrawal
+        withdrawal_result = await real_withdrawal_service.execute_real_withdrawal(
+            currency=currency,
+            to_address=request.destination_address,
+            amount=request.amount,
+            user_wallet=request.wallet_address,
+            withdrawal_type=request.withdrawal_type
+        )
+        
+        if withdrawal_result.get("success"):
+            # Deduct from user balances (prioritize winnings, then deposit, then savings)
+            remaining_to_deduct = request.amount
+            deduction_log = []
+            
+            for wallet_type in ["winnings_balance", "deposit_balance", "savings_balance", "liquidity_pool"]:
+                if remaining_to_deduct <= 0:
+                    break
+                    
+                wallet_balance = user.get(wallet_type, {}).get(currency, 0)
+                if wallet_balance > 0:
+                    deduction_amount = min(remaining_to_deduct, wallet_balance)
+                    new_balance = wallet_balance - deduction_amount
+                    
+                    # Update database
+                    await db.users.update_one(
+                        {"wallet_address": request.wallet_address},
+                        {"$set": {f"{wallet_type}.{currency}": new_balance}}
+                    )
+                    
+                    deduction_log.append({
+                        "wallet_type": wallet_type,
+                        "deducted": deduction_amount,
+                        "new_balance": new_balance
+                    })
+                    
+                    remaining_to_deduct -= deduction_amount
+            
+            # Record the real blockchain transaction
+            transaction_id = str(uuid.uuid4())
+            transaction_record = {
+                "transaction_id": transaction_id,
+                "user_wallet": request.wallet_address,
+                "type": "real_blockchain_withdrawal",
+                "currency": currency,
+                "amount": request.amount,
+                "destination_address": request.destination_address,
+                "withdrawal_type": request.withdrawal_type,
+                "blockchain": withdrawal_result.get("network"),
+                "transaction_hash": withdrawal_result.get("transaction_hash"),
+                "explorer_url": withdrawal_result.get("explorer_url"),
+                "status": "completed",
+                "created_at": datetime.utcnow(),
+                "service": "real_blockchain",
+                "network_fee": withdrawal_result.get("fee_estimate", 0),
+                "deduction_log": deduction_log,
+                "note": withdrawal_result.get("note", "")
+            }
+            
+            await db.transactions.insert_one(transaction_record)
+            
+            return {
+                "success": True,
+                "message": f"🎉 REAL {currency} withdrawal successful! {request.amount:,.6f} {currency} sent to blockchain",
+                "transaction": {
+                    "id": transaction_id,
+                    "amount": request.amount,
+                    "currency": currency,
+                    "destination_address": request.destination_address,
+                    "transaction_hash": withdrawal_result.get("transaction_hash"),
+                    "explorer_url": withdrawal_result.get("explorer_url"),
+                    "network": withdrawal_result.get("network"),
+                    "timestamp": withdrawal_result.get("timestamp"),
+                    "fee": withdrawal_result.get("fee_estimate", 0)
+                },
+                "balance_changes": deduction_log,
+                "blockchain_confirmed": True,
+                "method": "real_blockchain_transaction",
+                "note": withdrawal_result.get("note", "")
+            }
+        else:
+            return {
+                "success": False,
+                "message": f"Real blockchain withdrawal failed: {withdrawal_result.get('error')}",
+                "error_details": withdrawal_result.get("error"),
+                "currency": currency
+            }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Real blockchain withdrawal failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Real blockchain withdrawal failed: {str(e)}")
+
+@api_router.post("/blockchain/validate-address")
+async def validate_blockchain_address(request: Dict[str, str]):
+    """Validate blockchain address for real withdrawals"""
+    try:
+        currency = request.get("currency", "").upper()
+        address = request.get("address", "")
+        
+        if not currency or not address:
+            raise HTTPException(status_code=400, detail="Currency and address are required")
+        
+        validation_result = await real_withdrawal_service.validate_address(currency, address)
+        
+        return {
+            "success": True,
+            "validation": validation_result,
+            "currency": currency,
+            "address": address
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.get("/blockchain/real-balance/{currency}/{address}")
+async def get_real_blockchain_balance(currency: str, address: str):
+    """Get real blockchain balance for address"""
+    try:
+        balance_result = await real_withdrawal_service.get_real_balance(currency.upper(), address)
+        
+        return {
+            "success": True,
+            "balance": balance_result,
+            "currency": currency.upper(),
+            "address": address,
+            "timestamp": datetime.utcnow().isoformat()
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.get("/blockchain/network-fees")
+async def get_blockchain_network_fees():
+    """Get current network fees for all supported blockchains"""
+    try:
+        fees_result = await real_withdrawal_service.get_network_fees()
+        
+        return {
+            "success": True,
+            "fees": fees_result,
+            "supported_currencies": ["SOL", "USDC", "CRT", "DOGE", "TRX"],
+            "timestamp": datetime.utcnow().isoformat()
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.get("/blockchain/connectivity-test")
+async def test_blockchain_connectivity():
+    """Test connectivity to all blockchain networks"""
+    try:
+        test_result = await real_withdrawal_service.test_blockchain_connectivity()
+        
+        return {
+            "success": True,
+            "connectivity_test": test_result,
+            "timestamp": datetime.utcnow().isoformat()
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 # Legacy endpoints
 @api_router.post("/status", response_model=StatusCheck)
 async def create_status_check(input: StatusCheckCreate):
