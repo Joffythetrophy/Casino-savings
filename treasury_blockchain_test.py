@@ -219,9 +219,8 @@ class TreasuryBlockchainTester:
                 try:
                     headers = {"Authorization": f"Bearer {self.auth_token}"} if self.auth_token else {}
                     
-                    # Use the real balance endpoint
-                    async with self.session.get(f"{self.base_url}/blockchain/real-balance", 
-                                              params={"address": address, "currency": currency},
+                    # Use the real balance endpoint with path parameters
+                    async with self.session.get(f"{self.base_url}/blockchain/real-balance/{currency}/{address}", 
                                               headers=headers) as response:
                         if response.status == 200:
                             data = await response.json()
