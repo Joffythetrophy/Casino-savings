@@ -221,17 +221,23 @@ class NOWPaymentsCustodyTester:
     async def test_real_blockchain_withdrawal(self):
         """Test 5: Test real blockchain withdrawal with new credentials"""
         try:
+            if not self.auth_token:
+                self.log_test("Real Blockchain Withdrawal", False, "No authentication token available")
+                return False
+            
             # Test the actual withdrawal endpoint with smaller amount
             withdrawal_payload = {
-                "recipient_address": TEST_USER["personal_doge_address"],
+                "destination_address": TEST_USER["personal_doge_address"],
                 "amount": 50,  # 50 DOGE test amount
                 "currency": "DOGE",
                 "user_id": TEST_USER["wallet_address"]
             }
             
+            headers = {"Authorization": f"Bearer {self.auth_token}"}
+            
             # Test via backend NOWPayments endpoint
             async with self.session.post(f"{self.base_url}/nowpayments/withdraw", 
-                                       json=withdrawal_payload) as response:
+                                       json=withdrawal_payload, headers=headers) as response:
                 if response.status == 200:
                     data = await response.json()
                     if data.get("success"):
