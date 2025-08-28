@@ -144,17 +144,47 @@ class RealWithdrawalService:
     async def call_blockchain_manager(self, method: str, **kwargs) -> Dict[str, Any]:
         """Call Node.js blockchain manager function"""
         try:
-            # Prepare the Node.js command
+            # Prepare arguments as individual parameters
+            args_str = ""
+            if kwargs:
+                arg_values = []
+                for key, value in kwargs.items():
+                    if isinstance(value, str):
+                        arg_values.append(f'"{value}"')
+                    else:
+                        arg_values.append(str(value))
+                args_str = ", ".join(arg_values)
+            
+            # Create a more robust Node.js script
             node_script = f"""
+            const path = require('path');
             const RealBlockchainManager = require('{self.blockchain_manager_path}');
-            const manager = new RealBlockchainManager();
             
             async function execute() {{
                 try {{
-                    const result = await manager.{method}({json.dumps(kwargs) if kwargs else ''});
+                    const manager = new RealBlockchainManager();
+                    let result;
+                    
+                    if ('{method}' === 'sendCryptocurrency' && {len(kwargs)} >= 3) {{
+                        result = await manager.{method}({args_str});
+                    }} else if ('{method}' === 'validateAddress' && {len(kwargs)} >= 2) {{
+                        result = await manager.{method}({args_str});
+                    }} else if ('{method}' === 'getBalance' && {len(kwargs)} >= 2) {{
+                        result = await manager.{method}({args_str});
+                    }} else if ('{method}' === 'getNetworkFees') {{
+                        result = await manager.{method}();
+                    }} else {{
+                        result = {{ success: false, error: "Unknown method or invalid parameters" }};
+                    }}
+                    
                     console.log(JSON.stringify(result));
                 }} catch (error) {{
-                    console.log(JSON.stringify({{ success: false, error: error.message }}));
+                    const errorResult = {{ 
+                        success: false, 
+                        error: error.message,
+                        stack: error.stack
+                    }};
+                    console.log(JSON.stringify(errorResult));
                 }}
             }}
             
@@ -165,25 +195,33 @@ class RealWithdrawalService:
             process = await asyncio.create_subprocess_exec(
                 "node", "-e", node_script,
                 stdout=asyncio.subprocess.PIPE,
-                stderr=asyncio.subprocess.PIPE
+                stderr=asyncio.subprocess.PIPE,
+                cwd="/app/backend"
             )
             
             stdout, stderr = await process.communicate()
             
             if process.returncode == 0:
-                result = json.loads(stdout.decode().strip())
-                return result
+                stdout_text = stdout.decode().strip()
+                if stdout_text:
+                    try:
+                        result = json.loads(stdout_text)
+                        return result
+                    except json.JSONDecodeError as e:
+                        logger.error(f"JSON decode error: {e}, Raw output: {stdout_text}")
+                        return {"success": False, "error": f"Invalid JSON: {stdout_text}"}
+                else:
+                    return {"success": False, "error": "Empty response from blockchain manager"}
             else:
-                error_msg = stderr.decode() if stderr else "Unknown Node.js error"
+                error_msg = stderr.decode() if stderr else f"Process exit code: {process.returncode}"
                 return {
                     "success": False,
                     "error": f"Blockchain manager error: {error_msg}"
                 }
                 
-        except json.JSONDecodeError as e:
-            return {"success": False, "error": f"Invalid JSON response from blockchain manager: {e}"}
         except Exception as e:
-            return {"success": False, "error": f"Blockchain manager call failed: {str(e)}"}
+            logger.error(f"Blockchain manager call exception: {str(e)}")
+            return {"success": False, "error": f"Call failed: {str(e)}"}
     
     async def test_blockchain_connectivity(self) -> Dict[str, Any]:
         """Test connectivity to all blockchain networks"""
