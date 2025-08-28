@@ -33,11 +33,15 @@ export const AuthProvider = ({ children }) => {
   // Check for existing session on app start
   useEffect(() => {
     const savedUser = localStorage.getItem('casino_user');
-    if (savedUser) {
+    const savedToken = localStorage.getItem('auth_token');
+    if (savedUser && savedToken) {
       try {
-        setUser(JSON.parse(savedUser));
+        const userData = JSON.parse(savedUser);
+        userData.auth_token = savedToken; // Include token in user data
+        setUser(userData);
       } catch (e) {
         localStorage.removeItem('casino_user');
+        localStorage.removeItem('auth_token');
       }
     }
     setLoading(false);
