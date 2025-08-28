@@ -136,7 +136,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "Test the newly implemented REAL BLOCKCHAIN INTEGRATION system. This is the comprehensive test of actual cryptocurrency transaction capabilities including blockchain connectivity, address validation, real balance checking, network fee estimation, and real blockchain withdrawals for SOL, USDC, CRT, DOGE, and TRX currencies."
+user_problem_statement: "Validate and test the user's updated treasury addresses, then complete the blockchain integration with REAL cryptocurrency transactions: USDC Address: DwK4nUM8TKWAxEBKTG6mWA6PBRDHFPA3beLB18pwCekq (Solana network), TRON Address: TJkna9XCi5noxE7hsEo6jz6et6c3B7zE9o (TRON network), DOGE Address: DNmtdukSPBf1PTqVQ9z8GGSJjpR8JqAimQ (Dogecoin network). Execute real small test withdrawals and validate complete blockchain integration."
 
 frontend:
   - task: "Casino Lobby Navigation and UI"
