@@ -281,8 +281,9 @@ class NOWPaymentsCustodyTester:
                                         f"✅ CUSTODY ACTIVATED! Withdrawal successful: {data.get('message', 'Success')}", data)
                             return True
                         else:
+                            error_msg = data.get('error') or data.get('message') or data.get('detail') or 'Unknown error'
                             self.log_test("NOWPayments Withdrawal Test", False, 
-                                        f"Withdrawal failed: {data.get('error', 'Unknown error')}", data)
+                                        f"Withdrawal failed: {error_msg}", data)
                     except json.JSONDecodeError:
                         self.log_test("NOWPayments Withdrawal Test", False, 
                                     f"Invalid JSON response: {response_text}")
