@@ -94,7 +94,7 @@ function AppContent() {
           </>
         ) : (
           <Routes>
-            <Route path="/" element={<PremiumDashboard onNavigate={(section) => window.location.href = `/${section}`} />} />
+            <Route path="/" element={<StreamlinedGamingDashboard onNavigate={(section) => window.location.href = `/${section}`} onGameSelect={(gameId) => window.location.href = `/games`} />} />
             <Route path="/games" element={
               <>
                 <HeroSection />
