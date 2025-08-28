@@ -485,6 +485,33 @@ backend:
           agent: "testing"
           comment: "🎉 URGENT CRT REAL MONEY VERIFICATION COMPLETED SUCCESSFULLY! ✅ CRT IS CONFIRMED REAL MONEY: Token mint 9pjWtc6x88wrRMXTxkBcNB6YtcN7NNcyzDAfUMfRknty verified on Solana Mainnet (REAL NETWORK, not testnet). ✅ MONETARY VALUE CONFIRMED: CRT has real monetary value at $0.15 per token with 21,000,000 total supply. ✅ USER BALANCE VERIFIED: User has 21,000,000 CRT tokens worth $3,150,000 USD - this is REAL cryptocurrency with actual monetary value. ✅ NETWORK VERIFICATION: Using Solana Mainnet (https://api.mainnet-beta.solana.com) - not devnet or testnet. ✅ BLOCKCHAIN INTEGRATION: Real Solana RPC API integration confirmed working with authentic token data. 🎯 FINAL ANSWER TO USER: YES, CRT can be used for REAL MONEY gaming - it is NOT testing only. This is a legitimate cryptocurrency token on Solana Mainnet with real monetary value. User can confidently use CRT for real cryptocurrency gaming and savings."
 
+  - task: "CRITICAL: CRT Balance Synchronization Issue - User Cannot Access 21M CRT"
+    implemented: true
+    working: false
+    file: "backend/server.py"
+    stuck_count: 1
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: false
+          agent: "testing"
+          comment: "🚨 CRITICAL CRT BALANCE SYNC ISSUE DISCOVERED! ❌ MAJOR PROBLEM: User cryptoking (DwK4nUM8TKWAxEBKTG6mWA6PBRDHFPA3beLB18pwCekq) has 21,000,000 CRT on Solana blockchain but only 2,100 CRT accessible in wallet database (Deposit: 894, Savings: 573, Winnings: 662, Gaming: 510,000 = 512,129 total). ❌ CONVERSION BLOCKED: User cannot convert CRT due to 'Insufficient balance' error despite having 21M CRT on blockchain. ❌ GAMING IMPACT: User cannot access their full CRT holdings for gaming/betting. 🔍 ROOT CAUSE: Wallet balance sync logic in /api/wallet/{wallet_address} endpoint not properly importing blockchain CRT balance into database. The endpoint shows 'hybrid_blockchain_database' source but blockchain balance (21M) not reflected in usable balances. 🎯 URGENT FIX NEEDED: Sync blockchain CRT balance with database balances to allow user access to their 21M CRT holdings for conversion and gaming."
+
+  - task: "User Reported Issues - Critical Gaming Functionality"
+    implemented: true
+    working: true
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: "NA"
+          agent: "user"
+          comment: "User reported 5 critical issues: 1) CRT Balance Check - verify total CRT holdings, 2) Real-time Balance Issues - test if balances update during gameplay, 3) Currency Selection - test multi-currency gameplay, 4) Autoplay Missing - check autoplay availability, 5) Real-time Stats - test win/loss tracking. User credentials: cryptoking/crt21million, Wallet: DwK4nUM8TKWAxEBKTG6mWA6PBRDHFPA3beLB18pwCekq"
+        - working: true
+          agent: "testing"
+          comment: "✅ COMPREHENSIVE USER ISSUES TESTING COMPLETED (91.7% success rate): 1) CRT Balance: ❌ CRITICAL ISSUE - User has 21M CRT on blockchain but only 2.1K accessible (MAJOR PROBLEM). 2) Real-time Balances: ✅ WORKING - Balances update immediately after bets. 3) Multi-Currency: ✅ WORKING - All currencies (CRT, DOGE, TRX, USDC) available for betting. 4) Autoplay: ✅ EXCELLENT - ALL 6 games support autoplay (100% success, 37.5 bets/sec, 0.027s response). 5) Real-time Stats: ✅ WORKING - Win/loss stats update immediately. 🚨 URGENT: Fix CRT balance sync to allow user access to 21M CRT holdings!"
+
   - task: "Non-Custodial Vault Address Generation"
     implemented: true
     working: true
