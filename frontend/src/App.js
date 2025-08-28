@@ -16,6 +16,7 @@ import MillionaireCasinoInterface from "./components/MillionaireCasinoInterface"
 import SimplifiedCasinoInterface from "./components/SimplifiedCasinoInterface";
 import CleanCasinoInterface from "./components/CleanCasinoInterface";
 import SmartContractTreasuryDashboard from "./components/SmartContractTreasuryDashboard";
+import MultiCurrencyTreasuryManager from "./components/MultiCurrencyTreasuryManager";
 import { AuthProvider, useAuth, AuthModal } from "./components/UserAuth";
 
 function AppContent() {
