@@ -396,17 +396,17 @@ frontend:
           comment: "🎯 COINPAYMENTS FRONTEND INTEGRATION COMPREHENSIVE TESTING COMPLETED! ✅ ALL CRITICAL AREAS VERIFIED: 1) User Authentication: Successfully tested login with cryptoking/crt21million, wallet address DwK4nUM8TKWAxEBKTG6mWA6PBRDHFPA3beLB18pwCekq properly loaded. 2) Wallet Management: WalletManager component fully functional with real balances (36M+ DOGE, 0.0277 SOL), QR code generation working, multi-currency support (DOGE, TRX, USDC, CRT). 3) Casino Games: Slot Machine and Dice games successfully integrate with real transfer system, multi-currency betting operational, AI Auto-Play functional. 4) Savings Page: CoinPayments vault integration working, real-time balance tracking, export functionality available. 5) Deposit/Withdrawal Flow: Address generation working, withdrawal interfaces available, conversion rates displayed. 6) Real-time Updates: Balance updates working, transfer confirmations displayed. ⚠️ PARTIAL INTEGRATION DETECTED: While UI shows real blockchain balances and integrates with backend APIs, deposit addresses still use mock format indicating backend CoinPayments service needs completion. Frontend successfully handles all CoinPayments integration requirements and displays real transfer data."
 
 backend:
-  - task: "Solana USDC Direct Withdrawal Implementation"
+  - task: "Smart Contract Treasury System for USDC Withdrawals"
     implemented: true
     working: false
-    file: "/app/backend/blockchain/solana_manager.py"
+    file: "/app/solana-program/casino-treasury/src/lib.rs"
     stuck_count: 0
     priority: "high"
     needs_retesting: true
     status_history:
         - working: false
           agent: "main"
-          comment: "Implemented direct Solana USDC withdrawal system as alternative to NOWPayments. Created USDCTokenManager class with get_usdc_balance, send_usdc, and validate_usdc_address methods. Added USDC withdrawal endpoints (/api/usdc/withdraw, /api/usdc/balance, /api/usdc/validate-address) with proper authentication and balance checking. Uses Solana SPL token standard with USDC mint EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v. Ready for backend testing to verify USDC withdrawal functionality without NOWPayments dependency."
+          comment: "Implemented comprehensive Solana smart contract treasury system for secure USDC withdrawals. Created Rust program with initialize_treasury, deposit_to_treasury, authorize_withdrawal, execute_withdrawal functions. Implemented TreasuryManager service with processWithdrawal, fundTreasury, emergency controls. Added smart contract endpoints (/api/treasury/smart-withdraw, /api/treasury/status, /api/treasury/fund, /api/treasury/emergency-pause). Features multi-signature treasury, automated withdrawal limits, emergency pause/resume, auto-funding triggers. Ready for backend testing to verify treasury-backed withdrawals with smart contract security."
 
   - task: "Personal DOGE Address Integration with NOWPayments - Final Test"
     implemented: true
