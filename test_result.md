@@ -1094,12 +1094,11 @@ metadata:
 
 test_plan:
   current_focus:
-    - "URGENT: Gaming Balance Menu Confusion Fix Testing"
-    - "DOGE Balance Display Simplification Required"
+    - "Smart Contract Treasury System for USDC Withdrawals"
   stuck_tasks:
-    - "Balance Display Simplicity - Too Many Currencies and Balance Types"
+    - "Smart Contract Treasury System for USDC Withdrawals"
   test_all: false
-  test_priority: "high_first"
+  test_priority: "stuck_first"
 
 backend:
   - task: "URGENT: Gaming Balance Menu Confusion Fix"
