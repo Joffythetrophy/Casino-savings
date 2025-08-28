@@ -699,10 +699,13 @@ class DOGETreasuryWithdrawalTester:
                 print("❌ Cannot proceed - insufficient DOGE balance")
                 return len([r for r in self.test_results if "✅ PASS" in r["status"]]), len(self.test_results)
             
-            # Step 3: Try internal wallet transfer to consolidate funds
+            # Step 3: Validate DOGE address format
+            address_valid = await self.test_doge_address_validation()
+            
+            # Step 4: Try internal wallet transfer to consolidate funds
             await self.test_internal_wallet_transfer()
             
-            # Step 4: Test multiple withdrawal methods
+            # Step 5: Test multiple withdrawal methods
             print(f"\n🔄 Testing multiple withdrawal methods for {self.payment_amount:,.0f} DOGE...")
             
             # Method 1: Treasury Smart Withdraw
@@ -722,8 +725,16 @@ class DOGETreasuryWithdrawalTester:
                 wallet_success = False
                 print("⏭️ Skipping Wallet withdraw test - Previous method succeeded")
             
-            # Step 5: Verify transaction completion
-            if treasury_success or nowpayments_success or wallet_success:
+            # Method 4: Alternative - Convert to USDC and withdraw (if all DOGE methods failed)
+            if not treasury_success and not nowpayments_success and not wallet_success:
+                print(f"\n💡 Trying alternative approach: Convert DOGE to USDC then withdraw...")
+                conversion_success = await self.test_conversion_to_usdc_then_withdraw()
+            else:
+                conversion_success = False
+                print("⏭️ Skipping conversion approach - Direct DOGE withdrawal succeeded")
+            
+            # Step 6: Verify transaction completion
+            if treasury_success or nowpayments_success or wallet_success or conversion_success:
                 await self.verify_transaction_completion()
             
         finally:
