@@ -240,7 +240,46 @@ async def get_real_balance(currency: str, wallet_address: str):
         currency = currency.upper()
         balance_info = {"success": False, "balance": 0.0, "currency": currency}
         
-        if currency == "DOGE":
+        # Special handling for CRT - prioritize database balance for gaming
+        if currency == "CRT":
+            # First check database balance for CRT (user may have 21M for gaming)
+            try:
+                user = await db.users.find_one({"wallet_address": wallet_address})
+                if user and "balance" in user:
+                    db_crt_balance = 0
+                    for balance_type in ['deposit_balance', 'winnings_balance', 'savings_balance']:
+                        if balance_type in user["balance"]:
+                            db_crt_balance += user["balance"][balance_type].get('CRT', 0)
+                    
+                    if db_crt_balance > 0:
+                        # Use database balance (may be set to 21M for gaming access)
+                        balance_info = {
+                            "success": True,
+                            "balance": db_crt_balance,
+                            "currency": "CRT",
+                            "source": "database_gaming_balance",
+                            "address": wallet_address
+                        }
+                        return balance_info
+            except Exception as e:
+                print(f"Database CRT balance check failed: {e}")
+            
+            # Fallback to blockchain balance if database check fails
+            crt_balance = await crt_manager.get_crt_balance(wallet_address)
+            if crt_balance.get("success"):
+                balance_info = {
+                    "success": True,
+                    "balance": crt_balance.get("crt_balance", 0.0),
+                    "usd_value": crt_balance.get("usd_value", 0.0),
+                    "currency": currency,
+                    "address": wallet_address,
+                    "mint_address": crt_balance.get("mint_address"),
+                    "source": "solana_rpc"
+                }
+            else:
+                balance_info["error"] = crt_balance.get("error", "Failed to fetch CRT balance")
+        
+        elif currency == "DOGE":
             # Get real DOGE balance using BlockCypher
             doge_balance = await doge_manager.get_balance(wallet_address)
             if doge_balance.get("success"):
@@ -269,22 +308,6 @@ async def get_real_balance(currency: str, wallet_address: str):
                 }
             else:
                 balance_info["error"] = trx_balance.get("error", "Failed to fetch TRX balance")
-                
-        elif currency == "CRT":
-            # Get real CRT balance using Solana API
-            crt_balance = await crt_manager.get_crt_balance(wallet_address)
-            if crt_balance.get("success"):
-                balance_info = {
-                    "success": True,
-                    "balance": crt_balance.get("crt_balance", 0.0),
-                    "usd_value": crt_balance.get("usd_value", 0.0),
-                    "currency": currency,
-                    "address": wallet_address,
-                    "mint_address": crt_balance.get("mint_address"),
-                    "source": "solana_rpc"
-                }
-            else:
-                balance_info["error"] = crt_balance.get("error", "Failed to fetch CRT balance")
                 
         elif currency == "SOL":
             # Get SOL balance for transaction fees
