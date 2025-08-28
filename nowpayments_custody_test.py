@@ -310,8 +310,9 @@ class NOWPaymentsCustodyTester:
                 else:
                     try:
                         data = await response.json()
+                        error_msg = data.get('detail') or data.get('error') or data.get('message') or response_text
                         self.log_test("NOWPayments Withdrawal Test", False, 
-                                    f"Withdrawal error HTTP {response.status}: {data.get('detail', response_text)}", data)
+                                    f"Withdrawal error HTTP {response.status}: {error_msg}", data)
                     except json.JSONDecodeError:
                         self.log_test("NOWPayments Withdrawal Test", False, 
                                     f"HTTP {response.status}: {response_text}")
