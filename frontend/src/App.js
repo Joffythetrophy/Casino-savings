@@ -17,8 +17,34 @@ import SimplifiedCasinoInterface from "./components/SimplifiedCasinoInterface";
 import { AuthProvider, useAuth, AuthModal } from "./components/UserAuth";
 
 function AppContent() {
-  const { isAuthenticated, loading } = useAuth();
+  const { user, isAuthenticated, loading } = useAuth();
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [userBalance, setUserBalance] = useState(null);
+
+  // Fetch user balance when authenticated
+  useEffect(() => {
+    const fetchBalance = async () => {
+      if (isAuthenticated && user?.wallet_address) {
+        try {
+          const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
+          const response = await fetch(`${backendUrl}/api/wallet/${user.wallet_address}`);
+          if (response.ok) {
+            const data = await response.json();
+            if (data.success && data.wallet) {
+              setUserBalance(data.wallet);
+            }
+          }
+        } catch (error) {
+          console.error('Error fetching balance:', error);
+        }
+      }
+    };
+
+    fetchBalance();
+    // Refresh balance every 10 seconds
+    const interval = setInterval(fetchBalance, 10000);
+    return () => clearInterval(interval);
+  }, [isAuthenticated, user?.wallet_address]);
 
   if (loading) {
     return (
