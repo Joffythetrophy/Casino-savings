@@ -53,30 +53,55 @@ class TreasurySystemTester:
         print()
     
     async def authenticate_user(self) -> bool:
-        """Authenticate user and get JWT token"""
+        """Authenticate user and get JWT token using wallet auth flow"""
         try:
-            login_data = {
-                "identifier": TEST_USER,
-                "password": TEST_PASSWORD
+            # Step 1: Generate authentication challenge
+            challenge_data = {
+                "wallet_address": TEST_WALLET,
+                "network": "solana"
             }
             
-            async with self.session.post(f"{BASE_URL}/auth/login", json=login_data) as response:
+            async with self.session.post(f"{BASE_URL}/auth/challenge", json=challenge_data) as response:
                 if response.status == 200:
+                    challenge_response = await response.json()
+                    if not challenge_response.get("success"):
+                        self.log_test("User Authentication", False, "Failed to generate challenge", challenge_response)
+                        return False
+                    
+                    challenge_hash = challenge_response.get("challenge_hash")
+                    if not challenge_hash:
+                        self.log_test("User Authentication", False, "No challenge hash received", challenge_response)
+                        return False
+                else:
                     data = await response.json()
-                    if data.get("success") and "token" in data:
-                        self.auth_token = data["token"]
+                    self.log_test("User Authentication", False, f"Challenge generation failed: {response.status}", data)
+                    return False
+            
+            # Step 2: Verify with a mock signature (since we can't actually sign)
+            verify_data = {
+                "challenge_hash": challenge_hash,
+                "signature": "mock_signature_for_testing_purposes_that_is_long_enough_to_pass_validation",
+                "wallet_address": TEST_WALLET,
+                "network": "solana"
+            }
+            
+            async with self.session.post(f"{BASE_URL}/auth/verify", json=verify_data) as response:
+                if response.status == 200:
+                    verify_response = await response.json()
+                    if verify_response.get("success") and "token" in verify_response:
+                        self.auth_token = verify_response["token"]
                         self.log_test(
                             "User Authentication", 
                             True, 
-                            f"Successfully authenticated user '{TEST_USER}' with wallet {TEST_WALLET}"
+                            f"Successfully authenticated user with wallet {TEST_WALLET} using JWT token"
                         )
                         return True
                     else:
                         self.log_test(
                             "User Authentication", 
                             False, 
-                            "Login successful but no token received", 
-                            data
+                            "Verification successful but no token received", 
+                            verify_response
                         )
                         return False
                 else:
@@ -84,7 +109,7 @@ class TreasurySystemTester:
                     self.log_test(
                         "User Authentication", 
                         False, 
-                        f"Login failed with status {response.status}", 
+                        f"Verification failed with status {response.status}", 
                         data
                     )
                     return False
