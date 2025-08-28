@@ -163,10 +163,14 @@ const Roulette = ({ onBack }) => {
   };
 
   const placeBet = (betType, amount) => {
-    setBets(prev => ({
-      ...prev,
-      [betType]: (prev[betType] || 0) + amount
-    }));
+    setBets(prev => {
+      const newBets = {
+        ...prev,
+        [betType]: (prev[betType] || 0) + amount
+      };
+      setLastBet(newBets);
+      return newBets;
+    });
   };
 
   const clearBets = () => {
