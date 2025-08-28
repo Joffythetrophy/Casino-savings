@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-NOWPayments Withdrawal & Whitelisting Status Test
-Tests withdrawal functionality and whitelisting requirements
+URGENT: NOWPayments Real Blockchain Withdrawal Test - Whitelisting Complete!
+Testing real DOGE withdrawals to whitelisted address DLbWLzxq2mxE3Adzn9MFKQ6EBP8gTE5po8
 """
 
 import asyncio
@@ -11,13 +11,19 @@ from datetime import datetime
 
 BACKEND_URL = "https://cryptoplay-8.preview.emergentagent.com/api"
 
-# Test data
+# Test data - WHITELISTED ADDRESS NOW ACTIVE!
 TEST_DATA = {
     "username": "cryptoking",
     "password": "crt21million",
     "casino_wallet": "DwK4nUM8TKWAxEBKTG6mWA6PBRDHFPA3beLB18pwCekq",
-    "personal_wallet": "DLbWLzxq2mxE3Adzn9MFKQ6EBP8gTE5po8",
-    "test_amount": 100.0
+    "whitelisted_doge_address": "DLbWLzxq2mxE3Adzn9MFKQ6EBP8gTE5po8",  # NOW WHITELISTED!
+    "test_amount": 100.0  # Safe test amount
+}
+
+# NOWPayments credentials
+NOWPAYMENTS_CREDS = {
+    "api_key": "FSVPHG1-1TK4MDZ-MKC4TTV-MW1MAXX",
+    "public_key": "f9a7e8ba-2573-4da2-9f4f-3e0ffd748212"
 }
 
 class NOWPaymentsWithdrawalTester:
