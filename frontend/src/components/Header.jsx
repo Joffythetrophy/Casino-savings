@@ -19,8 +19,10 @@ const Header = ({ isWalletConnected }) => {
               <Coins className="w-6 h-6 text-black" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-yellow-400">Casino Savings</h1>
-              <p className="text-xs text-gray-400">Save while you play</p>
+              <h1 className="text-xl font-bold bg-gradient-to-r from-gold-400 via-yellow-500 to-gold-600 bg-clip-text text-transparent">
+                💎 JOFFY CASINO SAVER 💎
+              </h1>
+              <p className="text-xs text-gray-400">Million-Dollar Casino Empire</p>
             </div>
           </Link>
 
