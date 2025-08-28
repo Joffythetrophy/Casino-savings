@@ -3070,6 +3070,100 @@ async def transfer_to_gaming_balance(request: Dict[str, Any]):
     except Exception as e:
         return {"success": False, "error": str(e), "message": f"Transfer failed: {str(e)}"}
 
+@app.post("/api/wallet/transfer")
+async def internal_wallet_transfer(request: Dict[str, Any]):
+    """Transfer funds between internal wallet types (deposit, winnings, savings)"""
+    try:
+        wallet_address = request.get("wallet_address")
+        from_wallet_type = request.get("from_wallet_type")
+        to_wallet_type = request.get("to_wallet_type")
+        currency = request.get("currency")
+        amount = float(request.get("amount", 0))
+        
+        # Validate inputs
+        if not all([wallet_address, from_wallet_type, to_wallet_type, currency]):
+            return {"success": False, "message": "Missing required fields"}
+        
+        if amount <= 0:
+            return {"success": False, "message": "Invalid amount"}
+        
+        valid_wallet_types = ["deposit", "winnings", "savings"]
+        if from_wallet_type not in valid_wallet_types or to_wallet_type not in valid_wallet_types:
+            return {"success": False, "message": f"Invalid wallet type. Must be one of: {valid_wallet_types}"}
+        
+        if from_wallet_type == to_wallet_type:
+            return {"success": False, "message": "Source and destination wallet types cannot be the same"}
+        
+        # Find user
+        user = await db.users.find_one({"wallet_address": wallet_address})
+        if not user:
+            return {"success": False, "message": "User not found"}
+        
+        # Check source balance
+        from_balance_field = f"{from_wallet_type}_balance"
+        from_balance_dict = user.get(from_balance_field, {})
+        current_from_balance = from_balance_dict.get(currency, 0)
+        
+        if current_from_balance < amount:
+            return {
+                "success": False,
+                "message": f"Insufficient {currency} balance in {from_wallet_type} wallet. Available: {current_from_balance:,.2f}, Requested: {amount:,.2f}"
+            }
+        
+        # Get destination balance
+        to_balance_field = f"{to_wallet_type}_balance"
+        to_balance_dict = user.get(to_balance_field, {})
+        current_to_balance = to_balance_dict.get(currency, 0)
+        
+        # Calculate new balances
+        new_from_balance = current_from_balance - amount
+        new_to_balance = current_to_balance + amount
+        
+        # Update balances in database
+        await db.users.update_one(
+            {"wallet_address": wallet_address},
+            {"$set": {
+                f"{from_balance_field}.{currency}": new_from_balance,
+                f"{to_balance_field}.{currency}": new_to_balance
+            }}
+        )
+        
+        # Record the transfer transaction
+        transfer_record = {
+            "transaction_id": str(uuid.uuid4()),
+            "wallet_address": wallet_address,
+            "type": "internal_transfer",
+            "currency": currency,
+            "amount": amount,
+            "from_wallet_type": from_wallet_type,
+            "to_wallet_type": to_wallet_type,
+            "from_balance_before": current_from_balance,
+            "from_balance_after": new_from_balance,
+            "to_balance_before": current_to_balance,
+            "to_balance_after": new_to_balance,
+            "timestamp": datetime.utcnow(),
+            "status": "completed"
+        }
+        
+        await db.transactions.insert_one(transfer_record)
+        
+        return {
+            "success": True,
+            "message": f"✅ Successfully transferred {amount:,.2f} {currency} from {from_wallet_type} to {to_wallet_type}",
+            "transfer": {
+                "amount": amount,
+                "currency": currency,
+                "from_wallet_type": from_wallet_type,
+                "to_wallet_type": to_wallet_type,
+                "from_balance_after": new_from_balance,
+                "to_balance_after": new_to_balance,
+                "transaction_id": transfer_record["transaction_id"]
+            }
+        }
+        
+    except Exception as e:
+        return {"success": False, "error": str(e), "message": f"Internal transfer failed: {str(e)}"}
+
 # Real CRT deposit system
 @app.get("/api/deposit/address/{wallet_address}")
 async def get_deposit_address(wallet_address: str):
