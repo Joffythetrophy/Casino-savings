@@ -25,37 +25,49 @@ const Header = ({ isWalletConnected }) => {
           </Link>
 
           {/* Navigation */}
-          <nav className="hidden md:flex items-center space-x-8">
+          <nav className="hidden lg:flex items-center space-x-6">
             <Link 
               to="/" 
-              className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-300 ${
-                isActive('/') 
-                  ? 'bg-yellow-400 text-black font-medium' 
-                  : 'text-gray-300 hover:text-yellow-400 hover:bg-white/10'
+              className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-all duration-300 ${
+                isActive('/') || isActive('/dashboard')
+                  ? 'bg-gold-500 text-black font-medium' 
+                  : 'text-gray-300 hover:text-gold-400 hover:bg-white/10'
+              }`}
+            >
+              <BarChart3 className="w-4 h-4" />
+              <span>Dashboard</span>
+            </Link>
+            
+            <Link 
+              to="/games" 
+              className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-all duration-300 ${
+                isActive('/games') 
+                  ? 'bg-gold-500 text-black font-medium' 
+                  : 'text-gray-300 hover:text-gold-400 hover:bg-white/10'
               }`}
             >
               <Gamepad2 className="w-4 h-4" />
-              <span>Games</span>
+              <span>Casino</span>
             </Link>
             
             <Link 
               to="/savings" 
-              className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-300 ${
+              className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-all duration-300 ${
                 isActive('/savings') 
-                  ? 'bg-yellow-400 text-black font-medium' 
-                  : 'text-gray-300 hover:text-yellow-400 hover:bg-white/10'
+                  ? 'bg-gold-500 text-black font-medium' 
+                  : 'text-gray-300 hover:text-gold-400 hover:bg-white/10'
               }`}
             >
               <PiggyBank className="w-4 h-4" />
-              <span>Savings</span>
+              <span>Vault</span>
             </Link>
             
             <Link 
               to="/wallet" 
-              className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-300 ${
+              className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-all duration-300 ${
                 isActive('/wallet') 
-                  ? 'bg-yellow-400 text-black font-medium' 
-                  : 'text-gray-300 hover:text-yellow-400 hover:bg-white/10'
+                  ? 'bg-gold-500 text-black font-medium' 
+                  : 'text-gray-300 hover:text-gold-400 hover:bg-white/10'
               }`}
             >
               <Wallet className="w-4 h-4" />
@@ -63,15 +75,39 @@ const Header = ({ isWalletConnected }) => {
             </Link>
             
             <Link 
+              to="/history" 
+              className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-all duration-300 ${
+                isActive('/history') 
+                  ? 'bg-gold-500 text-black font-medium' 
+                  : 'text-gray-300 hover:text-gold-400 hover:bg-white/10'
+              }`}
+            >
+              <History className="w-4 h-4" />
+              <span>History</span>
+            </Link>
+            
+            <Link 
               to="/trading" 
-              className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-300 ${
+              className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-all duration-300 ${
                 isActive('/trading') 
-                  ? 'bg-yellow-400 text-black font-medium' 
-                  : 'text-gray-300 hover:text-yellow-400 hover:bg-white/10'
+                  ? 'bg-gold-500 text-black font-medium' 
+                  : 'text-gray-300 hover:text-gold-400 hover:bg-white/10'
               }`}
             >
               <TrendingUp className="w-4 h-4" />
-              <span>AI Trading</span>
+              <span>Trading</span>
+            </Link>
+            
+            <Link 
+              to="/admin" 
+              className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-all duration-300 ${
+                isActive('/admin') 
+                  ? 'bg-red-500 text-white font-medium' 
+                  : 'text-gray-300 hover:text-red-400 hover:bg-white/10'
+              }`}
+            >
+              <Settings className="w-4 h-4" />
+              <span>Admin</span>
             </Link>
           </nav>
 
