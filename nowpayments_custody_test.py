@@ -214,21 +214,62 @@ class NOWPaymentsCustodyTester:
             self.log_test("Treasury System Configuration", False, f"Error: {str(e)}")
         return False
 
+    async def get_jwt_token(self):
+        """Get JWT token for authenticated requests"""
+        try:
+            # Step 1: Generate challenge
+            challenge_payload = {
+                "wallet_address": TEST_CREDENTIALS["wallet_address"],
+                "network": "solana"
+            }
+            
+            async with self.session.post(f"{self.base_url}/auth/challenge", 
+                                       json=challenge_payload) as response:
+                if response.status == 200:
+                    challenge_data = await response.json()
+                    if challenge_data.get("success"):
+                        # Step 2: Verify with mock signature
+                        verify_payload = {
+                            "challenge_hash": challenge_data.get("challenge_hash"),
+                            "signature": "mock_signature_for_nowpayments_test",
+                            "wallet_address": TEST_CREDENTIALS["wallet_address"],
+                            "network": "solana"
+                        }
+                        
+                        async with self.session.post(f"{self.base_url}/auth/verify", 
+                                                   json=verify_payload) as verify_response:
+                            if verify_response.status == 200:
+                                verify_data = await verify_response.json()
+                                if verify_data.get("success"):
+                                    self.auth_token = verify_data.get("token")
+                                    return True
+        except Exception as e:
+            print(f"Failed to get JWT token: {e}")
+        return False
+
     async def test_nowpayments_withdrawal_endpoint(self):
         """Test 6: Test NOWPayments withdrawal endpoint with custody activation"""
         try:
+            # Get JWT token first
+            if not await self.get_jwt_token():
+                self.log_test("NOWPayments Withdrawal Test", False, 
+                            "❌ Failed to get authentication token")
+                return False
+            
             # Test the actual NOWPayments withdrawal endpoint
             withdrawal_payload = {
-                "wallet_address": TEST_CREDENTIALS["wallet_address"],
+                "user_id": TEST_CREDENTIALS["username"],
                 "currency": "DOGE",
                 "amount": TEST_CREDENTIALS["test_amount"],
                 "destination_address": TEST_CREDENTIALS["personal_address"],
                 "treasury_type": "treasury_2_liquidity"  # Use main liquidity treasury
             }
             
+            headers = {"Authorization": f"Bearer {self.auth_token}"}
+            
             # Check if backend has NOWPayments withdrawal endpoint
             async with self.session.post(f"{self.base_url}/nowpayments/withdraw", 
-                                       json=withdrawal_payload) as response:
+                                       json=withdrawal_payload, headers=headers) as response:
                 
                 response_text = await response.text()
                 
