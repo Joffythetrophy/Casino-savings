@@ -406,9 +406,9 @@ backend:
     implemented: true
     working: false
     file: "/app/solana-program/casino-treasury/src/lib.rs"
-    stuck_count: 2
+    stuck_count: 3
     priority: "high"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
         - working: false
           agent: "main"
