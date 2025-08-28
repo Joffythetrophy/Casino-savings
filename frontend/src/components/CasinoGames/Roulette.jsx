@@ -173,6 +173,61 @@ const Roulette = ({ onBack }) => {
     setBets({});
   };
 
+  const [autoPlaySettings, setAutoPlaySettings] = useState({
+    autoBetType: 'red',
+    isAutoPlaying: false
+  });
+
+  const [lastBet, setLastBet] = useState(null);
+
+  // AutoPlay function
+  const handleAutoPlay = async (settings) => {
+    if (!settings.enabled) {
+      setAutoPlaySettings(prev => ({ ...prev, isAutoPlaying: false }));
+      return;
+    }
+
+    setAutoPlaySettings(prev => ({ ...prev, isAutoPlaying: true }));
+    
+    try {
+      // Clear current bets and place auto bet
+      setBets({});
+      const newBets = { [autoPlaySettings.autoBetType]: settings.betAmount };
+      setBets(newBets);
+      setLastBet(newBets);
+      
+      // Trigger spin automatically
+      setTimeout(() => {
+        if (autoPlaySettings.isAutoPlaying) {
+          spin();
+        }
+      }, 100);
+      
+    } catch (error) {
+      console.error('AutoPlay error:', error);
+      setAutoPlaySettings(prev => ({ ...prev, isAutoPlaying: false }));
+    }
+  };
+
+  // Repeat last bet function
+  const repeatLastBet = () => {
+    if (lastBet && Object.keys(lastBet).length > 0) {
+      setBets(lastBet);
+      toast({
+        title: "Bet Repeated",
+        description: "Your previous bet has been placed again!",
+        duration: 2000
+      });
+    } else {
+      toast({
+        title: "No Previous Bet",
+        description: "Place a bet first to use repeat bet feature",
+        duration: 2000,
+        variant: "destructive"
+      });
+    }
+  };
+
   return (
     <CasinoGameLayout title="Roulette" onBack={onBack} stats={stats}>
       <div className="space-y-6">
