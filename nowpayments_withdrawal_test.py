@@ -428,7 +428,9 @@ class NOWPaymentsWithdrawalTester:
         print(f"\n📋 FINAL STATUS:")
         print(f"DEPOSITS: ✅ Work immediately (no whitelisting needed)")
         print(f"WITHDRAWALS: {'✅ NOW WORKING' if withdrawal_success else '⏳ Still pending activation'}")
-        print(f"USER CAN: {'✅ Withdraw {TEST_DATA[\"test_amount\"]} DOGE to personal wallet!' if withdrawal_success else '⏳ Wait for whitelisting completion'}")
+        test_amount = TEST_DATA["test_amount"]
+        user_status = f"✅ Withdraw {test_amount} DOGE to personal wallet!" if withdrawal_success else "⏳ Wait for whitelisting completion"
+        print(f"USER CAN: {user_status}")
 
 async def main():
     async with NOWPaymentsWithdrawalTester(BACKEND_URL) as tester:
