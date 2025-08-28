@@ -9,6 +9,7 @@ import hmac
 import hashlib
 import json
 import asyncio
+import jwt
 from typing import Dict, Any, Optional, List
 from datetime import datetime, timedelta
 from decimal import Decimal
