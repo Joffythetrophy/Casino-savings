@@ -662,6 +662,18 @@ backend:
         - working: true
           agent: "testing"
           comment: "🚨 URGENT: NOWPayments Invoice Address Analysis & Payment Flow Verification COMPLETED! ✅ CRITICAL FINDINGS CONFIRMED (13/22 tests passed, 59.1% success): 1) ✅ INVOICE ADDRESS OWNERSHIP: DCkfSVWPiwdPYFXChVNXkDzihVEWYCJjRT is CONFIRMED as NOWPayments controlled deposit address (NOT user's personal wallet DLbWLzxq2mxE3Adzn9MFKQ6EBP8gTE5po8 or casino wallet DwK4nUM8TKWAxEBKTG6mWA6PBRDHFPA3beLB18pwCekq). 2) ✅ PAYMENT FLOW VERIFIED: Invoice payments go to CASINO BALANCE, not personal wallet. When user pays 16,081.58 DOGE to invoice address, it credits their casino account from 34,835,923.50 to 34,852,005.08 DOGE. 3) ✅ DEPOSITS vs WITHDRAWALS DISTINCTION: Deposits work IMMEDIATELY (no whitelisting needed), withdrawals require NOWPayments payout permission activation (1-2 business days pending). 4) ✅ DEPOSIT FUNCTIONALITY: Tested successfully - 16,081.58 DOGE added to casino balance, funds immediately available for gaming. 5) ❌ WITHDRAWAL ISSUES: DOGE address validation bug prevents withdrawals to valid mainnet addresses. 6) ❌ NOWPayments Integration: Missing status endpoints and IPN webhook system. 🎯 ANSWERS TO USER QUESTIONS: 1) DCkfSVWPiwdPYFXChVNXkDzihVEWYCJjRT = NOWPayments deposit address, 2) User CAN pay invoice and receive DOGE in casino balance immediately, 3) NO whitelisting needed for deposits, only withdrawals require whitelisting completion."
+
+  - task: "DOGE Address Validation Bug Fix for Withdrawals"
+    implemented: false
+    working: false
+    file: "/app/backend/server.py"
+    stuck_count: 1
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: false
+          agent: "testing"
+          comment: "❌ CRITICAL BUG FOUND: DOGE address validation incorrectly rejects valid mainnet DOGE addresses during withdrawal. Address DLbWLzxq2mxE3Adzn9MFKQ6EBP8gTE5po8 is valid DOGE format (starts with D, 34 characters, base58 encoded) but backend returns 'Invalid DOGE address format' error. This prevents users from withdrawing to their personal DOGE wallets. The validation logic in withdrawal endpoint needs to be fixed to properly validate DOGE addresses according to mainnet standards."
     status_history:
         - working: true
           agent: "testing"
