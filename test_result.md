@@ -502,9 +502,9 @@ backend:
 
   - task: "User Reported Issues - Critical Gaming Functionality"
     implemented: true
-    working: true
+    working: false
     file: "backend/server.py"
-    stuck_count: 0
+    stuck_count: 1
     priority: "high"
     needs_retesting: false
     status_history:
@@ -514,6 +514,9 @@ backend:
         - working: true
           agent: "testing"
           comment: "✅ COMPREHENSIVE USER ISSUES TESTING COMPLETED (91.7% success rate): 1) CRT Balance: ❌ CRITICAL ISSUE - User has 21M CRT on blockchain but only 2.1K accessible (MAJOR PROBLEM). 2) Real-time Balances: ✅ WORKING - Balances update immediately after bets. 3) Multi-Currency: ✅ WORKING - All currencies (CRT, DOGE, TRX, USDC) available for betting. 4) Autoplay: ✅ EXCELLENT - ALL 6 games support autoplay (100% success, 37.5 bets/sec, 0.027s response). 5) Real-time Stats: ✅ WORKING - Win/loss stats update immediately. 🚨 URGENT: Fix CRT balance sync to allow user access to 21M CRT holdings!"
+        - working: false
+          agent: "testing"
+          comment: "🎯 USER-REQUESTED FIXES COMPREHENSIVE TESTING COMPLETED (84.2% success rate): ✅ FIXES WORKING: 1) Autoplay Added to Roulette: ✅ EXCELLENT - All 6 games (Slot Machine, Roulette, Dice, Plinko, Keno, Mines) support autoplay with 100% success rate for rapid betting. 2) Real-time Balance Updates: ✅ WORKING - Balances update immediately after bets, tested with CRT betting. 3) Multi-Currency Gaming: ✅ WORKING - All 4 currencies (CRT, DOGE, TRX, USDC) work for betting with 100% success. 4) Streamlined Interface: ✅ WORKING - Treasury wallet display shows all 3 wallets (deposit, winnings, savings) with 5 currencies, liquidity pool accessible. ❌ CRITICAL ISSUE NOT FIXED: 5) CRT Balance Fix: ❌ FAILED - User still only has 738 CRT deposit balance instead of 21M CRT access, large conversions fail with 'Insufficient balance'. 🚨 URGENT: Main agent must fix CRT balance synchronization to give user 21M CRT access as requested!"
 
   - task: "Non-Custodial Vault Address Generation"
     implemented: true
