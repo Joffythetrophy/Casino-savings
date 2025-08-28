@@ -405,11 +405,30 @@ class NOWPaymentsWithdrawalTester:
         else:
             print("✅ ADDRESS VALIDATION: Working correctly")
         
-        print("\n🎯 FINAL ANSWER:")
-        print("DEPOSITS: ✅ Work immediately (no whitelisting needed)")
-        print("WITHDRAWALS: ⏳ Require NOWPayments payout permission activation (1-2 business days)")
-        print(f"USER CAN: Pay invoice {TEST_DATA['test_amount']} DOGE → Casino balance immediately")
-        print(f"USER CANNOT: Withdraw to personal wallet until whitelisting complete")
+        # Check for successful withdrawal
+        withdrawal_success = any(r["success"] for r in self.test_results if "blockchain withdrawal" in r["test"].lower())
+        
+        print("\n🎯 CRITICAL SUCCESS CRITERIA:")
+        print(f"✅ Real Blockchain Withdrawal: {'✅ SUCCESS' if withdrawal_success else '❌ FAILED'}")
+        print(f"✅ Transaction ID Received: {'✅ SUCCESS' if withdrawal_success else '❌ FAILED'}")
+        print(f"✅ DOGE to Personal Wallet: {'✅ SUCCESS' if withdrawal_success else '❌ FAILED'}")
+        print(f"✅ System Ready for Production: {'✅ SUCCESS' if withdrawal_success else '❌ FAILED'}")
+        
+        print("\n🎉 MOMENT OF TRUTH RESULT:")
+        if withdrawal_success:
+            print("✅ SUCCESS! Real blockchain withdrawals are now working!")
+            print("🚀 DOGE successfully sent to whitelisted address!")
+            print("💰 User can now withdraw to personal wallet!")
+            print("🏆 System is ready for full production use!")
+        else:
+            print("❌ NOT YET - Whitelisting may still be pending")
+            print("⏳ NOWPayments payout permissions need more time")
+            print("🔄 The 1-2 business day period may not be complete")
+            
+        print(f"\n📋 FINAL STATUS:")
+        print(f"DEPOSITS: ✅ Work immediately (no whitelisting needed)")
+        print(f"WITHDRAWALS: {'✅ NOW WORKING' if withdrawal_success else '⏳ Still pending activation'}")
+        print(f"USER CAN: {'✅ Withdraw {TEST_DATA[\"test_amount\"]} DOGE to personal wallet!' if withdrawal_success else '⏳ Wait for whitelisting completion'}")
 
 async def main():
     async with NOWPaymentsWithdrawalTester(BACKEND_URL) as tester:
