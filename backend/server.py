@@ -4492,6 +4492,300 @@ async def validate_usdc_address(request: Dict[str, str]):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+# SMART CONTRACT TREASURY ENDPOINTS
+# =============================================================================
+
+class SmartContractWithdrawalRequest(BaseModel):
+    wallet_address: str = Field(..., description="User's wallet address")
+    amount: float = Field(..., gt=0, description="USDC amount to withdraw")
+    destination_address: str = Field(..., description="Solana address to receive USDC")
+    withdrawal_type: str = Field("Winnings", description="Type: Winnings, Savings, or Liquidity")
+
+async def call_treasury_manager(method: str, **kwargs) -> Dict[str, Any]:
+    """Call Node.js treasury manager functions"""
+    try:
+        script_path = "/app/backend/services/treasury_manager.js"
+        
+        # Prepare the Node.js command
+        node_command = [
+            "node", "-e", f"""
+            const {{ treasuryManager }} = require('{script_path}');
+            
+            async function execute() {{
+                try {{
+                    const result = await treasuryManager.{method}({json.dumps(kwargs) if kwargs else ''});
+                    console.log(JSON.stringify(result));
+                }} catch (error) {{
+                    console.log(JSON.stringify({{ success: false, error: error.message }}));
+                }}
+            }}
+            
+            execute();
+            """
+        ]
+        
+        # Execute the Node.js script
+        process = subprocess.run(node_command, capture_output=True, text=True, timeout=30)
+        
+        if process.returncode == 0:
+            result = json.loads(process.stdout.strip())
+            return result
+        else:
+            return {
+                "success": False,
+                "error": f"Treasury manager error: {process.stderr}"
+            }
+            
+    except subprocess.TimeoutExpired:
+        return {"success": False, "error": "Treasury operation timeout"}
+    except json.JSONDecodeError as e:
+        return {"success": False, "error": f"Invalid response from treasury manager: {e}"}
+    except Exception as e:
+        return {"success": False, "error": f"Treasury manager call failed: {str(e)}"}
+
+@api_router.post("/treasury/smart-withdraw")
+async def smart_contract_withdrawal(
+    request: SmartContractWithdrawalRequest,
+    wallet_info: Dict = Depends(get_authenticated_wallet)
+):
+    """Execute USDC withdrawal through smart contract treasury"""
+    try:
+        # Verify user authentication
+        if request.wallet_address != wallet_info["wallet_address"]:
+            raise HTTPException(status_code=403, detail="Unauthorized")
+        
+        # Find user in database
+        user = await db.users.find_one({"wallet_address": request.wallet_address})
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+        
+        # Determine source balance based on withdrawal type
+        balance_key = f"{request.withdrawal_type.lower()}_balance"
+        if balance_key not in user:
+            balance_key = "deposit_balance"  # Fallback to deposit balance
+        
+        user_usdc_balance = user.get(balance_key, {}).get("USDC", 0)
+        
+        if request.amount > user_usdc_balance:
+            return {
+                "success": False,
+                "message": f"Insufficient USDC balance in {request.withdrawal_type} wallet",
+                "available_balance": user_usdc_balance,
+                "requested_amount": request.amount
+            }
+        
+        # Initialize treasury manager if needed
+        init_result = await call_treasury_manager("initialize")
+        if not init_result.get("success"):
+            return {
+                "success": False,
+                "message": "Treasury initialization failed",
+                "error": init_result.get("error")
+            }
+        
+        # Process withdrawal through smart contract
+        withdrawal_result = await call_treasury_manager(
+            "processWithdrawal",
+            userWallet=request.destination_address,
+            amount=request.amount,
+            withdrawalType=request.withdrawal_type
+        )
+        
+        if withdrawal_result.get("success"):
+            # Deduct from user balance
+            new_balance = user_usdc_balance - request.amount
+            balance_field = f"{balance_key}.USDC"
+            
+            await db.users.update_one(
+                {"wallet_address": request.wallet_address},
+                {"$set": {balance_field: new_balance}}
+            )
+            
+            # Record transaction in database
+            transaction_id = str(uuid.uuid4())
+            transaction_record = {
+                "transaction_id": transaction_id,
+                "user_wallet": request.wallet_address,
+                "type": "smart_contract_withdrawal",
+                "currency": "USDC",
+                "amount": request.amount,
+                "destination_address": request.destination_address,
+                "withdrawal_type": request.withdrawal_type,
+                "blockchain": "Solana",
+                "smart_contract": True,
+                "authorization_signature": withdrawal_result.get("withdrawal", {}).get("authorizationSignature"),
+                "execution_signature": withdrawal_result.get("withdrawal", {}).get("executionSignature"),
+                "explorer_url": withdrawal_result.get("withdrawal", {}).get("explorerUrl"),
+                "status": "completed",
+                "created_at": datetime.utcnow(),
+                "service": "smart_contract_treasury"
+            }
+            
+            await db.transactions.insert_one(transaction_record)
+            
+            return {
+                "success": True,
+                "message": f"Smart contract withdrawal successful: {request.amount} USDC",
+                "transaction": {
+                    "id": transaction_id,
+                    "amount": request.amount,
+                    "currency": "USDC",
+                    "destination_address": request.destination_address,
+                    "withdrawal_type": request.withdrawal_type,
+                    "authorization_signature": withdrawal_result.get("withdrawal", {}).get("authorizationSignature"),
+                    "execution_signature": withdrawal_result.get("withdrawal", {}).get("executionSignature"),
+                    "explorer_url": withdrawal_result.get("withdrawal", {}).get("explorerUrl"),
+                    "timestamp": withdrawal_result.get("withdrawal", {}).get("timestamp")
+                },
+                "new_balance": new_balance,
+                "method": "smart_contract_treasury",
+                "treasury_backed": True
+            }
+        else:
+            return {
+                "success": False,
+                "message": "Smart contract withdrawal failed",
+                "error": withdrawal_result.get("error"),
+                "code": withdrawal_result.get("code")
+            }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Smart contract withdrawal failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Smart contract withdrawal failed: {str(e)}")
+
+@api_router.get("/treasury/status")
+async def get_treasury_status(
+    wallet_info: Dict = Depends(get_authenticated_wallet)
+):
+    """Get treasury status and health information"""
+    try:
+        status_result = await call_treasury_manager("getTreasuryStatus")
+        
+        if status_result.get("success"):
+            return {
+                "success": True,
+                "treasury": status_result.get("status", {}),
+                "smart_contract_active": True,
+                "withdrawal_limits": {
+                    "max_per_transaction": 10000,
+                    "max_daily": 100000,
+                    "min_treasury_balance": 50000
+                }
+            }
+        else:
+            return {
+                "success": False,
+                "message": "Failed to get treasury status",
+                "error": status_result.get("error"),
+                "smart_contract_active": False
+            }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.post("/treasury/fund")
+async def fund_treasury(
+    request: Dict[str, float],
+    wallet_info: Dict = Depends(get_authenticated_wallet)
+):
+    """Fund the treasury (admin only)"""
+    try:
+        # Basic admin check (in production, implement proper admin roles)
+        user = await db.users.find_one({"wallet_address": wallet_info["wallet_address"]})
+        if not user or user.get("username") != "cryptoking":  # Simple admin check
+            raise HTTPException(status_code=403, detail="Admin access required")
+        
+        amount = request.get("amount", 0)
+        if amount <= 0:
+            raise HTTPException(status_code=400, detail="Invalid funding amount")
+        
+        funding_result = await call_treasury_manager("fundTreasury", amount=amount)
+        
+        if funding_result.get("success"):
+            return {
+                "success": True,
+                "message": f"Treasury funded successfully: {amount} USDC",
+                "funding": funding_result,
+                "timestamp": datetime.utcnow().isoformat()
+            }
+        else:
+            return {
+                "success": False,
+                "message": "Treasury funding failed",
+                "error": funding_result.get("error")
+            }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.post("/treasury/emergency-pause")
+async def emergency_pause_treasury(
+    wallet_info: Dict = Depends(get_authenticated_wallet)
+):
+    """Emergency pause treasury operations (admin only)"""
+    try:
+        # Admin check
+        user = await db.users.find_one({"wallet_address": wallet_info["wallet_address"]})
+        if not user or user.get("username") != "cryptoking":
+            raise HTTPException(status_code=403, detail="Admin access required")
+        
+        pause_result = await call_treasury_manager("emergencyPause")
+        
+        if pause_result.get("success"):
+            return {
+                "success": True,
+                "message": "Treasury emergency pause activated",
+                "signature": pause_result.get("signature"),
+                "timestamp": datetime.utcnow().isoformat()
+            }
+        else:
+            return {
+                "success": False,
+                "message": "Failed to pause treasury",
+                "error": pause_result.get("error")
+            }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.post("/treasury/emergency-resume")
+async def emergency_resume_treasury(
+    wallet_info: Dict = Depends(get_authenticated_wallet)
+):
+    """Resume treasury operations (admin only)"""
+    try:
+        # Admin check
+        user = await db.users.find_one({"wallet_address": wallet_info["wallet_address"]})
+        if not user or user.get("username") != "cryptoking":
+            raise HTTPException(status_code=403, detail="Admin access required")
+        
+        resume_result = await call_treasury_manager("emergencyResume")
+        
+        if resume_result.get("success"):
+            return {
+                "success": True,
+                "message": "Treasury operations resumed",
+                "signature": resume_result.get("signature"),
+                "timestamp": datetime.utcnow().isoformat()
+            }
+        else:
+            return {
+                "success": False,
+                "message": "Failed to resume treasury",
+                "error": resume_result.get("error")
+            }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 # Legacy endpoints
 @api_router.post("/status", response_model=StatusCheck)
 async def create_status_check(input: StatusCheckCreate):
