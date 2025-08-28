@@ -387,7 +387,7 @@ class NOWPaymentsService:
                 'withdrawals': withdrawal_array
             }
             
-            result = await self._make_request('POST', '/payout', payout_data)
+            result = await self._make_request('POST', '/payout', payout_data, require_jwt=True)
             
             return {
                 'success': True,
