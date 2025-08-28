@@ -122,8 +122,8 @@ function AppContent() {
           </>
         ) : (
           <Routes>
-            <Route path="/" element={<SimplifiedCasinoInterface />} />
-            <Route path="/games" element={<SimplifiedCasinoInterface />} />
+            <Route path="/" element={<SimplifiedCasinoInterface userBalance={userBalance} />} />
+            <Route path="/games" element={<SimplifiedCasinoInterface userBalance={userBalance} />} />
             <Route path="/savings" element={<SavingsPage />} />
             <Route path="/trading" element={<TradingPage />} />
             <Route path="/wallet" element={<WalletManager />} />
