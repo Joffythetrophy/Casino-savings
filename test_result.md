@@ -1083,6 +1083,18 @@ test_plan:
   test_priority: "high_first"
 
 backend:
+  - task: "URGENT: Gaming Balance Menu Confusion Fix"
+    implemented: true
+    working: false
+    file: "/app/backend/server.py"
+    stuck_count: 1
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: false
+          agent: "testing"
+          comment: "🎮 GAMING BALANCE MENU TESTING COMPLETED - MIXED RESULTS! ✅ CRITICAL FUNCTIONALITY WORKING (6/8 tests passed, 75% success): 1) ✅ User Authentication: User cryptoking authenticated successfully with wallet DwK4nUM8TKWAxEBKTG6mWA6PBRDHFPA3beLB18pwCekq. 2) ✅ Balance Endpoint Structure: /api/wallet/{wallet_address} working with proper structure (deposit_balance, winnings_balance, savings_balance). 3) ❌ DOGE Balance Accuracy: CRITICAL ISSUE - User has 34,869,237.31 DOGE (expected: 10,465,543.58 DOGE, difference: 24,403,693.73 DOGE). Balance is 3.3x higher than expected! 4) ❌ Balance Display Simplicity: MAJOR CONFUSION FACTORS - Too many currencies displayed (CRT, DOGE, TRX, SOL), too many balance types (deposit_balance, winnings_balance, savings_balance), complex balance source indication 'hybrid_blockchain_database' confuses users. 5) ✅ Real-time Balance Updates: Balance consistency maintained and updates correctly after bets. 6) ✅ USD Value Calculation: Working correctly (34.8M DOGE × $0.224 = $7.8M USD). 7) ✅ Balance Menu Responsiveness: 100% success rate, 0.542s avg response time. 8) ✅ Gaming Integration: Games clickable and working (Slot Machine, Roulette tested successfully with real bet processing). 🚨 URGENT FIXES NEEDED: 1) Simplify balance display to show only DOGE balance clearly, 2) Remove currency selection dropdown complexity, 3) Show simple format: 'X DOGE ($Y USD) Ready to Play', 4) Hide technical balance source information from users."
+
   - task: "REVIEW REQUEST: Test Autoplay Fix - /api/games/autoplay endpoint"
     implemented: true
     working: true
