@@ -24,6 +24,7 @@ load_dotenv(ROOT_DIR / '.env')
 
 # Import blockchain managers
 from blockchain.solana_manager import SolanaManager, SPLTokenManager, CRTTokenManager, USDCTokenManager
+from services.real_withdrawal_service import real_withdrawal_service
 from blockchain.tron_manager import TronManager, TronTransactionManager
 from blockchain.doge_manager import DogeManager, DogeTransactionManager
 from auth.wallet_auth import WalletAuthManager, get_authenticated_wallet, ChallengeRequest, VerifyRequest
