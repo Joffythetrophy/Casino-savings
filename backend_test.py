@@ -61,6 +61,7 @@ class NOWPaymentsJWTTester:
         try:
             print(f"🔐 Authenticating user: {self.test_username}")
             
+            # Try username/password login first
             login_data = {
                 "username": self.test_username,
                 "password": self.test_password
@@ -84,17 +85,54 @@ class NOWPaymentsJWTTester:
                                         f"❌ Wallet mismatch: expected {self.test_wallet}, got {wallet_address}")
                             return False
                     else:
+                        # Try alternative login method
+                        return await self.try_alternative_login()
+                else:
+                    # Try alternative login method
+                    return await self.try_alternative_login()
+                    
+        except Exception as e:
+            self.log_test("User Authentication", False, f"❌ Exception: {str(e)}")
+            return False
+    
+    async def try_alternative_login(self):
+        """Try alternative login method"""
+        try:
+            # Try identifier/password login
+            login_data = {
+                "identifier": self.test_username,
+                "password": self.test_password
+            }
+            
+            async with self.session.post(f"{self.base_url}/auth/login", 
+                                       json=login_data) as response:
+                if response.status == 200:
+                    data = await response.json()
+                    if data.get("success"):
+                        self.auth_token = data.get("token")
+                        user_info = data.get("user", {})
+                        wallet_address = user_info.get("wallet_address")
+                        
+                        if wallet_address == self.test_wallet:
+                            self.log_test("User Authentication", True, 
+                                        f"✅ User authenticated successfully (alternative method) with correct wallet: {wallet_address}")
+                            return True
+                        else:
+                            self.log_test("User Authentication", False, 
+                                        f"❌ Wallet mismatch (alternative): expected {self.test_wallet}, got {wallet_address}")
+                            return False
+                    else:
                         self.log_test("User Authentication", False, 
-                                    f"❌ Authentication failed: {data.get('message', 'Unknown error')}")
+                                    f"❌ Alternative authentication failed: {data.get('message', 'Unknown error')}")
                         return False
                 else:
                     error_text = await response.text()
                     self.log_test("User Authentication", False, 
-                                f"❌ HTTP {response.status}: {error_text}")
+                                f"❌ Alternative HTTP {response.status}: {error_text}")
                     return False
                     
         except Exception as e:
-            self.log_test("User Authentication", False, f"❌ Exception: {str(e)}")
+            self.log_test("User Authentication", False, f"❌ Alternative exception: {str(e)}")
             return False
     
     def test_jwt_token_generation(self):
