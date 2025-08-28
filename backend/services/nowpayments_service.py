@@ -156,10 +156,10 @@ class NOWPaymentsService:
         
         return headers
     
-    async def _make_request(self, method: str, endpoint: str, data: Dict = None) -> Dict[str, Any]:
+    async def _make_request(self, method: str, endpoint: str, data: Dict = None, require_jwt: bool = False) -> Dict[str, Any]:
         """Make authenticated API request to NOWPayments"""
         url = f"{self.base_url}{endpoint}"
-        headers = self._get_headers()
+        headers = self._get_headers(include_jwt=require_jwt)
         
         try:
             if method.upper() == 'POST':
