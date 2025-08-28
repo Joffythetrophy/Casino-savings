@@ -136,7 +136,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "Test the Casino Savings dApp frontend that we just built. This is a comprehensive casino gaming platform with real CRT token integration and multiple games."
+user_problem_statement: "Test the newly implemented REAL BLOCKCHAIN INTEGRATION system. This is the comprehensive test of actual cryptocurrency transaction capabilities including blockchain connectivity, address validation, real balance checking, network fee estimation, and real blockchain withdrawals for SOL, USDC, CRT, DOGE, and TRX currencies."
 
 frontend:
   - task: "Casino Lobby Navigation and UI"
