@@ -4324,7 +4324,7 @@ async def process_nowpayments_status_update(notification_info: Dict[str, Any]):
     except Exception as e:
         logger.error(f"Failed to process NOWPayments status update: {str(e)}")
 
-# SOLANA USDC WITHDRAWAL ENDPOINTS
+# SMART CONTRACT TREASURY WITHDRAWAL ENDPOINTS
 # =============================================================================
 
 class USDCWithdrawalRequest(BaseModel):
