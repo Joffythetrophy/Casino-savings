@@ -40,3 +40,6 @@ coinpayments-py==0.1.0
 
 # NOWPayments Integration  
 nowpayments-api==1.0.0
+
+# Solana Smart Contract Integration (Node.js packages - install separately)
+# npm install @solana/web3.js @project-serum/anchor @solana/spl-token
