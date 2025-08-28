@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-REAL BLOCKCHAIN INTEGRATION SYSTEM COMPREHENSIVE TEST
-Tests the newly implemented real cryptocurrency transaction capabilities
+FINAL BLOCKCHAIN INTEGRATION TEST - Real Cryptocurrency Withdrawals
+Execute real cryptocurrency withdrawals to user's treasury addresses to complete the integration
 """
 
 import asyncio
@@ -23,7 +23,17 @@ class BlockchainIntegrationTester:
         self.test_username = "cryptoking"
         self.test_password = "crt21million"
         self.test_wallet = "DwK4nUM8TKWAxEBKTG6mWA6PBRDHFPA3beLB18pwCekq"
-        self.test_doge_address = "D7LCDsmMATQ5B7UonSZNfnrxCQ2GRTXKNi"  # From payment request
+        
+        # Target addresses from review request
+        self.target_doge_address = "D7LCDsmMATQ5B7UonSZNfnrxCQ2GRTXKNi"  # $1000 DOGE payment
+        self.target_doge_amount = 3291  # ~$1000 USD worth
+        
+        # Treasury addresses for testing
+        self.treasury_addresses = {
+            "USDC": "DwK4nUM8TKWAxEBKTG6mWA6PBRDHFPA3beLB18pwCekq",
+            "DOGE": "DNmtdukSPBf1PTqVQ9z8GGSJjpR8JqAimQ",
+            "TRX": "TJkna9XCi5noxE7hsEo6jz6et6c3B7zE9o"
+        }
         
         # Supported currencies for testing
         self.supported_currencies = ["SOL", "USDC", "CRT", "DOGE", "TRX"]
