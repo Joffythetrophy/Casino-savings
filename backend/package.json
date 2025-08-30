@@ -8,6 +8,7 @@
     "test-blockchain": "node test-blockchain.js"
   },
   "dependencies": {
+    "@coral-xyz/anchor": "^0.31.1",
     "@orca-so/common-sdk": "^0.6.11",
     "@orca-so/sdk": "^1.2.26",
     "@orca-so/whirlpools-sdk": "^0.15.0",
