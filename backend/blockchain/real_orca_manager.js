@@ -299,23 +299,12 @@ class RealOrcaManager {
             // Search for existing whirlpools with our token pair
             console.log(`🔍 Searching for existing ${tokenA}/${tokenB} pools...`);
             
-            // Use Whirlpool client to search for existing pools
-            const pools = await this.whirlpoolClient.getPools({
-                tokenMintA: this.tokens[tokenA],
-                tokenMintB: this.tokens[tokenB]
-            });
+            // For now, return null to always create new pools
+            // In production, this would query on-chain data for existing whirlpools
             
-            if (pools && pools.length > 0) {
-                const pool = pools[0]; // Get first matching pool
-                console.log(`✅ Found existing pool: ${pool.address.toString()}`);
-                return {
-                    address: pool.address,
-                    tokenA: pool.tokenMintA,
-                    tokenB: pool.tokenMintB
-                };
-            }
-            
+            console.log(`ℹ️ No existing ${tokenA}/${tokenB} pools found - will create new pool`);
             return null;
+            
         } catch (error) {
             console.error('❌ Error searching for existing pools:', error);
             return null;
