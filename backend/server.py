@@ -31,8 +31,8 @@ from blockchain.tron_manager import TronManager, TronTransactionManager
 from blockchain.doge_manager import DogeManager, DogeTransactionManager
 from auth.wallet_auth import WalletAuthManager, get_authenticated_wallet, ChallengeRequest, VerifyRequest
 
-# Import CoinPayments service (after loading environment variables)
-from services.coinpayments_service import coinpayments_service
+# Import real blockchain service
+from services.real_blockchain_service import real_blockchain_service
 
 # Initialize CoinGecko client for real-time prices
 cg = CoinGeckoAPI()
