@@ -86,27 +86,25 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const register = async (walletAddress, password) => {
+  const register = async (walletAddress, password, username = null) => {
     try {
       const response = await axios.post(`${BACKEND_URL}/api/auth/register`, {
         wallet_address: walletAddress,
-        password: password
+        password: password,
+        username: username
       });
 
       if (response.data.success) {
         const userData = {
-          wallet_address: walletAddress,
+          wallet_address: response.data.wallet_address,
           user_id: response.data.user_id,
           username: response.data.username,
-          created_at: response.data.created_at,
           auth_token: response.data.token
         };
         setUser(userData);
+        setAuthToken(response.data.token);
         localStorage.setItem('casino_user', JSON.stringify(userData));
-        // Store JWT token separately for API calls
-        if (response.data.token) {
-          localStorage.setItem('auth_token', response.data.token);
-        }
+        localStorage.setItem('auth_token', response.data.token);
         return { success: true };
       } else {
         return { success: false, error: response.data.message };
@@ -114,7 +112,7 @@ export const AuthProvider = ({ children }) => {
     } catch (error) {
       return { 
         success: false, 
-        error: error.response?.data?.message || 'Registration failed' 
+        error: error.response?.data?.detail || 'Registration failed' 
       };
     }
   };
