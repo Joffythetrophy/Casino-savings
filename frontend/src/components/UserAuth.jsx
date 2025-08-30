@@ -34,9 +34,14 @@ export const AuthProvider = ({ children }) => {
   // Check for existing session on app start
   useEffect(() => {
     const savedUser = localStorage.getItem('casino_user');
-    const savedToken = localStorage.getItem('auth_token');
+    const savedToken = localStorage.getItem('auth_token') || localStorage.getItem('casino_auth_token');
     
-    console.log('AuthProvider initializing:', { savedUser: !!savedUser, savedToken: !!savedToken });
+    console.log('AuthProvider initializing:', { 
+      savedUser: !!savedUser, 
+      savedToken: !!savedToken,
+      userData: savedUser ? savedUser.substring(0, 50) + '...' : 'none',
+      tokenData: savedToken ? savedToken.substring(0, 50) + '...' : 'none'
+    });
     
     if (savedUser && savedToken) {
       try {
@@ -44,14 +49,17 @@ export const AuthProvider = ({ children }) => {
         userData.auth_token = savedToken; // Include token in user data
         setUser(userData);
         setAuthToken(savedToken);
-        console.log('AuthProvider: User and token restored successfully');
+        console.log('AuthProvider: User and token restored successfully', userData.username || userData.wallet_address);
       } catch (e) {
         console.error('AuthProvider: Error restoring session:', e);
         localStorage.removeItem('casino_user');
         localStorage.removeItem('auth_token');
+        localStorage.removeItem('casino_auth_token');
         setUser(null);
         setAuthToken(null);
       }
+    } else {
+      console.log('AuthProvider: No saved session found');
     }
     setLoading(false);
   }, []);
