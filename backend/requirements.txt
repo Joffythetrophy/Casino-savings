@@ -19,6 +19,7 @@ PyJWT==2.8.0
 solana==0.34.2
 solders==0.21.0
 spl-token==0.2.0
+anchorpy==0.20.1
 base58==2.1.1
 construct-typing==0.6.2
 
