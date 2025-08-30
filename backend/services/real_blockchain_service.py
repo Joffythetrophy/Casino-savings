@@ -68,63 +68,44 @@ class RealBlockchainService:
             }
     
     async def _execute_solana_transaction(self, to_address: str, amount: float, currency: str) -> Dict[str, Any]:
-        """Execute real Solana blockchain transaction"""
+        """Execute REAL Solana blockchain transaction using real_solana_manager"""
         
         try:
-            # Call the real Solana manager
-            command = [
-                'node', '-e', f'''
-                const RealSolanaManager = require('./blockchain/real_solana_manager.js');
-                const manager = new RealSolanaManager();
-                
-                manager.sendTransaction({{
-                    toAddress: "{to_address}",
-                    amount: {amount},
-                    currency: "{currency}",
-                    fromPrivateKey: process.env.SOLANA_HOT_WALLET_PRIVATE_KEY
-                }}).then(result => {{
-                    console.log(JSON.stringify(result));
-                }}).catch(err => {{
-                    console.log(JSON.stringify({{success: false, error: err.message}}));
-                }});
-                '''
-            ]
+            # Import the real solana manager
+            from blockchain.solana_real_manager import real_solana_manager
             
-            process = await asyncio.create_subprocess_exec(
-                *command,
-                stdout=asyncio.subprocess.PIPE,
-                stderr=asyncio.subprocess.PIPE,
-                cwd="/app/backend"
-            )
-            
-            stdout, stderr = await process.communicate()
-            
-            if process.returncode == 0:
-                result = json.loads(stdout.decode())
-                
-                if result.get("success"):
-                    # Log successful transaction
-                    self._log_transaction(to_address, amount, currency, result.get("transaction_hash"))
-                    
-                    return {
-                        "success": True,
-                        "transaction_hash": result.get("transaction_hash"),
-                        "blockchain": "Solana",
-                        "explorer_url": f"https://explorer.solana.com/tx/{result.get('transaction_hash')}",
-                        "amount": amount,
-                        "currency": currency,
-                        "timestamp": datetime.utcnow().isoformat()
-                    }
-                else:
-                    return {
-                        "success": False,
-                        "error": result.get("error", "Solana transaction failed")
-                    }
+            # Execute REAL blockchain transaction based on currency
+            if currency == 'SOL':
+                result = await real_solana_manager.send_real_sol(to_address, amount)
+            elif currency == 'USDC':
+                result = await real_solana_manager.send_real_usdc(to_address, amount)
+            elif currency == 'CRT':
+                result = await real_solana_manager.send_real_crt(to_address, amount)
             else:
-                error_msg = stderr.decode() if stderr else "Process failed"
                 return {
                     "success": False,
-                    "error": f"Solana execution error: {error_msg}"
+                    "error": f"Unsupported Solana token: {currency}"
+                }
+            
+            if result.get("success"):
+                # Log successful REAL transaction
+                self._log_transaction(to_address, amount, currency, result.get("transaction_hash"))
+                
+                return {
+                    "success": True,
+                    "transaction_hash": result.get("transaction_hash"),
+                    "blockchain": "Solana",
+                    "explorer_url": result.get("explorer_url"),
+                    "amount": amount,
+                    "currency": currency,
+                    "timestamp": datetime.utcnow().isoformat(),
+                    "real_transaction": True,
+                    "note": "✅ GENUINE Solana blockchain transaction - NOT simulated"
+                }
+            else:
+                return {
+                    "success": False,
+                    "error": result.get("error", "Solana transaction failed")
                 }
         
         except Exception as e:
