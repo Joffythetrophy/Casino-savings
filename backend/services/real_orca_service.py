@@ -30,6 +30,29 @@ class RealOrcaService:
             }
         }
     
+    def extract_json_from_output(self, stdout_text: str) -> dict:
+        """Extract JSON from Node.js output that may contain console.log messages"""
+        # Find the JSON object in the output (look for lines starting with { or [)
+        json_lines = []
+        for line in stdout_text.split('\n'):
+            line = line.strip()
+            if line.startswith('{') or line.startswith('['):
+                json_lines.append(line)
+        
+        if json_lines:
+            try:
+                return json.loads(json_lines[-1])  # Use the last JSON line
+            except json.JSONDecodeError:
+                # If JSON parsing fails, try to find JSON in the entire output
+                import re
+                json_match = re.search(r'\{.*\}', stdout_text, re.DOTALL)
+                if json_match:
+                    return json.loads(json_match.group())
+                else:
+                    raise Exception(f"No valid JSON found in output: {stdout_text}")
+        else:
+            raise Exception(f"No JSON output found: {stdout_text}")
+    
     async def create_real_crt_usdc_pool_from_user_balance(self, crt_amount: float, usdc_amount: float, user_wallet: str) -> Dict[str, Any]:
         """Create real CRT/USDC Orca pool using user's existing balances"""
         try:
