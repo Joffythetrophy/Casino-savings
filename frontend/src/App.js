@@ -18,6 +18,7 @@ import CleanCasinoInterface from "./components/CleanCasinoInterface";
 import SmartContractTreasuryDashboard from "./components/SmartContractTreasuryDashboard";
 import MultiCurrencyTreasuryManager from "./components/MultiCurrencyTreasuryManager";
 import CRTTokenDEXManager from "./components/CRTTokenDEXManager";
+import TrustWalletSwift from "./components/TrustWalletSwift";
 import { AuthProvider, useAuth, AuthModal } from "./components/UserAuth";
 
 function AppContent() {
