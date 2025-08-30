@@ -89,6 +89,18 @@ const Header = ({ isWalletConnected }) => {
             </Link>
             
             <Link 
+              to="/dex" 
+              className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-all duration-300 ${
+                isActive('/dex') 
+                  ? 'bg-casino-green-500 text-white font-medium glow-green' 
+                  : 'text-casino-green-200 hover:text-casino-green-400 hover:bg-casino-green-800/30'
+              }`}
+            >
+              <TrendingUp className="w-4 h-4" />
+              <span>🌊 DEX</span>
+            </Link>
+            
+            <Link 
               to="/history" 
               className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-all duration-300 ${
                 isActive('/history') 
