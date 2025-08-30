@@ -509,14 +509,15 @@ class RealBlockchainService:
                 "success": True,
                 "transaction_hash": transaction_hash,
                 "blockchain": "Solana (Direct CRT)",
-                "explorer_url": f"https://explorer.solana.com/tx/{transaction_hash}",
+                "explorer_url": result.get("explorer_url"),
                 "amount": amount,
                 "currency": currency,
                 "funding_source": "DIRECT_CRT_BALANCE",
                 "crt_cost": required_crt,
                 "remaining_crt_total": total_crt - required_crt,
                 "timestamp": datetime.utcnow().isoformat(),
-                "note": f"✅ Transfer funded directly by {required_crt:,.0f} CRT tokens from user balance"
+                "real_transaction": True,
+                "note": f"✅ REAL transfer funded directly by {required_crt:,.0f} CRT tokens from user balance"
             }
             
         except Exception as e:
