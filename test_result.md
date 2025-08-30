@@ -1291,6 +1291,7 @@ metadata:
 
 test_plan:
   current_focus:
+    - "Enhanced Casino System with Real Orca Pool Funding - COMPLETED"
     - "CRT Token DEX Listing System - Comprehensive Testing Completed"
     - "CRT/SOL Orca Pool Creation"
     - "CRT/USDC Orca Pool Creation"
