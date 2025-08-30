@@ -30,6 +30,178 @@ class RealOrcaService:
             }
         }
     
+    async def create_real_crt_usdc_pool(self, crt_amount: float, usdc_amount: float, user_wallet: str) -> Dict[str, Any]:
+        """Create real CRT/USDC Orca pool using user's existing balances"""
+        try:
+            # Use real Orca manager to create actual pool
+            command = [
+                'node', '-e', f'''
+                const RealOrcaManager = require('../blockchain/real_orca_manager.js');
+                const manager = new RealOrcaManager();
+                
+                manager.createCRTUSDCPool({{
+                    crtAmount: {crt_amount},
+                    usdcAmount: {usdc_amount},
+                    userWallet: "{user_wallet}",
+                    useUserBalance: true
+                }}).then(result => {{
+                    console.log(JSON.stringify(result));
+                }}).catch(err => {{
+                    console.log(JSON.stringify({{success: false, error: err.message}}));
+                }});
+                '''
+            ]
+            
+            process = await asyncio.create_subprocess_exec(
+                *command,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
+                cwd="/app/backend"
+            )
+            
+            stdout, stderr = await process.communicate()
+            
+            if process.returncode == 0:
+                result = json.loads(stdout.decode())
+                
+                if result.get("success"):
+                    return {
+                        "success": True,
+                        "pool_address": result.get("pool_address"),
+                        "transaction_hash": result.get("transaction_hash"),
+                        "crt_amount": crt_amount,
+                        "usdc_amount": usdc_amount,
+                        "pool_type": "CRT/USDC",
+                        "explorer_url": result.get("explorer_url"),
+                        "real_transaction": True,
+                        "funding_source": "USER_BALANCE"
+                    }
+                else:
+                    return {
+                        "success": False,
+                        "error": result.get("error", "Pool creation failed")
+                    }
+            else:
+                error_msg = stderr.decode() if stderr else "Process failed"
+                return {
+                    "success": False,
+                    "error": f"Orca pool creation error: {error_msg}"
+                }
+                
+        except Exception as e:
+            return {
+                "success": False,
+                "error": f"CRT/USDC pool creation failed: {str(e)}"
+            }
+
+    async def create_real_crt_sol_pool(self, crt_amount: float, sol_amount: float, user_wallet: str) -> Dict[str, Any]:
+        """Create real CRT/SOL Orca pool using user's existing balances"""
+        try:
+            # Use real Orca manager to create actual pool
+            command = [
+                'node', '-e', f'''
+                const RealOrcaManager = require('../blockchain/real_orca_manager.js');
+                const manager = new RealOrcaManager();
+                
+                manager.createCRTSOLPool({{
+                    crtAmount: {crt_amount},
+                    solAmount: {sol_amount},
+                    userWallet: "{user_wallet}",
+                    useUserBalance: true
+                }}).then(result => {{
+                    console.log(JSON.stringify(result));
+                }}).catch(err => {{
+                    console.log(JSON.stringify({{success: false, error: err.message}}));
+                }});
+                '''
+            ]
+            
+            process = await asyncio.create_subprocess_exec(
+                *command,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
+                cwd="/app/backend"
+            )
+            
+            stdout, stderr = await process.communicate()
+            
+            if process.returncode == 0:
+                result = json.loads(stdout.decode())
+                
+                if result.get("success"):
+                    return {
+                        "success": True,
+                        "pool_address": result.get("pool_address"),
+                        "transaction_hash": result.get("transaction_hash"),
+                        "crt_amount": crt_amount,
+                        "sol_amount": sol_amount,
+                        "pool_type": "CRT/SOL",
+                        "explorer_url": result.get("explorer_url"),
+                        "real_transaction": True,
+                        "funding_source": "USER_BALANCE"
+                    }
+                else:
+                    return {
+                        "success": False,
+                        "error": result.get("error", "Pool creation failed")
+                    }
+            else:
+                error_msg = stderr.decode() if stderr else "Process failed"
+                return {
+                    "success": False,
+                    "error": f"Orca pool creation error: {error_msg}"
+                }
+                
+        except Exception as e:
+            return {
+                "success": False,
+                "error": f"CRT/SOL pool creation failed: {str(e)}"
+            }
+
+    async def handle_game_loss_to_orca_pools(self, loss_amount: float, currency: str, user_address: str) -> Dict[str, Any]:
+        """Handle game losses by adding liquidity to Orca pools"""
+        try:
+            logger.info(f"Processing game loss: {loss_amount} {currency} from {user_address}")
+            
+            # Convert loss to appropriate pool liquidity
+            if currency == "CRT":
+                # Add to CRT/SOL pool
+                crt_amount = loss_amount
+                sol_amount = loss_amount * 0.0001  # CRT to SOL conversion rate
+                
+                result = await self.create_real_crt_sol_pool(crt_amount, sol_amount, user_address)
+                
+            elif currency == "USDC":
+                # Add to CRT/USDC pool
+                crt_amount = loss_amount * 6.67  # USDC to CRT conversion rate
+                usdc_amount = loss_amount
+                
+                result = await self.create_real_crt_usdc_pool(crt_amount, usdc_amount, user_address)
+                
+            else:
+                return {
+                    "success": False,
+                    "error": f"Unsupported currency for pool creation: {currency}"
+                }
+            
+            if result.get("success"):
+                return {
+                    "success": True,
+                    "message": f"Game loss converted to pool liquidity",
+                    "loss_amount": loss_amount,
+                    "currency": currency,
+                    "pool_result": result
+                }
+            else:
+                return result
+                
+        except Exception as e:
+            logger.error(f"Failed to handle game loss: {str(e)}")
+            return {
+                "success": False,
+                "error": f"Game loss processing failed: {str(e)}"
+            }
+
     async def create_real_crt_sol_pool(self, initial_crt: float = None, initial_sol: float = None) -> Dict[str, Any]:
         """Create actual CRT/SOL liquidity pool on Orca"""
         try:
