@@ -1,6 +1,6 @@
 """
 Real Casino Savings System - Backend API
-Built specifically for CRT token integration
+Built specifically for CRT token integration with Bridge Pool functionality
 """
 
 from fastapi import FastAPI, HTTPException, Depends
@@ -16,6 +16,7 @@ import uuid
 from blockchain.real_wallet_manager import real_wallet_manager
 from casino.real_casino_engine import real_casino_engine
 from savings.real_savings_manager import real_savings_manager
+from bridge.crt_bridge_manager import crt_bridge_manager
 from config.blockchain_config import blockchain_config
 
 # Configure logging
@@ -23,8 +24,8 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 app = FastAPI(
-    title="Real Casino Savings System",
-    description="Real cryptocurrency casino with CRT token integration",
+    title="Real Casino Savings System with CRT Bridge Pools",
+    description="Real cryptocurrency casino with CRT token integration and bridge pools",
     version="1.0.0"
 )
 
@@ -105,6 +106,120 @@ async def get_all_balances(wallet_address: str):
         
     except Exception as e:
         logger.error(f"❌ Failed to get all balances: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+# ===============================
+# CRT BRIDGE POOL ENDPOINTS
+# ===============================
+
+@app.post("/api/bridge/create-crt-bridge-pool")
+async def create_crt_bridge_pool(request: Dict[str, Any]):
+    """Create REAL CRT bridge pool for cross-chain functionality"""
+    try:
+        wallet_address = request.get("wallet_address")
+        bridge_pair = request.get("bridge_pair", "CRT/SOL")  # CRT/SOL, CRT/USDC, CRT/ETH, CRT/BTC
+        target_value_usd = float(request.get("target_value_usd", 10000))  # $10K default
+        
+        if not wallet_address:
+            raise HTTPException(status_code=400, detail="wallet_address is required")
+        
+        logger.info(f"🌉 Creating CRT bridge pool: {bridge_pair} worth ${target_value_usd} for {wallet_address}")
+        
+        # Estimate requirements
+        estimation = await crt_bridge_manager.estimate_bridge_requirements(bridge_pair, target_value_usd)
+        if not estimation.get('success'):
+            raise HTTPException(status_code=400, detail=estimation.get('error'))
+        
+        required_crt = estimation['required_crt']
+        
+        # Verify user has enough CRT balance
+        balance_result = await real_wallet_manager.get_real_solana_balance(wallet_address)
+        if not balance_result.get('success'):
+            raise HTTPException(status_code=400, detail="Could not verify CRT balance")
+        
+        crt_balance = balance_result.get('balances', {}).get('CRT', 0.0)
+        if crt_balance < required_crt:
+            raise HTTPException(status_code=400, detail=f"Insufficient CRT balance: {crt_balance:,.0f} < {required_crt:,.0f}")
+        
+        # Create bridge pool
+        bridge_result = await crt_bridge_manager.create_bridge_pool(
+            wallet_address=wallet_address,
+            bridge_pair=bridge_pair,
+            crt_amount=required_crt,
+            target_value_usd=target_value_usd
+        )
+        
+        if bridge_result.get('success'):
+            return {
+                "success": True,
+                "bridge_result": bridge_result,
+                "bridge_pair": bridge_pair,
+                "target_value_usd": target_value_usd,
+                "required_crt": required_crt,
+                "wallet_address": wallet_address,
+                "real_bridge_pool": True,
+                "note": f"✅ REAL {bridge_pair} bridge pool created for cross-chain CRT transfers"
+            }
+        else:
+            return {
+                "success": False,
+                "error": bridge_result.get('error', 'Bridge pool creation failed'),
+                "bridge_pair": bridge_pair,
+                "target_value_usd": target_value_usd
+            }
+            
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"❌ CRT bridge pool creation failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/bridge/estimate-requirements")
+async def estimate_bridge_requirements(bridge_pair: str, target_value_usd: float):
+    """Estimate CRT and other token requirements for bridge pool"""
+    try:
+        logger.info(f"💡 Estimating bridge requirements: {bridge_pair} worth ${target_value_usd}")
+        
+        estimation = await crt_bridge_manager.estimate_bridge_requirements(bridge_pair, target_value_usd)
+        
+        return estimation
+        
+    except Exception as e:
+        logger.error(f"❌ Bridge estimation failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/bridge/supported-pairs")
+async def get_supported_bridge_pairs():
+    """Get all supported CRT bridge pairs"""
+    try:
+        return {
+            "success": True,
+            "bridge_pairs": crt_bridge_manager.supported_bridge_pairs,
+            "note": "All bridge pairs support REAL cross-chain CRT transfers"
+        }
+        
+    except Exception as e:
+        logger.error(f"❌ Failed to get bridge pairs: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/bridge/crt-summary")
+async def get_crt_bridge_summary(wallet_address: str):
+    """Get comprehensive CRT bridge pools summary"""
+    try:
+        logger.info(f"📊 Getting CRT bridge summary for {wallet_address}")
+        
+        bridge_summary = await crt_bridge_manager.get_bridge_pools_summary(wallet_address)
+        
+        return {
+            "success": True,
+            "bridge_summary": bridge_summary,
+            "wallet_address": wallet_address,
+            "last_updated": datetime.utcnow().isoformat(),
+            "note": "CRT bridge pools and cross-chain functionality summary"
+        }
+        
+    except Exception as e:
+        logger.error(f"❌ Failed to get CRT bridge summary: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
 # ===============================
@@ -387,7 +502,7 @@ async def get_system_status():
     try:
         return {
             "success": True,
-            "system": "Real Casino Savings System",
+            "system": "Real Casino Savings System with CRT Bridge Pools",
             "version": "1.0.0",
             "primary_currency": "CRT",
             "supported_networks": ["Solana", "Ethereum", "Bitcoin", "TRON"],
@@ -395,15 +510,18 @@ async def get_system_status():
                 "real_cryptocurrency_betting": True,
                 "real_blockchain_withdrawals": True,
                 "real_dex_pool_creation": True,
+                "real_bridge_pools": True,
                 "real_balance_checking": True,
+                "cross_chain_transfers": True,
                 "fake_transactions": False,
                 "simulated_balances": False
             },
             "casino_games": ["slots", "blackjack", "roulette", "dice"],
             "savings_strategies": ["dex_pools", "yield_farming", "compound_savings"],
+            "bridge_pairs": ["CRT/SOL", "CRT/USDC", "CRT/ETH", "CRT/BTC"],
             "status": "OPERATIONAL",
             "timestamp": datetime.utcnow().isoformat(),
-            "note": "✅ Real cryptocurrency system - NO SIMULATIONS"
+            "note": "✅ Real cryptocurrency system with bridge pools - NO SIMULATIONS"
         }
         
     except Exception as e:
@@ -414,10 +532,11 @@ async def get_system_status():
 async def root():
     """Root endpoint"""
     return {
-        "message": "Real Casino Savings System API",
+        "message": "Real Casino Savings System with CRT Bridge Pools API",
         "status": "OPERATIONAL",
         "primary_currency": "CRT",
-        "real_cryptocurrency": True
+        "real_cryptocurrency": True,
+        "bridge_pools_supported": True
     }
 
 if __name__ == "__main__":
