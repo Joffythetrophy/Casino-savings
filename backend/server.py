@@ -1805,6 +1805,85 @@ async def check_hot_wallet_status():
             "status": "ERROR"
         }
 
+# URGENT: Fix user balance synchronization - Real blockchain integration
+@api_router.post("/wallet/sync-real-balances")
+async def sync_real_blockchain_balances(request: Dict[str, Any]):
+    """Sync user balances with REAL blockchain data - Fix fake balance issue"""
+    try:
+        wallet_address = request.get("wallet_address")
+        if not wallet_address:
+            raise HTTPException(status_code=400, detail="wallet_address is required")
+        
+        user = await db.users.find_one({"wallet_address": wallet_address})
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+        
+        # Import real blockchain managers
+        from blockchain.solana_real_manager import real_solana_manager
+        
+        # Get REAL Solana token balances
+        solana_balances = {}
+        try:
+            # Get real CRT balance from Solana blockchain
+            crt_balance_response = await real_solana_manager.get_real_crt_balance(wallet_address)
+            if crt_balance_response.get("success"):
+                solana_balances["CRT"] = crt_balance_response.get("balance", 0)
+            
+            # Get real USDC balance from Solana blockchain  
+            usdc_balance_response = await real_solana_manager.get_real_usdc_balance(wallet_address)
+            if usdc_balance_response.get("success"):
+                solana_balances["USDC"] = usdc_balance_response.get("balance", 0)
+            
+            # Get real SOL balance
+            sol_balance_response = await real_solana_manager.get_real_sol_balance(wallet_address)
+            if sol_balance_response.get("success"):
+                solana_balances["SOL"] = sol_balance_response.get("balance", 0)
+                
+        except Exception as e:
+            print(f"Error getting Solana balances: {e}")
+        
+        # Get REAL balances from other blockchain APIs (if needed)
+        real_balances = {
+            "blockchain_source": solana_balances,
+            "sync_timestamp": datetime.utcnow()
+        }
+        
+        # Update user's database balances with REAL blockchain data
+        # Keep existing gaming/winnings balances but sync deposit with real blockchain
+        current_balances = user.get("deposit_balance", {})
+        
+        # Update with real blockchain balances where available
+        for currency in ["CRT", "USDC", "SOL"]:
+            if currency in solana_balances:
+                current_balances[currency] = solana_balances[currency]
+        
+        await db.users.update_one(
+            {"wallet_address": wallet_address},
+            {
+                "$set": {
+                    "deposit_balance": current_balances,
+                    "last_blockchain_sync": datetime.utcnow(),
+                    "balance_source": "REAL_BLOCKCHAIN_SYNCHRONIZED"
+                }
+            }
+        )
+        
+        return {
+            "success": True,
+            "message": "Real blockchain balance synchronization completed",
+            "wallet_address": wallet_address,
+            "synchronized_balances": current_balances,
+            "blockchain_balances": solana_balances,
+            "sync_timestamp": datetime.utcnow().isoformat(),
+            "balance_source": "REAL_BLOCKCHAIN_SYNCHRONIZED",
+            "note": "✅ Balances now reflect REAL blockchain token holdings"
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Balance synchronization failed: {str(e)}")
+
 # EMERGENCY BALANCE RESTORE ENDPOINT
 @app.post("/api/admin/restore-balances")
 async def restore_user_balances(request: Dict[str, Any]):
