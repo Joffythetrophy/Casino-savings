@@ -3,10 +3,16 @@
  * Uses actual Orca SDK for real cryptocurrency liquidity pools on Solana
  */
 
-const { Connection, PublicKey, Keypair, Transaction, SystemProgram } = require('@solana/web3.js');
+const { Connection, PublicKey, Keypair } = require('@solana/web3.js');
 const { getOrca, Network } = require('@orca-so/sdk');
-const { getAssociatedTokenAddress, createAssociatedTokenAccountInstruction, TOKEN_PROGRAM_ID } = require('@solana/spl-token');
-const { WhirlpoolContext, buildWhirlpoolClient, ORCA_WHIRLPOOL_PROGRAM_ID } = require('@orca-so/whirlpools-sdk');
+const { getAssociatedTokenAddress, TOKEN_PROGRAM_ID } = require('@solana/spl-token');
+const { 
+    WhirlpoolContext, 
+    buildWhirlpoolClient, 
+    ORCA_WHIRLPOOL_PROGRAM_ID,
+    PDAUtil,
+    PoolUtil
+} = require('@orca-so/whirlpools-sdk');
 const Decimal = require('decimal.js');
 
 class RealOrcaManager {
