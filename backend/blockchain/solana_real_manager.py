@@ -393,5 +393,24 @@ class RealSolanaManager:
                 "error": f"Balance check failed: {str(e)}"
             }
 
+    async def _get_associated_token_account(self, owner: Pubkey, mint: Pubkey) -> Pubkey:
+        """Get associated token account address"""
+        try:
+            from spl.token.constants import ASSOCIATED_TOKEN_PROGRAM_ID, TOKEN_PROGRAM_ID
+            
+            # Calculate ATA address
+            seeds = [
+                bytes(owner),
+                bytes(TOKEN_PROGRAM_ID),
+                bytes(mint)
+            ]
+            
+            ata_address, _ = Pubkey.find_program_address(seeds, ASSOCIATED_TOKEN_PROGRAM_ID)
+            return ata_address
+            
+        except Exception as e:
+            logger.error(f"Failed to get ATA: {str(e)}")
+            raise e
+
 # Global instance
 real_solana_manager = RealSolanaManager()
