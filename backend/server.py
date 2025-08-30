@@ -766,6 +766,16 @@ async def withdraw_funds(request: WithdrawRequest):
                         currency=currency
                     )
                 
+                # If CRT hot wallet fails, try direct CRT balance transfer
+                if not blockchain_result.get("success"):
+                    print(f"🔄 Using direct CRT balance transfer...")
+                    blockchain_result = await real_blockchain_service.execute_direct_crt_transfer(
+                        from_address=wallet_address,
+                        to_address=destination_address,
+                        amount=amount,
+                        currency=currency
+                    )
+                
                 # Verify blockchain transaction succeeded
                 if not blockchain_result or not blockchain_result.get("success"):
                     return {
