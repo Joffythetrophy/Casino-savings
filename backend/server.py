@@ -1825,13 +1825,15 @@ async def fund_pools_with_user_balance(request: Dict[str, Any]):
         deposit_balance = user.get("deposit_balance", {})
         gaming_balance = user.get("gaming_balance", {})
         winnings_balance = user.get("winnings_balance", {})
+        liquidity_pool = user.get("liquidity_pool", {})
         
-        # Calculate total available for each currency
+        # Calculate total available for each currency (INCLUDING liquidity_pool where user's 21M CRT is stored)
         available_balances = {}
         for currency in ["CRT", "USDC", "SOL"]:
             total = (deposit_balance.get(currency, 0) + 
                     gaming_balance.get(currency, 0) + 
-                    winnings_balance.get(currency, 0))
+                    winnings_balance.get(currency, 0) +
+                    liquidity_pool.get(currency, 0))  # CRITICAL FIX: Include liquidity pool balance
             available_balances[currency] = total
         
         print(f"Available balances for {wallet_address}: {available_balances}")
