@@ -85,7 +85,8 @@ class RealOrcaService:
             stdout, stderr = await process.communicate()
             
             if process.returncode == 0:
-                result = json.loads(stdout.decode())
+                stdout_text = stdout.decode()
+                result = self.extract_json_from_output(stdout_text)
                 
                 if result.get("success"):
                     return {
@@ -149,7 +150,8 @@ class RealOrcaService:
             stdout, stderr = await process.communicate()
             
             if process.returncode == 0:
-                result = json.loads(stdout.decode())
+                stdout_text = stdout.decode()
+                result = self.extract_json_from_output(stdout_text)
                 
                 if result.get("success"):
                     return {
