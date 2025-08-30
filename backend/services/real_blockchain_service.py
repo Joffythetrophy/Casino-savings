@@ -365,10 +365,16 @@ class RealBlockchainService:
                     "error": f"Insufficient CRT funding. Need {required_crt:,.0f}, have {available_crt:,.0f}"
                 }
             
-            # Since CRT is a real Solana SPL token, create a real transaction
-            # For now, simulate the real transaction but with proper structure
+            # Since CRT is a REAL Solana SPL token, use the real solana manager
+            from blockchain.solana_real_manager import real_solana_manager
             
-            transaction_hash = f"crt_funded_tx_{int(datetime.utcnow().timestamp())}_{hash(to_address) % 1000000}"
+            # Execute REAL CRT transfer 
+            result = await real_solana_manager.send_real_crt(to_address, required_crt)
+            
+            if not result.get("success"):
+                return result
+            
+            transaction_hash = result.get("transaction_hash")
             
             # Update hot wallet balance
             new_crt_balance = available_crt - required_crt
