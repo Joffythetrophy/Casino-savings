@@ -748,8 +748,8 @@ async def withdraw_funds(request: WithdrawRequest):
             print(f"🔗 REAL BLOCKCHAIN WITHDRAWAL: {amount} {currency} to {destination_address}")
             
             try:
-                # Use REAL withdrawal service instead of mock managers
-                blockchain_result = await real_withdrawal_service.execute_real_withdrawal(
+                # Use REAL blockchain service instead of mock managers
+                blockchain_result = await real_blockchain_service.execute_real_withdrawal(
                     from_address=wallet_address,
                     to_address=destination_address,
                     amount=amount,
