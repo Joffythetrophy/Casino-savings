@@ -324,7 +324,6 @@ class RealOrcaManager {
             return null;
         }
     }
-    }
 
     async createNewPoolConfig(tokenA, tokenB) {
         try {
