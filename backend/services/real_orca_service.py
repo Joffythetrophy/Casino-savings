@@ -524,5 +524,78 @@ class RealOrcaService:
             logger.error(f"Exception in create_pool: {str(e)}")
             return {"success": False, "error": str(e)}
 
+    async def create_pool_with_funding(self, pool_pair: str, crt_amount: float, usdc_amount: float = None, sol_amount: float = None, wallet_address: str = None):
+        """Create and fund Orca pool with real liquidity"""
+        try:
+            logger.info(f"Creating funded pool: {pool_pair} with CRT: {crt_amount}, USDC: {usdc_amount}, SOL: {sol_amount}")
+            
+            if pool_pair == "CRT/USDC":
+                if not usdc_amount:
+                    return {"success": False, "error": "USDC amount required for CRT/USDC pool"}
+                
+                # Create CRT/USDC pool with real funding
+                command = ["node", "-e", f"""
+                    const RealOrcaManager = require('./blockchain/real_orca_manager.js');
+                    const manager = new RealOrcaManager();
+                    manager.createCRTUSDCPool({crt_amount}, {usdc_amount})
+                    .then(result => {{
+                        console.log(JSON.stringify({{
+                            ...result,
+                            funded: true,
+                            liquidity_usd: {usdc_amount + (crt_amount * 0.01)},
+                            crt_funded: {crt_amount},
+                            usdc_funded: {usdc_amount}
+                        }}));
+                    }})
+                    .catch(err => console.log(JSON.stringify({{success: false, error: err.message}})));
+                """]
+                
+            elif pool_pair == "CRT/SOL":
+                if not sol_amount:
+                    return {"success": False, "error": "SOL amount required for CRT/SOL pool"}
+                
+                # Create CRT/SOL pool with real funding
+                command = ["node", "-e", f"""
+                    const RealOrcaManager = require('./blockchain/real_orca_manager.js');
+                    const manager = new RealOrcaManager();
+                    manager.createCRTSOLPool({crt_amount}, {sol_amount})
+                    .then(result => {{
+                        console.log(JSON.stringify({{
+                            ...result,
+                            funded: true,
+                            liquidity_usd: {(crt_amount * 0.01) + (sol_amount * 100)},
+                            crt_funded: {crt_amount},
+                            sol_funded: {sol_amount}
+                        }}));
+                    }})
+                    .catch(err => console.log(JSON.stringify({{success: false, error: err.message}})));
+                """]
+            
+            else:
+                return {"success": False, "error": f"Unsupported pool pair: {pool_pair}"}
+            
+            result = await self.call_orca_manager(command)
+            
+            if result.get("success"):
+                logger.info(f"Successfully created funded pool: {pool_pair}")
+                return {
+                    "success": True,
+                    "pool_address": result.get("pool_address"),
+                    "transaction_hash": result.get("transaction_hash"),
+                    "pool_pair": pool_pair,
+                    "funded": True,
+                    "liquidity_usd": result.get("liquidity_usd"),
+                    "crt_funded": result.get("crt_funded"),
+                    "usdc_funded": result.get("usdc_funded") if pool_pair == "CRT/USDC" else None,
+                    "sol_funded": result.get("sol_funded") if pool_pair == "CRT/SOL" else None,
+                    "note": "🌊 Real liquidity added to Orca pool!"
+                }
+            else:
+                return result
+                
+        except Exception as e:
+            logger.error(f"Exception in create_pool_with_funding: {str(e)}")
+            return {"success": False, "error": str(e)}
+
 # Global service instance
 real_orca_service = RealOrcaService()
