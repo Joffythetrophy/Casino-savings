@@ -1936,19 +1936,47 @@ async def fund_pools_with_user_balance(request: Dict[str, Any]):
         
         # Update user balances after successful pool funding
         if funded_pools:
-            # Deduct used amounts from user's balances (prioritize gaming balance first)
+            # Deduct used amounts from user's balances (use deposit balance where CRT is stored)
+            updated_deposit_balance = user.get("deposit_balance", {}).copy()
             updated_gaming_balance = user.get("gaming_balance", {}).copy()
+            updated_winnings_balance = user.get("winnings_balance", {}).copy()
             
             for currency, used_amount in total_used.items():
                 if used_amount > 0:
-                    current_balance = updated_gaming_balance.get(currency, 0)
-                    updated_gaming_balance[currency] = max(0, current_balance - used_amount)
+                    # Deduct from deposit balance first (where most balances are stored)
+                    deposit_available = updated_deposit_balance.get(currency, 0)
+                    if deposit_available >= used_amount:
+                        updated_deposit_balance[currency] = deposit_available - used_amount
+                        used_amount = 0
+                    else:
+                        updated_deposit_balance[currency] = 0
+                        used_amount -= deposit_available
+                    
+                    # If still need to deduct, use gaming balance
+                    if used_amount > 0:
+                        gaming_available = updated_gaming_balance.get(currency, 0)
+                        if gaming_available >= used_amount:
+                            updated_gaming_balance[currency] = gaming_available - used_amount
+                            used_amount = 0
+                        else:
+                            updated_gaming_balance[currency] = 0
+                            used_amount -= gaming_available
+                    
+                    # If still need to deduct, use winnings balance
+                    if used_amount > 0:
+                        winnings_available = updated_winnings_balance.get(currency, 0)
+                        if winnings_available >= used_amount:
+                            updated_winnings_balance[currency] = winnings_available - used_amount
+                        else:
+                            updated_winnings_balance[currency] = max(0, winnings_available - used_amount)
             
             await db.users.update_one(
                 {"wallet_address": wallet_address},
                 {
                     "$set": {
+                        "deposit_balance": updated_deposit_balance,
                         "gaming_balance": updated_gaming_balance,
+                        "winnings_balance": updated_winnings_balance,
                         "last_pool_funding": datetime.utcnow()
                     },
                     "$push": {
