@@ -489,7 +489,7 @@ class RealCRTCasinoTester:
             "Real CRT Balance": any("crt balance" in r["test"].lower() and r["success"] for r in self.test_results),
             "Bridge Pool Estimation": any("bridge" in r["test"].lower() and "estimation" in r["test"].lower() and r["success"] for r in self.test_results),
             "System Real Crypto Status": any("system status" in r["test"].lower() and r["success"] for r in self.test_results),
-            "CRT Casino Betting": any("casino" in r["test"].lower() and r["success"] for r in self.test_results),
+            "CRT Casino Betting": any(("casino" in r["test"].lower() or "betting" in r["test"].lower()) and r["success"] for r in self.test_results),
             "Bridge Pairs Support": any("bridge pairs" in r["test"].lower() and r["success"] for r in self.test_results),
             "No Fake Transactions": any("fake" in r["test"].lower() and r["success"] for r in self.test_results)
         }
