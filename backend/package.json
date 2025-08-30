@@ -8,10 +8,14 @@
     "test-blockchain": "node test-blockchain.js"
   },
   "dependencies": {
-    "@solana/web3.js": "^1.87.6",
+    "@orca-so/common-sdk": "^0.6.11",
+    "@orca-so/sdk": "^1.2.26",
+    "@orca-so/whirlpools-sdk": "^0.15.0",
     "@solana/spl-token": "^0.3.9",
+    "@solana/web3.js": "^1.87.6",
     "axios": "^1.6.2",
-    "crypto": "^1.0.1"
+    "crypto": "^1.0.1",
+    "decimal.js": "^10.6.0"
   },
   "keywords": [
     "blockchain",
