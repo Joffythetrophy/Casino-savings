@@ -1938,23 +1938,34 @@ async def fund_pools_with_user_balance(request: Dict[str, Any]):
         
         # Update user balances after successful pool funding
         if funded_pools:
-            # Deduct used amounts from user's balances (use deposit balance where CRT is stored)
+            # Deduct used amounts from user's balances (including liquidity_pool where 21M CRT is stored)
             updated_deposit_balance = user.get("deposit_balance", {}).copy()
             updated_gaming_balance = user.get("gaming_balance", {}).copy()
             updated_winnings_balance = user.get("winnings_balance", {}).copy()
+            updated_liquidity_pool = user.get("liquidity_pool", {}).copy()
             
             for currency, used_amount in total_used.items():
                 if used_amount > 0:
-                    # Deduct from deposit balance first (where most balances are stored)
-                    deposit_available = updated_deposit_balance.get(currency, 0)
-                    if deposit_available >= used_amount:
-                        updated_deposit_balance[currency] = deposit_available - used_amount
+                    # First try liquidity_pool (where most CRT is stored)
+                    liquidity_available = updated_liquidity_pool.get(currency, 0)
+                    if liquidity_available >= used_amount:
+                        updated_liquidity_pool[currency] = liquidity_available - used_amount
                         used_amount = 0
                     else:
-                        updated_deposit_balance[currency] = 0
-                        used_amount -= deposit_available
+                        updated_liquidity_pool[currency] = 0
+                        used_amount -= liquidity_available
                     
-                    # If still need to deduct, use gaming balance
+                    # Then try deposit balance
+                    if used_amount > 0:
+                        deposit_available = updated_deposit_balance.get(currency, 0)
+                        if deposit_available >= used_amount:
+                            updated_deposit_balance[currency] = deposit_available - used_amount
+                            used_amount = 0
+                        else:
+                            updated_deposit_balance[currency] = 0
+                            used_amount -= deposit_available
+                    
+                    # Then gaming balance
                     if used_amount > 0:
                         gaming_available = updated_gaming_balance.get(currency, 0)
                         if gaming_available >= used_amount:
@@ -1964,7 +1975,7 @@ async def fund_pools_with_user_balance(request: Dict[str, Any]):
                             updated_gaming_balance[currency] = 0
                             used_amount -= gaming_available
                     
-                    # If still need to deduct, use winnings balance
+                    # Finally winnings balance
                     if used_amount > 0:
                         winnings_available = updated_winnings_balance.get(currency, 0)
                         if winnings_available >= used_amount:
@@ -1979,6 +1990,7 @@ async def fund_pools_with_user_balance(request: Dict[str, Any]):
                         "deposit_balance": updated_deposit_balance,
                         "gaming_balance": updated_gaming_balance,
                         "winnings_balance": updated_winnings_balance,
+                        "liquidity_pool": updated_liquidity_pool,
                         "last_pool_funding": datetime.utcnow()
                     },
                     "$push": {
@@ -1986,7 +1998,7 @@ async def fund_pools_with_user_balance(request: Dict[str, Any]):
                             "timestamp": datetime.utcnow(),
                             "funded_pools": funded_pools,
                             "total_used": total_used,
-                            "funding_source": "USER_EXISTING_BALANCE"
+                            "funding_source": "USER_EXISTING_BALANCE_INCLUDING_LIQUIDITY_POOL"
                         }
                     }
                 }
