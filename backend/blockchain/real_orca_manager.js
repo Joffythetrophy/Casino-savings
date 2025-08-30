@@ -23,13 +23,20 @@ class RealOrcaManager {
         // Token mint addresses
         this.tokens = {
             CRT: new PublicKey('9pjWtc6x88wrRMXTxkBcNB6YtcN7NNcyzDAfUMfRknty'),
-            SOL: new PublicKey('So11111111111111111111111111111111111111112'),
+            SOL: new PublicKey('So11111111111111111111111111111111111111112'), // Wrapped SOL
             USDC: new PublicKey('EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v'),
             USDT: new PublicKey('Es9vMFrzaCERmJfrF4H2FYD4KCoNkY1NCe8BenwNYB')
         };
 
         // Load treasury keypair for pool operations
         this.treasuryKeypair = this.loadTreasuryKeypair();
+        
+        // Initialize Whirlpool context for new pool creation
+        this.whirlpoolCtx = WhirlpoolContext.withProvider(
+            { connection: this.connection, wallet: { publicKey: this.treasuryKeypair.publicKey } },
+            this.connection
+        );
+        this.whirlpoolClient = buildWhirlpoolClient(this.whirlpoolCtx);
         
         console.log('🌊 Real Orca Manager initialized for mainnet operations');
     }
