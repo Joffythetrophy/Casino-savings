@@ -112,7 +112,7 @@ const CleanCasinoInterface = ({ userBalance }) => {
     }
 
     return (
-        <div className="w-full max-w-4xl mx-auto p-6 min-h-screen">
+        <div className="w-full max-w-6xl mx-auto p-6"> {/* Removed min-h-screen to prevent header overlap */}
             {/* Simple Header */}
             <div className="text-center mb-8">
                 <h1 className="text-5xl font-bold text-casino-green-400 mb-4 glow-green">
