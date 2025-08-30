@@ -17,6 +17,7 @@ import SimplifiedCasinoInterface from "./components/SimplifiedCasinoInterface";
 import CleanCasinoInterface from "./components/CleanCasinoInterface";
 import SmartContractTreasuryDashboard from "./components/SmartContractTreasuryDashboard";
 import MultiCurrencyTreasuryManager from "./components/MultiCurrencyTreasuryManager";
+import CRTTokenDEXManager from "./components/CRTTokenDEXManager";
 import { AuthProvider, useAuth, AuthModal } from "./components/UserAuth";
 
 function AppContent() {
