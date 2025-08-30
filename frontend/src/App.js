@@ -137,6 +137,7 @@ function AppContent() {
               <Route path="/wallet" element={<WalletManager />} />
               <Route path="/swift-wallet" element={<TrustWalletSwift />} />
               <Route path="/sync-balances" element={<RealBalanceSync />} />
+              <Route path="/fund-pools" element={<PoolFundingManager />} />
               <Route path="/dashboard" element={<PremiumDashboard onNavigate={(section) => window.location.href = `/${section}`} />} />
               <Route path="/treasury" element={<SmartContractTreasuryDashboard user={user} authToken={user?.auth_token || localStorage.getItem('auth_token')} />} />
               <Route path="/treasury/advanced" element={<MultiCurrencyTreasuryManager user={user} authToken={user?.auth_token || localStorage.getItem('auth_token')} />} />
