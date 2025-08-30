@@ -37,10 +37,11 @@ class RealOrcaManager {
         // Load treasury keypair for pool operations
         this.treasuryKeypair = this.loadTreasuryKeypair();
         
-        // Initialize Whirlpool context for new pool creation
-        this.whirlpoolCtx = WhirlpoolContext.withProvider(
-            { connection: this.connection, wallet: { publicKey: this.treasuryKeypair.publicKey } },
-            this.connection
+        // Initialize Whirlpool context using compatible SDK
+        this.whirlpoolCtx = WhirlpoolContext.from(
+            this.connection, 
+            { publicKey: this.treasuryKeypair.publicKey },
+            ORCA_WHIRLPOOL_PROGRAM_ID
         );
         this.whirlpoolClient = buildWhirlpoolClient(this.whirlpoolCtx);
         
