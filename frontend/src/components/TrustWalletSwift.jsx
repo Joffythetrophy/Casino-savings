@@ -158,7 +158,7 @@ const TrustWalletSwift = () => {
     const [error, setError] = useState('');
     const [balances, setBalances] = useState({});
 
-    const { user, setUser } = useContext(AuthContext);
+    const { user, setUser } = useAuth();
 
     useEffect(() => {
         const swiftConnector = new TrustWalletSwiftConnector();
