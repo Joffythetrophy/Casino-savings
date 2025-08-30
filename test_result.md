@@ -49,8 +49,11 @@
 ##
 ## test_plan:
 ##   current_focus:
-##     - "Task name 1"
-##     - "Task name 2"
+##     - "CRITICAL: Replace fake transaction hash system with real blockchain operations"
+##     - "Implement Trust Wallet SWIFT Account Abstraction integration"
+##     - "Fix solana_real_manager.py to perform genuine Solana transactions"
+##     - "Update real_blockchain_service.py to eliminate all fake hashes"
+##     - "Test real withdrawals and Orca pool operations"
 ##   stuck_tasks:
 ##     - "Task name with persistent issues"
 ##   test_all: false
