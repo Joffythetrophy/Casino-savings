@@ -1,0 +1,796 @@
+[
+  {
+    "test": "User Authentication",
+    "success": true,
+    "details": "Successfully authenticated user 'cryptoking' with wallet DwK4nUM8TKWAxEBKTG6mWA6PBRDHFPA3beLB18pwCekq",
+    "timestamp": "2025-08-30T16:11:44.973512",
+    "data": null
+  },
+  {
+    "test": "User Balance Verification",
+    "success": true,
+    "details": "Retrieved balances - CRT: 8,242,185.44, DOGE: 90,809.73, TRX: 16,724.13, USDC: 6,362,808.48, SOL: 0.01",
+    "timestamp": "2025-08-30T16:11:45.816164",
+    "data": {
+      "balances": {
+        "deposit": {
+          "CRT": 7729677.968,
+          "DOGE": 88804.72405788815,
+          "TRX": 8600.2,
+          "SOL": 0.014885632,
+          "USDC": 30051.563041330315
+        },
+        "winnings": {
+          "CRT": 1622.473465140567,
+          "DOGE": 0.0036848485233349493,
+          "TRX": 503.93095411105327,
+          "USDC": 2686236.27
+        },
+        "savings": {
+          "CRT": 885.0,
+          "DOGE": 5.0,
+          "TRX": 2620.0,
+          "USDC": 3634320.65
+        },
+        "gaming": {
+          "CRT": 510000.0,
+          "USDC": 12200.0,
+          "DOGE": 2000.0,
+          "TRX": 5000.0
+        }
+      },
+      "totals": {
+        "CRT": 8242185.441465141,
+        "DOGE": 90809.72774273666,
+        "TRX": 16724.130954111053,
+        "USDC": 6362808.48304133,
+        "SOL": 0.014885632
+      }
+    }
+  },
+  {
+    "test": "Authentication Requirement Check",
+    "success": true,
+    "details": "Betting API allows unauthenticated access (no auth required)",
+    "timestamp": "2025-08-30T16:11:50.290589",
+    "data": null
+  },
+  {
+    "test": "Game Betting - Slot Machine (DOGE)",
+    "success": true,
+    "details": "Bet placed successfully: 10.0 DOGE \u2192 loss, payout: 0",
+    "timestamp": "2025-08-30T16:11:54.748787",
+    "data": {
+      "success": true,
+      "game_id": "game_6b8bb2fe",
+      "bet_amount": 10.0,
+      "currency": "DOGE",
+      "result": "loss",
+      "payout": 0,
+      "savings_contribution": 10.0,
+      "orca_pool_funding": {
+        "enabled": true,
+        "amount": 5.0,
+        "success": false,
+        "pool_address": null,
+        "transaction_hash": null,
+        "note": "\ud83c\udf0a 50% of losses fund Orca CRT pools for real liquidity!"
+      },
+      "savings_vault": {
+        "amount": 5.0,
+        "vault_type": "non_custodial",
+        "user_controlled": true
+      },
+      "message": "Game processed. \ud83c\udf0a Loss funded Orca pools + savings!"
+    }
+  },
+  {
+    "test": "User Balance Verification",
+    "success": true,
+    "details": "Retrieved balances - CRT: 8,242,185.44, DOGE: 90,799.73, TRX: 16,724.13, USDC: 6,362,808.48, SOL: 0.01",
+    "timestamp": "2025-08-30T16:11:55.564932",
+    "data": {
+      "balances": {
+        "deposit": {
+          "CRT": 7729677.968,
+          "DOGE": 88784.72405788815,
+          "TRX": 8600.2,
+          "SOL": 0.014885632,
+          "USDC": 30051.563041330315
+        },
+        "winnings": {
+          "CRT": 1622.473465140567,
+          "DOGE": 0.0036848485233349493,
+          "TRX": 503.93095411105327,
+          "USDC": 2686236.27
+        },
+        "savings": {
+          "CRT": 885.0,
+          "DOGE": 15.0,
+          "TRX": 2620.0,
+          "USDC": 3634320.65
+        },
+        "gaming": {
+          "CRT": 510000.0,
+          "USDC": 12200.0,
+          "DOGE": 2000.0,
+          "TRX": 5000.0
+        }
+      },
+      "totals": {
+        "CRT": 8242185.441465141,
+        "DOGE": 90799.72774273666,
+        "TRX": 16724.130954111053,
+        "USDC": 6362808.48304133,
+        "SOL": 0.014885632
+      }
+    }
+  },
+  {
+    "test": "Game Betting - Roulette (DOGE)",
+    "success": true,
+    "details": "Bet placed successfully: 50.0 DOGE \u2192 loss, payout: 0",
+    "timestamp": "2025-08-30T16:12:04.921768",
+    "data": {
+      "success": true,
+      "game_id": "game_bdd7e551",
+      "bet_amount": 50.0,
+      "currency": "DOGE",
+      "result": "loss",
+      "payout": 0,
+      "savings_contribution": 50.0,
+      "orca_pool_funding": {
+        "enabled": true,
+        "amount": 25.0,
+        "success": false,
+        "pool_address": null,
+        "transaction_hash": null,
+        "note": "\ud83c\udf0a 50% of losses fund Orca CRT pools for real liquidity!"
+      },
+      "savings_vault": {
+        "amount": 25.0,
+        "vault_type": "non_custodial",
+        "user_controlled": true
+      },
+      "message": "Game processed. \ud83c\udf0a Loss funded Orca pools + savings!"
+    }
+  },
+  {
+    "test": "User Balance Verification",
+    "success": true,
+    "details": "Retrieved balances - CRT: 8,242,185.44, DOGE: 90,774.73, TRX: 16,724.13, USDC: 6,362,808.48, SOL: 0.01",
+    "timestamp": "2025-08-30T16:12:05.664108",
+    "data": {
+      "balances": {
+        "deposit": {
+          "CRT": 7729677.968,
+          "DOGE": 88734.72405788815,
+          "TRX": 8600.2,
+          "SOL": 0.014885632,
+          "USDC": 30051.563041330315
+        },
+        "winnings": {
+          "CRT": 1622.473465140567,
+          "DOGE": 0.0036848485233349493,
+          "TRX": 503.93095411105327,
+          "USDC": 2686236.27
+        },
+        "savings": {
+          "CRT": 885.0,
+          "DOGE": 40.0,
+          "TRX": 2620.0,
+          "USDC": 3634320.65
+        },
+        "gaming": {
+          "CRT": 510000.0,
+          "USDC": 12200.0,
+          "DOGE": 2000.0,
+          "TRX": 5000.0
+        }
+      },
+      "totals": {
+        "CRT": 8242185.441465141,
+        "DOGE": 90774.72774273666,
+        "TRX": 16724.130954111053,
+        "USDC": 6362808.48304133,
+        "SOL": 0.014885632
+      }
+    }
+  },
+  {
+    "test": "Game Betting - Dice (DOGE)",
+    "success": true,
+    "details": "Bet placed successfully: 100.0 DOGE \u2192 win, payout: 530.0384832962086",
+    "timestamp": "2025-08-30T16:12:05.675933",
+    "data": {
+      "success": true,
+      "game_id": "game_4392a834",
+      "bet_amount": 100.0,
+      "currency": "DOGE",
+      "result": "win",
+      "payout": 530.0384832962086,
+      "savings_contribution": 0,
+      "orca_pool_funding": {
+        "enabled": true,
+        "amount": 0,
+        "success": false,
+        "pool_address": null,
+        "transaction_hash": null,
+        "note": "\ud83c\udf0a 50% of losses fund Orca CRT pools for real liquidity!"
+      },
+      "savings_vault": {
+        "amount": 0,
+        "vault_type": "non_custodial",
+        "user_controlled": true
+      },
+      "message": "Game processed. \ud83c\udf89 You won!"
+    }
+  },
+  {
+    "test": "User Balance Verification",
+    "success": true,
+    "details": "Retrieved balances - CRT: 8,242,185.44, DOGE: 91,204.77, TRX: 16,724.13, USDC: 6,362,808.48, SOL: 0.01",
+    "timestamp": "2025-08-30T16:12:06.434409",
+    "data": {
+      "balances": {
+        "deposit": {
+          "CRT": 7729677.968,
+          "DOGE": 88634.72405788815,
+          "TRX": 8600.2,
+          "SOL": 0.014885632,
+          "USDC": 30051.563041330315
+        },
+        "winnings": {
+          "CRT": 1622.473465140567,
+          "DOGE": 530.0421681447319,
+          "TRX": 503.93095411105327,
+          "USDC": 2686236.27
+        },
+        "savings": {
+          "CRT": 885.0,
+          "DOGE": 40.0,
+          "TRX": 2620.0,
+          "USDC": 3634320.65
+        },
+        "gaming": {
+          "CRT": 510000.0,
+          "USDC": 12200.0,
+          "DOGE": 2000.0,
+          "TRX": 5000.0
+        }
+      },
+      "totals": {
+        "CRT": 8242185.441465141,
+        "DOGE": 91204.76622603288,
+        "TRX": 16724.130954111053,
+        "USDC": 6362808.48304133,
+        "SOL": 0.014885632
+      }
+    }
+  },
+  {
+    "test": "Game Betting - Slot Machine (CRT)",
+    "success": true,
+    "details": "Bet placed successfully: 10.0 CRT \u2192 loss, payout: 0",
+    "timestamp": "2025-08-30T16:12:06.480658",
+    "data": {
+      "success": true,
+      "game_id": "game_e0c79a50",
+      "bet_amount": 10.0,
+      "currency": "CRT",
+      "result": "loss",
+      "payout": 0,
+      "savings_contribution": 10.0,
+      "orca_pool_funding": {
+        "enabled": true,
+        "amount": 5.0,
+        "success": false,
+        "pool_address": null,
+        "transaction_hash": null,
+        "note": "\ud83c\udf0a 50% of losses fund Orca CRT pools for real liquidity!"
+      },
+      "savings_vault": {
+        "amount": 5.0,
+        "vault_type": "non_custodial",
+        "user_controlled": true
+      },
+      "message": "Game processed. \ud83c\udf0a Loss funded Orca pools + savings!"
+    }
+  },
+  {
+    "test": "User Balance Verification",
+    "success": true,
+    "details": "Retrieved balances - CRT: 8,242,180.44, DOGE: 91,204.77, TRX: 16,724.13, USDC: 6,362,808.48, SOL: 0.01",
+    "timestamp": "2025-08-30T16:12:07.146569",
+    "data": {
+      "balances": {
+        "deposit": {
+          "CRT": 7729667.968,
+          "DOGE": 88634.72405788815,
+          "TRX": 8600.2,
+          "SOL": 0.014885632,
+          "USDC": 30051.563041330315
+        },
+        "winnings": {
+          "CRT": 1622.473465140567,
+          "DOGE": 530.0421681447319,
+          "TRX": 503.93095411105327,
+          "USDC": 2686236.27
+        },
+        "savings": {
+          "CRT": 890.0,
+          "DOGE": 40.0,
+          "TRX": 2620.0,
+          "USDC": 3634320.65
+        },
+        "gaming": {
+          "CRT": 510000.0,
+          "USDC": 12200.0,
+          "DOGE": 2000.0,
+          "TRX": 5000.0
+        }
+      },
+      "totals": {
+        "CRT": 8242180.441465141,
+        "DOGE": 91204.76622603288,
+        "TRX": 16724.130954111053,
+        "USDC": 6362808.48304133,
+        "SOL": 0.014885632
+      }
+    }
+  },
+  {
+    "test": "Game Betting - Roulette (TRX)",
+    "success": true,
+    "details": "Bet placed successfully: 25.0 TRX \u2192 loss, payout: 0",
+    "timestamp": "2025-08-30T16:12:15.932439",
+    "data": {
+      "success": true,
+      "game_id": "game_19b3cd48",
+      "bet_amount": 25.0,
+      "currency": "TRX",
+      "result": "loss",
+      "payout": 0,
+      "savings_contribution": 25.0,
+      "orca_pool_funding": {
+        "enabled": true,
+        "amount": 12.5,
+        "success": false,
+        "pool_address": null,
+        "transaction_hash": null,
+        "note": "\ud83c\udf0a 50% of losses fund Orca CRT pools for real liquidity!"
+      },
+      "savings_vault": {
+        "amount": 12.5,
+        "vault_type": "non_custodial",
+        "user_controlled": true
+      },
+      "message": "Game processed. \ud83c\udf0a Loss funded Orca pools + savings!"
+    }
+  },
+  {
+    "test": "User Balance Verification",
+    "success": true,
+    "details": "Retrieved balances - CRT: 8,242,180.44, DOGE: 91,204.77, TRX: 16,711.63, USDC: 6,362,808.48, SOL: 0.01",
+    "timestamp": "2025-08-30T16:12:16.632845",
+    "data": {
+      "balances": {
+        "deposit": {
+          "CRT": 7729667.968,
+          "DOGE": 88634.72405788815,
+          "TRX": 8575.2,
+          "SOL": 0.014885632,
+          "USDC": 30051.563041330315
+        },
+        "winnings": {
+          "CRT": 1622.473465140567,
+          "DOGE": 530.0421681447319,
+          "TRX": 503.93095411105327,
+          "USDC": 2686236.27
+        },
+        "savings": {
+          "CRT": 890.0,
+          "DOGE": 40.0,
+          "TRX": 2632.5,
+          "USDC": 3634320.65
+        },
+        "gaming": {
+          "CRT": 510000.0,
+          "USDC": 12200.0,
+          "DOGE": 2000.0,
+          "TRX": 5000.0
+        }
+      },
+      "totals": {
+        "CRT": 8242180.441465141,
+        "DOGE": 91204.76622603288,
+        "TRX": 16711.630954111053,
+        "USDC": 6362808.48304133,
+        "SOL": 0.014885632
+      }
+    }
+  },
+  {
+    "test": "Game Betting - Dice (USDC)",
+    "success": true,
+    "details": "Bet placed successfully: 5.0 USDC \u2192 win, payout: 15.090908849860199",
+    "timestamp": "2025-08-30T16:12:16.683233",
+    "data": {
+      "success": true,
+      "game_id": "game_fb7dbdfb",
+      "bet_amount": 5.0,
+      "currency": "USDC",
+      "result": "win",
+      "payout": 15.090908849860199,
+      "savings_contribution": 0,
+      "orca_pool_funding": {
+        "enabled": true,
+        "amount": 0,
+        "success": false,
+        "pool_address": null,
+        "transaction_hash": null,
+        "note": "\ud83c\udf0a 50% of losses fund Orca CRT pools for real liquidity!"
+      },
+      "savings_vault": {
+        "amount": 0,
+        "vault_type": "non_custodial",
+        "user_controlled": true
+      },
+      "message": "Game processed. \ud83c\udf89 You won!"
+    }
+  },
+  {
+    "test": "User Balance Verification",
+    "success": true,
+    "details": "Retrieved balances - CRT: 8,242,180.44, DOGE: 91,204.77, TRX: 16,711.63, USDC: 6,362,818.57, SOL: 0.01",
+    "timestamp": "2025-08-30T16:12:17.162106",
+    "data": {
+      "balances": {
+        "deposit": {
+          "CRT": 7729667.968,
+          "DOGE": 88634.72405788815,
+          "TRX": 8575.2,
+          "SOL": 0.014885632,
+          "USDC": 30046.563041330315
+        },
+        "winnings": {
+          "CRT": 1622.473465140567,
+          "DOGE": 530.0421681447319,
+          "TRX": 503.93095411105327,
+          "USDC": 2686251.36090885
+        },
+        "savings": {
+          "CRT": 890.0,
+          "DOGE": 40.0,
+          "TRX": 2632.5,
+          "USDC": 3634320.65
+        },
+        "gaming": {
+          "CRT": 510000.0,
+          "USDC": 12200.0,
+          "DOGE": 2000.0,
+          "TRX": 5000.0
+        }
+      },
+      "totals": {
+        "CRT": 8242180.441465141,
+        "DOGE": 91204.76622603288,
+        "TRX": 16711.630954111053,
+        "USDC": 6362818.573950181,
+        "SOL": 0.014885632
+      }
+    }
+  },
+  {
+    "test": "Game Betting - Dice (DOGE)",
+    "success": true,
+    "details": "Bet placed successfully: 10.0 DOGE \u2192 win, payout: 84.80935922902454",
+    "timestamp": "2025-08-30T16:12:17.213197",
+    "data": {
+      "success": true,
+      "game_id": "game_52185d24",
+      "bet_amount": 10.0,
+      "currency": "DOGE",
+      "result": "win",
+      "payout": 84.80935922902454,
+      "savings_contribution": 0,
+      "orca_pool_funding": {
+        "enabled": true,
+        "amount": 0,
+        "success": false,
+        "pool_address": null,
+        "transaction_hash": null,
+        "note": "\ud83c\udf0a 50% of losses fund Orca CRT pools for real liquidity!"
+      },
+      "savings_vault": {
+        "amount": 0,
+        "vault_type": "non_custodial",
+        "user_controlled": true
+      },
+      "message": "Game processed. \ud83c\udf89 You won!"
+    }
+  },
+  {
+    "test": "User Balance Verification",
+    "success": true,
+    "details": "Retrieved balances - CRT: 8,242,180.44, DOGE: 91,279.58, TRX: 16,711.63, USDC: 6,362,818.57, SOL: 0.01",
+    "timestamp": "2025-08-30T16:12:18.707724",
+    "data": {
+      "balances": {
+        "deposit": {
+          "CRT": 7729667.968,
+          "DOGE": 88624.72405788815,
+          "TRX": 8575.2,
+          "SOL": 0.014885632,
+          "USDC": 30046.563041330315
+        },
+        "winnings": {
+          "CRT": 1622.473465140567,
+          "DOGE": 614.8515273737564,
+          "TRX": 503.93095411105327,
+          "USDC": 2686251.36090885
+        },
+        "savings": {
+          "CRT": 890.0,
+          "DOGE": 40.0,
+          "TRX": 2632.5,
+          "USDC": 3634320.65
+        },
+        "gaming": {
+          "CRT": 510000.0,
+          "USDC": 12200.0,
+          "DOGE": 2000.0,
+          "TRX": 5000.0
+        }
+      },
+      "totals": {
+        "CRT": 8242180.441465141,
+        "DOGE": 91279.5755852619,
+        "TRX": 16711.630954111053,
+        "USDC": 6362818.573950181,
+        "SOL": 0.014885632
+      }
+    }
+  },
+  {
+    "test": "Balance Deduction Test (DOGE)",
+    "success": false,
+    "details": "Balance not deducted: 91204.76622603288 \u2192 91279.5755852619",
+    "timestamp": "2025-08-30T16:12:18.707790",
+    "data": null
+  },
+  {
+    "test": "Game Betting - Dice (CRT)",
+    "success": true,
+    "details": "Bet placed successfully: 10.0 CRT \u2192 loss, payout: 0",
+    "timestamp": "2025-08-30T16:12:18.754013",
+    "data": {
+      "success": true,
+      "game_id": "game_9ea4f70b",
+      "bet_amount": 10.0,
+      "currency": "CRT",
+      "result": "loss",
+      "payout": 0,
+      "savings_contribution": 10.0,
+      "orca_pool_funding": {
+        "enabled": true,
+        "amount": 5.0,
+        "success": false,
+        "pool_address": null,
+        "transaction_hash": null,
+        "note": "\ud83c\udf0a 50% of losses fund Orca CRT pools for real liquidity!"
+      },
+      "savings_vault": {
+        "amount": 5.0,
+        "vault_type": "non_custodial",
+        "user_controlled": true
+      },
+      "message": "Game processed. \ud83c\udf0a Loss funded Orca pools + savings!"
+    }
+  },
+  {
+    "test": "User Balance Verification",
+    "success": true,
+    "details": "Retrieved balances - CRT: 8,242,175.44, DOGE: 91,279.58, TRX: 16,711.63, USDC: 6,362,818.57, SOL: 0.01",
+    "timestamp": "2025-08-30T16:12:20.225970",
+    "data": {
+      "balances": {
+        "deposit": {
+          "CRT": 7729657.968,
+          "DOGE": 88624.72405788815,
+          "TRX": 8575.2,
+          "SOL": 0.014885632,
+          "USDC": 30046.563041330315
+        },
+        "winnings": {
+          "CRT": 1622.473465140567,
+          "DOGE": 614.8515273737564,
+          "TRX": 503.93095411105327,
+          "USDC": 2686251.36090885
+        },
+        "savings": {
+          "CRT": 895.0,
+          "DOGE": 40.0,
+          "TRX": 2632.5,
+          "USDC": 3634320.65
+        },
+        "gaming": {
+          "CRT": 510000.0,
+          "USDC": 12200.0,
+          "DOGE": 2000.0,
+          "TRX": 5000.0
+        }
+      },
+      "totals": {
+        "CRT": 8242175.441465141,
+        "DOGE": 91279.5755852619,
+        "TRX": 16711.630954111053,
+        "USDC": 6362818.573950181,
+        "SOL": 0.014885632
+      }
+    }
+  },
+  {
+    "test": "Balance Deduction Test (CRT)",
+    "success": true,
+    "details": "Balance properly deducted: 8242180.441465141 \u2192 8242175.441465141 (change: -5.0)",
+    "timestamp": "2025-08-30T16:12:20.226033",
+    "data": null
+  },
+  {
+    "test": "Game Betting - Dice (TRX)",
+    "success": true,
+    "details": "Bet placed successfully: 10.0 TRX \u2192 win, payout: 67.97129104398368",
+    "timestamp": "2025-08-30T16:12:20.275748",
+    "data": {
+      "success": true,
+      "game_id": "game_300dcd43",
+      "bet_amount": 10.0,
+      "currency": "TRX",
+      "result": "win",
+      "payout": 67.97129104398368,
+      "savings_contribution": 0,
+      "orca_pool_funding": {
+        "enabled": true,
+        "amount": 0,
+        "success": false,
+        "pool_address": null,
+        "transaction_hash": null,
+        "note": "\ud83c\udf0a 50% of losses fund Orca CRT pools for real liquidity!"
+      },
+      "savings_vault": {
+        "amount": 0,
+        "vault_type": "non_custodial",
+        "user_controlled": true
+      },
+      "message": "Game processed. \ud83c\udf89 You won!"
+    }
+  },
+  {
+    "test": "User Balance Verification",
+    "success": true,
+    "details": "Retrieved balances - CRT: 8,242,175.44, DOGE: 91,279.58, TRX: 16,769.60, USDC: 6,362,818.57, SOL: 0.01",
+    "timestamp": "2025-08-30T16:12:21.841064",
+    "data": {
+      "balances": {
+        "deposit": {
+          "CRT": 7729657.968,
+          "DOGE": 88624.72405788815,
+          "TRX": 8565.2,
+          "SOL": 0.014885632,
+          "USDC": 30046.563041330315
+        },
+        "winnings": {
+          "CRT": 1622.473465140567,
+          "DOGE": 614.8515273737564,
+          "TRX": 571.902245155037,
+          "USDC": 2686251.36090885
+        },
+        "savings": {
+          "CRT": 895.0,
+          "DOGE": 40.0,
+          "TRX": 2632.5,
+          "USDC": 3634320.65
+        },
+        "gaming": {
+          "CRT": 510000.0,
+          "USDC": 12200.0,
+          "DOGE": 2000.0,
+          "TRX": 5000.0
+        }
+      },
+      "totals": {
+        "CRT": 8242175.441465141,
+        "DOGE": 91279.5755852619,
+        "TRX": 16769.602245155038,
+        "USDC": 6362818.573950181,
+        "SOL": 0.014885632
+      }
+    }
+  },
+  {
+    "test": "Balance Deduction Test (TRX)",
+    "success": false,
+    "details": "Balance not deducted: 16711.630954111053 \u2192 16769.602245155038",
+    "timestamp": "2025-08-30T16:12:21.841132",
+    "data": null
+  },
+  {
+    "test": "Game Betting - Dice (USDC)",
+    "success": true,
+    "details": "Bet placed successfully: 10.0 USDC \u2192 win, payout: 49.662560597861685",
+    "timestamp": "2025-08-30T16:12:21.851286",
+    "data": {
+      "success": true,
+      "game_id": "game_b3e9403e",
+      "bet_amount": 10.0,
+      "currency": "USDC",
+      "result": "win",
+      "payout": 49.662560597861685,
+      "savings_contribution": 0,
+      "orca_pool_funding": {
+        "enabled": true,
+        "amount": 0,
+        "success": false,
+        "pool_address": null,
+        "transaction_hash": null,
+        "note": "\ud83c\udf0a 50% of losses fund Orca CRT pools for real liquidity!"
+      },
+      "savings_vault": {
+        "amount": 0,
+        "vault_type": "non_custodial",
+        "user_controlled": true
+      },
+      "message": "Game processed. \ud83c\udf89 You won!"
+    }
+  },
+  {
+    "test": "User Balance Verification",
+    "success": true,
+    "details": "Retrieved balances - CRT: 8,242,175.44, DOGE: 91,279.58, TRX: 16,769.60, USDC: 6,362,858.24, SOL: 0.01",
+    "timestamp": "2025-08-30T16:12:23.319115",
+    "data": {
+      "balances": {
+        "deposit": {
+          "CRT": 7729657.968,
+          "DOGE": 88624.72405788815,
+          "TRX": 8565.2,
+          "SOL": 0.014885632,
+          "USDC": 30036.563041330315
+        },
+        "winnings": {
+          "CRT": 1622.473465140567,
+          "DOGE": 614.8515273737564,
+          "TRX": 571.902245155037,
+          "USDC": 2686301.023469448
+        },
+        "savings": {
+          "CRT": 895.0,
+          "DOGE": 40.0,
+          "TRX": 2632.5,
+          "USDC": 3634320.65
+        },
+        "gaming": {
+          "CRT": 510000.0,
+          "USDC": 12200.0,
+          "DOGE": 2000.0,
+          "TRX": 5000.0
+        }
+      },
+      "totals": {
+        "CRT": 8242175.441465141,
+        "DOGE": 91279.5755852619,
+        "TRX": 16769.602245155038,
+        "USDC": 6362858.236510778,
+        "SOL": 0.014885632
+      }
+    }
+  },
+  {
+    "test": "Balance Deduction Test (USDC)",
+    "success": false,
+    "details": "Balance not deducted: 6362818.573950181 \u2192 6362858.236510778",
+    "timestamp": "2025-08-30T16:12:23.319179",
+    "data": null
+  }
+]
