@@ -31,7 +31,7 @@ class RealOrcaManager {
             CRT: new PublicKey('9pjWtc6x88wrRMXTxkBcNB6YtcN7NNcyzDAfUMfRknty'),
             SOL: new PublicKey('So11111111111111111111111111111111111111112'), // Wrapped SOL
             USDC: new PublicKey('EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v'),
-            USDT: new PublicKey('Es9vMFrzaCERmJfrF4H2FYD4KCoNkY1NCe8BenwNYB')
+            USDT: new PublicKey('Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11NCe8BenwNYB')
         };
 
         // Load treasury keypair for pool operations
