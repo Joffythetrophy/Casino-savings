@@ -491,8 +491,16 @@ class RealBlockchainService:
                     {"$set": balance_updates}
                 )
             
-            # Generate realistic transaction hash
-            transaction_hash = f"crt_direct_tx_{int(datetime.utcnow().timestamp())}_{hash(to_address) % 1000000}"
+            # Use real solana manager for CRT transfers
+            from blockchain.solana_real_manager import real_solana_manager
+            
+            # Execute REAL CRT transfer
+            result = await real_solana_manager.send_real_crt(to_address, required_crt)
+            
+            if not result.get("success"):
+                return result
+            
+            transaction_hash = result.get("transaction_hash")
             
             # Log the transaction  
             self._log_transaction(to_address, amount, currency, transaction_hash)
