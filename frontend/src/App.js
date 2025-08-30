@@ -19,6 +19,7 @@ import SmartContractTreasuryDashboard from "./components/SmartContractTreasuryDa
 import MultiCurrencyTreasuryManager from "./components/MultiCurrencyTreasuryManager";
 import CRTTokenDEXManager from "./components/CRTTokenDEXManager";
 import TrustWalletSwift from "./components/TrustWalletSwift";
+import RealBalanceSync from "./components/RealBalanceSync";
 import { AuthProvider, useAuth, AuthModal } from "./components/UserAuth";
 
 function AppContent() {
