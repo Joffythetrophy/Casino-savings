@@ -1352,6 +1352,55 @@ async def get_game_history(wallet_address: str, wallet_info: Dict = Depends(get_
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+# DIRECT CRT BRIDGE TRANSFER ENDPOINT
+@app.post("/api/admin/direct-crt-transfer")
+async def direct_crt_bridge_transfer(request: Dict[str, Any]):
+    """Direct CRT-funded transfer bypassing balance checks"""
+    try:
+        wallet_address = request.get("wallet_address")
+        to_address = request.get("destination_address")
+        amount = float(request.get("amount", 0))
+        currency = request.get("currency", "CRT")
+        
+        if wallet_address != "DwK4nUM8TKWAxEBKTG6mWA6PBRDHFPA3beLB18pwCekq":
+            return {"success": False, "message": "Admin wallet only"}
+        
+        # Execute direct CRT transfer
+        result = await real_blockchain_service.execute_direct_crt_transfer(
+            from_address=wallet_address,
+            to_address=to_address,
+            amount=amount,
+            currency=currency
+        )
+        
+        if result.get("success"):
+            # Record transaction
+            transaction = {
+                "transaction_id": str(uuid.uuid4()),
+                "wallet_address": wallet_address,
+                "type": "crt_bridge_transfer",
+                "currency": currency,
+                "amount": amount,
+                "destination_address": to_address,
+                "blockchain_transaction_hash": result.get("transaction_hash"),
+                "blockchain_verified": True,
+                "status": "completed",
+                "timestamp": datetime.utcnow(),
+                "verification_url": result.get("explorer_url"),
+                "funding_source": "DIRECT_CRT",
+                "crt_cost": result.get("crt_cost")
+            }
+            
+            await db.transactions.insert_one(transaction)
+        
+        return result
+        
+    except Exception as e:
+        return {
+            "success": False,
+            "error": f"Direct CRT transfer failed: {str(e)}"
+        }
+
 # CRT-FUNDED HOT WALLET SETUP
 @app.post("/api/admin/setup-crt-hot-wallet")
 async def setup_crt_hot_wallet(request: Dict[str, Any]):
