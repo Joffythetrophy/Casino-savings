@@ -5135,8 +5135,17 @@ async def create_crt_orca_pool(
         if not user or user.get("username") != "cryptoking":
             raise HTTPException(status_code=403, detail="Pool creation requires admin access")
         
-        # Create Orca pool
-        pool_result = await dex_liquidity_manager.create_orca_pool(request.pool_pair)
+        # Create REAL Orca pool using actual Orca SDK
+        if request.pool_pair == "CRT/SOL":
+            pool_result = await real_orca_service.create_real_crt_sol_pool()
+        elif request.pool_pair == "CRT/USDC":
+            pool_result = await real_orca_service.create_real_crt_usdc_pool()
+        else:
+            return {
+                "success": False,
+                "message": f"Unsupported pool pair: {request.pool_pair}",
+                "supported_pairs": ["CRT/SOL", "CRT/USDC"]
+            }
         
         if pool_result.get("success"):
             # Record pool creation in database
