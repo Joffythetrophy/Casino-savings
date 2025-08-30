@@ -462,7 +462,7 @@ class RealOrcaService:
                 sol_amount = amount * 0.0001  # Rough CRT/SOL ratio
                 
                 command = ["node", "-e", f"""
-                    const RealOrcaManager = require('./blockchain/real_orca_manager.js');
+                    const RealOrcaManager = require('/app/backend/blockchain/real_orca_manager.js');
                     const manager = new RealOrcaManager();
                     manager.addLiquidity('{pool_pair}', {crt_amount}, {sol_amount})
                     .then(result => console.log(JSON.stringify(result)))
@@ -475,7 +475,7 @@ class RealOrcaService:
                 sol_amount = crt_equivalent * 0.0001
                 
                 command = ["node", "-e", f"""
-                    const RealOrcaManager = require('./blockchain/real_orca_manager.js');
+                    const RealOrcaManager = require('/app/backend/blockchain/real_orca_manager.js');
                     const manager = new RealOrcaManager();
                     manager.addLiquidity('CRT/SOL', {crt_equivalent}, {sol_amount})
                     .then(result => console.log(JSON.stringify(result)))
@@ -487,7 +487,7 @@ class RealOrcaService:
                 crt_amount = amount * 6.67  # USDC to CRT rate
                 
                 command = ["node", "-e", f"""
-                    const RealOrcaManager = require('./blockchain/real_orca_manager.js');
+                    const RealOrcaManager = require('/app/backend/blockchain/real_orca_manager.js');
                     const manager = new RealOrcaManager();
                     manager.addLiquidity('CRT/USDC', {crt_amount}, {amount})
                     .then(result => console.log(JSON.stringify(result)))
@@ -539,7 +539,7 @@ class RealOrcaService:
                 usdc_amount = amount
                 
                 command = ["node", "-e", f"""
-                    const RealOrcaManager = require('./blockchain/real_orca_manager.js');
+                    const RealOrcaManager = require('/app/backend/blockchain/real_orca_manager.js');
                     const manager = new RealOrcaManager();
                     manager.addLiquidity('{pool_pair}', {crt_amount}, {usdc_amount})
                     .then(result => console.log(JSON.stringify(result)))
@@ -560,7 +560,7 @@ class RealOrcaService:
 
             # For CRT and DOGE (converted to CRT/SOL)
             command = ["node", "-e", f"""
-                const RealOrcaManager = require('./blockchain/real_orca_manager.js');
+                const RealOrcaManager = require('/app/backend/blockchain/real_orca_manager.js');
                 const manager = new RealOrcaManager();
                 manager.addLiquidity('{pool_pair}', {crt_amount}, {sol_amount})
                 .then(result => console.log(JSON.stringify(result)))
