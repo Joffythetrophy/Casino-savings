@@ -203,6 +203,97 @@ async def health_check():
     }
 
 # Authentication endpoints
+@api_router.post("/auth/register")
+async def register_user(request: RegisterRequest):
+    """Register new user with username and password"""
+    try:
+        # Check if user already exists
+        existing_user = await db.users.find_one({
+            "$or": [
+                {"wallet_address": request.wallet_address},
+                {"username": request.username} if request.username else {}
+            ]
+        })
+        
+        if existing_user:
+            if existing_user.get("wallet_address") == request.wallet_address:
+                raise HTTPException(status_code=400, detail="Wallet address already registered")
+            if existing_user.get("username") == request.username:
+                raise HTTPException(status_code=400, detail="Username already taken")
+        
+        # Hash password
+        hashed_password = pwd_context.hash(request.password)
+        
+        # Create user
+        user_data = {
+            "user_id": str(uuid.uuid4()),
+            "wallet_address": request.wallet_address,
+            "username": request.username or f"user_{request.wallet_address[:8]}",
+            "password_hash": hashed_password,
+            "created_at": datetime.utcnow(),
+            "deposit_balance": {"CRT": 0, "DOGE": 0, "TRX": 0, "USDC": 0, "SOL": 0},
+            "winnings_balance": {"CRT": 0, "DOGE": 0, "TRX": 0, "USDC": 0, "SOL": 0},
+            "gaming_balance": {"CRT": 0, "DOGE": 0, "TRX": 0, "USDC": 0, "SOL": 0},
+            "savings_balance": {"CRT": 0, "DOGE": 0, "TRX": 0, "USDC": 0, "SOL": 0},
+            "liquidity_pool": {"CRT": 0, "DOGE": 0, "TRX": 0, "USDC": 0, "SOL": 0}
+        }
+        
+        result = await db.users.insert_one(user_data)
+        
+        # Generate JWT token
+        jwt_token = auth_manager.create_jwt_token(request.wallet_address, "casino")
+        
+        return {
+            "success": True,
+            "message": "User registered successfully",
+            "user_id": user_data["user_id"],
+            "username": user_data["username"],
+            "wallet_address": request.wallet_address,
+            "token": jwt_token
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Registration failed: {str(e)}")
+
+@api_router.post("/auth/login")
+async def login_user(request: LoginRequest):
+    """Login user with username or wallet address + password"""
+    try:
+        # Find user by username or wallet address
+        user = await db.users.find_one({
+            "$or": [
+                {"username": request.identifier},
+                {"wallet_address": request.identifier}
+            ]
+        })
+        
+        if not user:
+            raise HTTPException(status_code=401, detail="Invalid credentials")
+        
+        # Verify password
+        if not pwd_context.verify(request.password, user["password_hash"]):
+            raise HTTPException(status_code=401, detail="Invalid credentials")
+        
+        # Generate JWT token
+        jwt_token = auth_manager.create_jwt_token(user["wallet_address"], "casino")
+        
+        return {
+            "success": True,
+            "message": f"Login successful! Welcome, {user['username']}!",
+            "user_id": user["user_id"],
+            "username": user["username"],
+            "wallet_address": user["wallet_address"],
+            "token": jwt_token,
+            "expires_in": 86400  # 24 hours
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Login failed: {str(e)}")
+
 @api_router.post("/auth/challenge")
 async def generate_auth_challenge(request: ChallengeRequest):
     """Generate authentication challenge for wallet connection"""
