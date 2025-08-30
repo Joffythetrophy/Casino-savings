@@ -141,7 +141,7 @@ class RealSolanaManager:
         amount: float, 
         from_keypair: Optional[Keypair] = None
     ) -> Dict[str, Any]:
-        """Send REAL CRT tokens - simplified implementation"""
+        """Send REAL CRT SPL tokens on Solana blockchain"""
         
         try:
             if not from_keypair:
@@ -149,32 +149,94 @@ class RealSolanaManager:
                 if not from_keypair:
                     return {"success": False, "error": "No keypair available"}
             
-            # For now, simulate a real CRT transaction with proper structure
-            # In production, this would use SPL token transfer instructions
+            from solders.transaction import VersionedTransaction
+            from solders.message import MessageV0
+            from spl.token.instructions import transfer_checked, TransferCheckedParams
+            from spl.token.constants import ASSOCIATED_TOKEN_PROGRAM_ID, TOKEN_PROGRAM_ID
+            from solders.address_lookup_table_account import AddressLookupTableAccount
             
-            # Generate a proper Solana transaction hash format
-            import hashlib
-            import secrets
+            # Convert addresses
+            to_pubkey = Pubkey.from_string(to_address)
             
-            # Create transaction data
-            tx_data = f"{from_keypair.pubkey()}{to_address}{amount}{secrets.randbits(64)}"
-            tx_hash_bytes = hashlib.sha256(tx_data.encode()).digest()
-            transaction_hash = base58.b58encode(tx_hash_bytes).decode()
+            # Convert amount with decimals (CRT has 6 decimals)
+            decimals = 6
+            token_amount = int(amount * (10 ** decimals))
             
-            logger.info(f'✅ Real CRT transfer simulated: {transaction_hash}')
+            # Get associated token accounts
+            from_ata = await self._get_associated_token_account(from_keypair.pubkey(), self.CRT_MINT)
+            to_ata = await self._get_associated_token_account(to_pubkey, self.CRT_MINT)
             
-            return {
-                "success": True,
-                "transaction_hash": transaction_hash,
-                "amount": amount,
-                "currency": "CRT",
-                "from_address": str(from_keypair.pubkey()),
-                "to_address": to_address,
-                "blockchain": "Solana",
-                "explorer_url": f"https://explorer.solana.com/tx/{transaction_hash}",
-                "real_transaction": True,
-                "note": "Real CRT transaction with proper Solana hash format"
-            }
+            # Check if destination ATA exists, create if not
+            to_ata_info = await self.client.get_account_info(to_ata)
+            instructions = []
+            
+            if not to_ata_info.value:
+                # Create associated token account instruction
+                from spl.token.instructions import create_associated_token_account
+                create_ata_ix = create_associated_token_account(
+                    payer=from_keypair.pubkey(),
+                    owner=to_pubkey,
+                    mint=self.CRT_MINT
+                )
+                instructions.append(create_ata_ix)
+            
+            # Create transfer instruction
+            transfer_ix = transfer_checked(
+                TransferCheckedParams(
+                    program_id=TOKEN_PROGRAM_ID,
+                    source=from_ata,
+                    mint=self.CRT_MINT,
+                    dest=to_ata,
+                    owner=from_keypair.pubkey(),
+                    amount=token_amount,
+                    decimals=decimals
+                )
+            )
+            instructions.append(transfer_ix)
+            
+            # Get recent blockhash
+            recent_blockhash_resp = await self.client.get_latest_blockhash()
+            recent_blockhash = recent_blockhash_resp.value.blockhash
+            
+            # Create and send transaction
+            message = MessageV0.try_compile(
+                payer=from_keypair.pubkey(),
+                instructions=instructions,
+                address_lookup_table_accounts=[],
+                recent_blockhash=recent_blockhash
+            )
+            
+            transaction = VersionedTransaction(message, [from_keypair])
+            
+            # Send transaction
+            response = await self.client.send_transaction(transaction)
+            
+            # Confirm transaction
+            confirmation = await self.client.confirm_transaction(response.value, commitment="confirmed")
+            
+            if confirmation.value[0].confirmation_status == "confirmed":
+                logger.info(f'✅ REAL CRT transfer completed: {response.value}')
+                
+                return {
+                    "success": True,
+                    "transaction_hash": str(response.value),
+                    "amount": amount,
+                    "currency": "CRT",
+                    "from_address": str(from_keypair.pubkey()),
+                    "to_address": to_address,
+                    "blockchain": "Solana",
+                    "explorer_url": f"https://explorer.solana.com/tx/{response.value}",
+                    "real_transaction": True,
+                    "token_amount": token_amount,
+                    "decimals": decimals,
+                    "note": "✅ GENUINE CRT SPL token transfer on Solana mainnet"
+                }
+            else:
+                return {
+                    "success": False,
+                    "error": "Transaction failed to confirm",
+                    "transaction_hash": str(response.value)
+                }
             
         except Exception as e:
             logger.error(f'❌ Real CRT transfer failed: {str(e)}')
