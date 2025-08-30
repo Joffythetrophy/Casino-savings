@@ -248,52 +248,6 @@ class RealOrcaManager {
         }
     }
 
-    async addInitialLiquidity(poolAddress, tokenMintA, tokenMintB, amountA, amountB) {
-        try {
-            console.log(`💧 Adding initial liquidity to pool ${poolAddress.toString()}`);
-
-            // Get the whirlpool instance
-            const whirlpool = await this.whirlpoolClient.getPool(poolAddress);
-            
-            // Define price range for liquidity (full range for initial liquidity)
-            const tickLowerIndex = -443636; // Min tick
-            const tickUpperIndex = 443636;  // Max tick
-
-            // Create position and add liquidity
-            const positionTx = await whirlpool.openPosition(
-                tickLowerIndex,
-                tickUpperIndex,
-                {
-                    tokenA: new Decimal(amountA),
-                    tokenB: new Decimal(amountB)
-                }
-            );
-
-            // Sign and send the transaction
-            const signature = await this.connection.sendTransaction(
-                positionTx,
-                [this.treasuryKeypair],
-                { skipPreflight: false, preflightCommitment: 'confirmed' }
-            );
-
-            // Wait for confirmation
-            await this.connection.confirmTransaction(signature, 'confirmed');
-
-            console.log('✅ Initial liquidity added successfully');
-            return {
-                success: true,
-                transaction_hash: signature
-            };
-
-        } catch (error) {
-            console.error('❌ Adding initial liquidity failed:', error);
-            return {
-                success: false,
-                error: `Liquidity addition failed: ${error.message}`
-            };
-        }
-    }
-
     async findExistingPool(tokenA, tokenB) {
         try {
             // Search for existing whirlpools with our token pair
