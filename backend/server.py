@@ -1805,6 +1805,183 @@ async def check_hot_wallet_status():
             "status": "ERROR"
         }
 
+# REAL POOL FUNDING USING USER'S EXISTING BALANCES
+@api_router.post("/pools/fund-with-user-balance")
+async def fund_pools_with_user_balance(request: Dict[str, Any]):
+    """Fund Orca pools using user's existing cryptocurrency balances - REAL TRANSACTIONS"""
+    try:
+        wallet_address = request.get("wallet_address")
+        pool_requests = request.get("pool_requests", [])
+        
+        if not wallet_address or not pool_requests:
+            raise HTTPException(status_code=400, detail="Missing wallet_address or pool_requests")
+        
+        # Verify user exists and has sufficient balances
+        user = await db.users.find_one({"wallet_address": wallet_address})
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+        
+        # Get user's current balances
+        deposit_balance = user.get("deposit_balance", {})
+        gaming_balance = user.get("gaming_balance", {})
+        winnings_balance = user.get("winnings_balance", {})
+        
+        # Calculate total available for each currency
+        available_balances = {}
+        for currency in ["CRT", "USDC", "SOL"]:
+            total = (deposit_balance.get(currency, 0) + 
+                    gaming_balance.get(currency, 0) + 
+                    winnings_balance.get(currency, 0))
+            available_balances[currency] = total
+        
+        print(f"Available balances for {wallet_address}: {available_balances}")
+        
+        funded_pools = []
+        total_used = {"CRT": 0, "USDC": 0, "SOL": 0}
+        
+        # Process each pool funding request
+        for pool_request in pool_requests:
+            pool_type = pool_request.get("pool_type")  # "CRT/USDC", "CRT/SOL", etc.
+            amount_usd = float(pool_request.get("amount_usd", 0))
+            
+            print(f"Processing pool: {pool_type} for ${amount_usd}")
+            
+            if pool_type == "CRT/USDC" or pool_type == "USDC/CRT":
+                # Calculate amounts needed (50/50 split)
+                usdc_needed = amount_usd / 2
+                crt_needed = amount_usd / 2 / 0.01  # Assuming $0.01 per CRT
+                
+                # Check if user has enough
+                if (available_balances["CRT"] - total_used["CRT"]) >= crt_needed and \
+                   (available_balances["USDC"] - total_used["USDC"]) >= usdc_needed:
+                    
+                    # Use real Orca manager to create pool
+                    from services.real_orca_service import real_orca_service
+                    
+                    pool_result = await real_orca_service.create_real_crt_usdc_pool(
+                        crt_amount=crt_needed,
+                        usdc_amount=usdc_needed,
+                        user_wallet=wallet_address
+                    )
+                    
+                    if pool_result.get("success"):
+                        total_used["CRT"] += crt_needed
+                        total_used["USDC"] += usdc_needed
+                        
+                        funded_pools.append({
+                            "pool_type": pool_type,
+                            "crt_amount": crt_needed,
+                            "usdc_amount": usdc_needed,
+                            "pool_address": pool_result.get("pool_address"),
+                            "transaction_hash": pool_result.get("transaction_hash"),
+                            "real_transaction": True
+                        })
+                    else:
+                        return {
+                            "success": False,
+                            "error": f"Failed to create {pool_type} pool: {pool_result.get('error')}",
+                            "pool_type": pool_type
+                        }
+                else:
+                    return {
+                        "success": False,
+                        "error": f"Insufficient balance for {pool_type} pool",
+                        "needed": {"CRT": crt_needed, "USDC": usdc_needed},
+                        "available": {"CRT": available_balances["CRT"] - total_used["CRT"], 
+                                    "USDC": available_balances["USDC"] - total_used["USDC"]}
+                    }
+            
+            elif pool_type == "CRT/SOL" or pool_type == "SOL/CRT":
+                # Calculate amounts needed (50/50 split)
+                sol_needed = amount_usd / 2 / 240  # Assuming $240 per SOL
+                crt_needed = amount_usd / 2 / 0.01  # Assuming $0.01 per CRT
+                
+                # Check if user has enough
+                if (available_balances["CRT"] - total_used["CRT"]) >= crt_needed and \
+                   (available_balances["SOL"] - total_used["SOL"]) >= sol_needed:
+                    
+                    # Use real Orca manager to create pool
+                    pool_result = await real_orca_service.create_real_crt_sol_pool(
+                        crt_amount=crt_needed,
+                        sol_amount=sol_needed,
+                        user_wallet=wallet_address
+                    )
+                    
+                    if pool_result.get("success"):
+                        total_used["CRT"] += crt_needed
+                        total_used["SOL"] += sol_needed
+                        
+                        funded_pools.append({
+                            "pool_type": pool_type,
+                            "crt_amount": crt_needed,
+                            "sol_amount": sol_needed,
+                            "pool_address": pool_result.get("pool_address"),
+                            "transaction_hash": pool_result.get("transaction_hash"),
+                            "real_transaction": True
+                        })
+                    else:
+                        return {
+                            "success": False,
+                            "error": f"Failed to create {pool_type} pool: {pool_result.get('error')}",
+                            "pool_type": pool_type
+                        }
+                else:
+                    return {
+                        "success": False,
+                        "error": f"Insufficient balance for {pool_type} pool",
+                        "needed": {"CRT": crt_needed, "SOL": sol_needed},
+                        "available": {"CRT": available_balances["CRT"] - total_used["CRT"], 
+                                    "SOL": available_balances["SOL"] - total_used["SOL"]}
+                    }
+        
+        # Update user balances after successful pool funding
+        if funded_pools:
+            # Deduct used amounts from user's balances (prioritize gaming balance first)
+            updated_gaming_balance = user.get("gaming_balance", {}).copy()
+            
+            for currency, used_amount in total_used.items():
+                if used_amount > 0:
+                    current_balance = updated_gaming_balance.get(currency, 0)
+                    updated_gaming_balance[currency] = max(0, current_balance - used_amount)
+            
+            await db.users.update_one(
+                {"wallet_address": wallet_address},
+                {
+                    "$set": {
+                        "gaming_balance": updated_gaming_balance,
+                        "last_pool_funding": datetime.utcnow()
+                    },
+                    "$push": {
+                        "pool_funding_history": {
+                            "timestamp": datetime.utcnow(),
+                            "funded_pools": funded_pools,
+                            "total_used": total_used,
+                            "funding_source": "USER_EXISTING_BALANCE"
+                        }
+                    }
+                }
+            )
+        
+        return {
+            "success": True,
+            "message": f"Successfully funded {len(funded_pools)} pools using your existing balances",
+            "funded_pools": funded_pools,
+            "total_used": total_used,
+            "remaining_balances": {
+                "CRT": available_balances["CRT"] - total_used["CRT"],
+                "USDC": available_balances["USDC"] - total_used["USDC"],
+                "SOL": available_balances["SOL"] - total_used["SOL"]
+            },
+            "funding_source": "USER_EXISTING_BALANCE",
+            "real_transactions": True,
+            "note": "✅ Pools funded with YOUR real cryptocurrency balances"
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Pool funding failed: {str(e)}")
+
 # URGENT: Fix user balance synchronization - Real blockchain integration
 @api_router.post("/wallet/sync-real-balances")
 async def sync_real_blockchain_balances(request: Dict[str, Any]):
