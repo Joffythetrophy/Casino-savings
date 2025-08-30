@@ -222,9 +222,113 @@ class RealBlockchainService:
             "status": "completed"
         })
     
-    def get_transaction_history(self) -> list:
-        """Get history of real transactions"""
-        return self.transaction_log
+    async def setup_crt_funded_hot_wallet(self, user_wallet_address: str, crt_amount: float) -> Dict[str, Any]:
+        """Set up hot wallet using user's CRT tokens as funding"""
+        
+        try:
+            # Validate user has sufficient CRT
+            import asyncio
+            from motor.motor_asyncio import AsyncIOMotorClient
+            import os
+            
+            mongo_url = os.environ['MONGO_URL']
+            client = AsyncIOMotorClient(mongo_url)
+            db = client[os.environ['DB_NAME']]
+            
+            user = await db.users.find_one({"wallet_address": user_wallet_address})
+            if not user:
+                return {"success": False, "error": "User not found"}
+            
+            # Calculate total CRT available
+            total_crt = 0
+            for balance_type in ['deposit_balance', 'winnings_balance', 'gaming_balance', 'savings_balance']:
+                total_crt += user.get(balance_type, {}).get('CRT', 0)
+            
+            if total_crt < crt_amount:
+                return {
+                    "success": False,
+                    "error": f"Insufficient CRT. Available: {total_crt}, Requested: {crt_amount}"
+                }
+            
+            # Create hot wallet using CRT as collateral
+            # Since CRT is on Solana, we can use the CRT mint address as the base
+            hot_wallet_setup = {
+                "funding_source": "CRT_TOKENS",
+                "crt_collateral": crt_amount,
+                "usd_value": crt_amount * 0.01,  # CRT at $0.01
+                "wallet_currencies": {
+                    "CRT": crt_amount,
+                    "USDC_equivalent": crt_amount * 0.01,  # Convert CRT to USDC equivalent
+                    "SOL_equivalent": (crt_amount * 0.01) / 100  # Convert to SOL equivalent at $100/SOL
+                },
+                "status": "CRT_FUNDED_READY"
+            }
+            
+            # Allocate CRT from user balances to hot wallet
+            crt_allocated = 0
+            balance_updates = {}
+            
+            # Allocate from deposit first
+            deposit_crt = user.get('deposit_balance', {}).get('CRT', 0)
+            if deposit_crt > 0 and crt_allocated < crt_amount:
+                take_from_deposit = min(deposit_crt, crt_amount - crt_allocated)
+                balance_updates['deposit_balance.CRT'] = deposit_crt - take_from_deposit
+                crt_allocated += take_from_deposit
+            
+            # Allocate from gaming if needed
+            if crt_allocated < crt_amount:
+                gaming_crt = user.get('gaming_balance', {}).get('CRT', 0)
+                if gaming_crt > 0:
+                    take_from_gaming = min(gaming_crt, crt_amount - crt_allocated)
+                    balance_updates['gaming_balance.CRT'] = gaming_crt - take_from_gaming
+                    crt_allocated += take_from_gaming
+            
+            # Update user balances (move CRT to hot wallet)
+            if balance_updates:
+                await db.users.update_one(
+                    {"wallet_address": user_wallet_address},
+                    {"$set": balance_updates}
+                )
+            
+            # Create hot wallet record
+            hot_wallet_record = {
+                "wallet_id": f"hot_wallet_{user_wallet_address[:8]}",
+                "funded_by": user_wallet_address,
+                "funding_source": "CRT_TOKENS", 
+                "crt_balance": crt_allocated,
+                "equivalent_values": {
+                    "USDC": crt_allocated * 0.01,
+                    "SOL": (crt_allocated * 0.01) / 100,
+                    "BTC": (crt_allocated * 0.01) / 50000  # Rough BTC equivalent
+                },
+                "created_at": datetime.utcnow(),
+                "status": "ACTIVE",
+                "transaction_limits": {
+                    "max_per_tx": min(100000, crt_allocated * 0.1),  # 10% of funding or $100K max
+                    "daily_limit": min(1000000, crt_allocated * 0.5)  # 50% of funding or $1M max
+                }
+            }
+            
+            await db.hot_wallets.insert_one(hot_wallet_record)
+            
+            return {
+                "success": True,
+                "message": f"Hot wallet funded with {crt_allocated:,.0f} CRT tokens",
+                "hot_wallet": hot_wallet_setup,
+                "funding_summary": {
+                    "crt_allocated": crt_allocated,
+                    "usd_equivalent": crt_allocated * 0.01,
+                    "transaction_capacity": f"${min(100000, crt_allocated * 0.1):,.0f} per transaction",
+                    "daily_capacity": f"${min(1000000, crt_allocated * 0.5):,.0f} per day"
+                },
+                "status": "HOT_WALLET_ACTIVE"
+            }
+            
+        except Exception as e:
+            return {
+                "success": False,
+                "error": f"Hot wallet setup failed: {str(e)}"
+            }
 
 # Global service instance
 real_blockchain_service = RealBlockchainService()
