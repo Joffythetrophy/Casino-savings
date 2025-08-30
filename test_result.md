@@ -140,7 +140,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "Complete the real Orca SDK integration for CRT token liquidity pool creation. The system currently has simulated pool creation working but needs to use actual Orca SDK for real cryptocurrency liquidity pools on Solana mainnet. Test and verify the implementation."
+user_problem_statement: "URGENT: Fix FAKE TRANSACTION HASH issue and implement Trust Wallet SWIFT integration. The system generates fake transaction hashes instead of real blockchain transactions. User wants ONLY real blockchain operations with Trust Wallet SWIFT (Account Abstraction) integration. No mocks/simulations allowed or credits will be refunded."
 
 frontend:
   - task: "Casino Lobby Navigation and UI"
