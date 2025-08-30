@@ -5108,6 +5108,254 @@ async def test_blockchain_connectivity():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+# DEX LIQUIDITY AND TOKEN LISTING ENDPOINTS
+# =============================================================================
+
+class OrcaPoolRequest(BaseModel):
+    pool_pair: str = Field("CRT/SOL", description="Trading pair for the pool")
+    wallet_address: str = Field(..., description="User's wallet address")
+
+class JupiterListingRequest(BaseModel):
+    wallet_address: str = Field(..., description="User's wallet address")
+    
+@api_router.post("/dex/create-orca-pool")
+async def create_crt_orca_pool(
+    request: OrcaPoolRequest,
+    wallet_info: Dict = Depends(get_authenticated_wallet)
+):
+    """Create CRT token liquidity pool on Orca DEX"""
+    try:
+        # Verify user authentication
+        if request.wallet_address != wallet_info["wallet_address"]:
+            raise HTTPException(status_code=403, detail="Unauthorized")
+        
+        # Admin check for pool creation
+        user = await db.users.find_one({"wallet_address": request.wallet_address})
+        if not user or user.get("username") != "cryptoking":
+            raise HTTPException(status_code=403, detail="Pool creation requires admin access")
+        
+        # Create Orca pool
+        pool_result = await dex_liquidity_manager.create_orca_pool(request.pool_pair)
+        
+        if pool_result.get("success"):
+            # Record pool creation in database
+            pool_record = {
+                "pool_id": str(uuid.uuid4()),
+                "pool_pair": request.pool_pair,
+                "dex": "Orca",
+                "creator_wallet": request.wallet_address,
+                "pool_address": pool_result.get("pool", {}).get("pool_address"),
+                "transaction_hash": pool_result.get("transaction_hash"),
+                "status": "active",
+                "created_at": datetime.utcnow(),
+                "pool_data": pool_result.get("pool", {})
+            }
+            
+            await db.liquidity_pools.insert_one(pool_record)
+            
+            return {
+                "success": True,
+                "message": f"🌊 Orca pool created successfully for {request.pool_pair}!",
+                "pool": pool_result.get("pool"),
+                "pool_url": pool_result.get("pool_url"),
+                "transaction_hash": pool_result.get("transaction_hash"),
+                "next_steps": [
+                    "Monitor pool liquidity and trading activity",
+                    "Submit token to Jupiter aggregator",
+                    "Set up market making strategy if needed"
+                ]
+            }
+        else:
+            return {
+                "success": False,
+                "message": f"Pool creation failed: {pool_result.get('error')}",
+                "error": pool_result.get("error")
+            }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Orca pool creation failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Pool creation failed: {str(e)}")
+
+@api_router.post("/dex/submit-jupiter-listing")
+async def submit_crt_jupiter_listing(
+    request: JupiterListingRequest,
+    wallet_info: Dict = Depends(get_authenticated_wallet)
+):
+    """Submit CRT token to Jupiter aggregator for listing"""
+    try:
+        # Verify user authentication
+        if request.wallet_address != wallet_info["wallet_address"]:
+            raise HTTPException(status_code=403, detail="Unauthorized")
+        
+        # Admin check for Jupiter submission
+        user = await db.users.find_one({"wallet_address": request.wallet_address})
+        if not user or user.get("username") != "cryptoking":
+            raise HTTPException(status_code=403, detail="Jupiter submission requires admin access")
+        
+        # Submit to Jupiter
+        jupiter_result = await dex_liquidity_manager.submit_jupiter_listing()
+        
+        if jupiter_result.get("success"):
+            # Record Jupiter submission
+            submission_record = {
+                "submission_id": jupiter_result.get("submission", {}).get("submission_id"),
+                "submitter_wallet": request.wallet_address,
+                "platform": "Jupiter",
+                "token_mint": dex_liquidity_manager.crt_token_mint,
+                "status": "pending_review",
+                "submission_data": jupiter_result.get("submission"),
+                "created_at": datetime.utcnow()
+            }
+            
+            await db.dex_submissions.insert_one(submission_record)
+            
+            return {
+                "success": True,
+                "message": "🪐 CRT token submitted to Jupiter aggregator successfully!",
+                "submission": jupiter_result.get("submission"),
+                "pr_url": jupiter_result.get("submission", {}).get("pr_url"),
+                "next_steps": jupiter_result.get("next_steps", []),
+                "estimated_review_time": "2-5 business days"
+            }
+        else:
+            return {
+                "success": False,
+                "message": f"Jupiter submission failed: {jupiter_result.get('error')}",
+                "error": jupiter_result.get("error")
+            }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Jupiter submission failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Jupiter submission failed: {str(e)}")
+
+@api_router.get("/dex/crt-price")
+async def get_crt_token_price():
+    """Get current CRT token price data from DEX sources"""
+    try:
+        price_result = await dex_liquidity_manager.get_crt_price_data()
+        
+        if price_result.get("success"):
+            return {
+                "success": True,
+                "price_data": price_result.get("price_data"),
+                "timestamp": datetime.utcnow().isoformat()
+            }
+        else:
+            return {
+                "success": False,
+                "message": "Failed to fetch CRT price data",
+                "error": price_result.get("error")
+            }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.get("/dex/listing-status")
+async def get_dex_listing_status():
+    """Get current DEX listing status for CRT token"""
+    try:
+        status_result = await dex_liquidity_manager.get_dex_listing_status()
+        
+        if status_result.get("success"):
+            return {
+                "success": True,
+                "listing_status": status_result.get("listing_status"),
+                "summary": status_result.get("summary"),
+                "token": status_result.get("token"),
+                "last_updated": status_result.get("last_updated")
+            }
+        else:
+            return {
+                "success": False,
+                "error": status_result.get("error")
+            }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.post("/dex/create-market-maker")
+async def create_market_maker_strategy(
+    request: Dict[str, str],
+    wallet_info: Dict = Depends(get_authenticated_wallet)
+):
+    """Create automated market making strategy for CRT token"""
+    try:
+        # Admin check for market maker setup
+        user = await db.users.find_one({"wallet_address": wallet_info["wallet_address"]})
+        if not user or user.get("username") != "cryptoking":
+            raise HTTPException(status_code=403, detail="Market maker setup requires admin access")
+        
+        pool_pair = request.get("pool_pair", "CRT/SOL")
+        
+        mm_result = await dex_liquidity_manager.create_market_maker_strategy(pool_pair)
+        
+        if mm_result.get("success"):
+            # Record market maker strategy
+            mm_record = {
+                "strategy_id": str(uuid.uuid4()),
+                "pool_pair": pool_pair,
+                "creator_wallet": wallet_info["wallet_address"],
+                "strategy_config": mm_result.get("strategy"),
+                "status": "configured",
+                "created_at": datetime.utcnow()
+            }
+            
+            await db.market_maker_strategies.insert_one(mm_record)
+            
+            return {
+                "success": True,
+                "message": f"🤖 Market maker strategy created for {pool_pair}",
+                "strategy": mm_result.get("strategy"),
+                "activation_required": mm_result.get("activation_required"),
+                "note": mm_result.get("note")
+            }
+        else:
+            return {
+                "success": False,
+                "error": mm_result.get("error")
+            }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.get("/dex/pools")
+async def get_crt_liquidity_pools():
+    """Get all CRT token liquidity pools across DEXs"""
+    try:
+        # Get pools from database
+        pools_cursor = db.liquidity_pools.find({"status": "active"})
+        pools = await pools_cursor.to_list(length=100)
+        
+        # Format pools for response
+        formatted_pools = []
+        for pool in pools:
+            formatted_pools.append({
+                "pool_id": pool.get("pool_id"),
+                "pool_pair": pool.get("pool_pair"),
+                "dex": pool.get("dex"),
+                "pool_address": pool.get("pool_address"),
+                "transaction_hash": pool.get("transaction_hash"),
+                "created_at": pool.get("created_at"),
+                "status": pool.get("status")
+            })
+        
+        return {
+            "success": True,
+            "pools": formatted_pools,
+            "total_pools": len(formatted_pools),
+            "supported_dexs": dex_liquidity_manager.supported_dexs,
+            "timestamp": datetime.utcnow().isoformat()
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 # Legacy endpoints
 @api_router.post("/status", response_model=StatusCheck)
 async def create_status_check(input: StatusCheckCreate):
