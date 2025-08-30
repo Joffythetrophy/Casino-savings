@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Pool Funding System Testing - User Balance Integration
-Tests the new /api/pools/fund-with-user-balance endpoint using cryptoking's $230K balance
+Pool Funding System Testing - FIXED Balance Deduction Bug Verification
+Tests the FIXED pool funding system with the balance deduction bug resolved.
 """
 
 import asyncio
