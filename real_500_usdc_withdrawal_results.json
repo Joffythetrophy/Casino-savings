@@ -5,7 +5,7 @@
     "external_address": "0xaA94Fe949f6734e228c13C9Fc25D1eBCd994bffD",
     "currency": "USDC",
     "timestamp": "2025-08-26T03:36:32.614675",
-    "backend_url": "https://tiger-dex-casino.preview.emergentagent.com/api"
+    "backend_url": "https://crypto-treasury-app.preview.emergentagent.com/api"
   },
   "test_results": [
     {

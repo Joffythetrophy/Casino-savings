@@ -14,7 +14,7 @@ from datetime import datetime
 from typing import Dict, Any, Optional
 
 # Get backend URL from frontend env
-BACKEND_URL = "https://tiger-dex-casino.preview.emergentagent.com/api"
+BACKEND_URL = "https://crypto-treasury-app.preview.emergentagent.com/api"
 
 # Test credentials and parameters
 TEST_CREDENTIALS = {

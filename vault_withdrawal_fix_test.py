@@ -8,7 +8,7 @@ import aiohttp
 import json
 from datetime import datetime
 
-BACKEND_URL = "https://tiger-dex-casino.preview.emergentagent.com/api"
+BACKEND_URL = "https://crypto-treasury-app.preview.emergentagent.com/api"
 
 async def test_vault_withdrawal_fixed():
     """Test vault withdrawal with correct parameter names"""

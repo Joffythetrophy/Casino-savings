@@ -10,7 +10,7 @@ import json
 from datetime import datetime
 
 # Backend URL
-BACKEND_URL = "https://tiger-dex-casino.preview.emergentagent.com/api"
+BACKEND_URL = "https://crypto-treasury-app.preview.emergentagent.com/api"
 
 # Invoice details from review request
 INVOICE_DETAILS = {

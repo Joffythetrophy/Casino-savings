@@ -8,7 +8,7 @@ import aiohttp
 import json
 from datetime import datetime
 
-BACKEND_URL = "https://tiger-dex-casino.preview.emergentagent.com/api"
+BACKEND_URL = "https://crypto-treasury-app.preview.emergentagent.com/api"
 USER_WALLET = "DwK4nUM8TKWAxEBKTG6mWA6PBRDHFPA3beLB18pwCekq"
 
 async def verify_final_state():

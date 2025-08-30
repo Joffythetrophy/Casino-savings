@@ -12,7 +12,7 @@ import os
 from datetime import datetime
 
 # Backend URL from environment
-BACKEND_URL = "https://tiger-dex-casino.preview.emergentagent.com/api"
+BACKEND_URL = "https://crypto-treasury-app.preview.emergentagent.com/api"
 
 # Test user credentials (admin access required for DEX operations)
 TEST_USER = {
