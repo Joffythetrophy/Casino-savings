@@ -134,6 +134,7 @@ function AppContent() {
             <Route path="/dashboard" element={<PremiumDashboard onNavigate={(section) => window.location.href = `/${section}`} />} />
             <Route path="/treasury" element={<SmartContractTreasuryDashboard user={user} authToken={user?.auth_token || localStorage.getItem('auth_token')} />} />
             <Route path="/treasury/advanced" element={<MultiCurrencyTreasuryManager user={user} authToken={user?.auth_token || localStorage.getItem('auth_token')} />} />
+            <Route path="/dex" element={<CRTTokenDEXManager user={user} authToken={user?.auth_token || localStorage.getItem('auth_token')} />} />
             <Route path="/admin" element={<AdminControlPanel />} />
             <Route path="/history" element={<ConversionHistoryTracker />} />
           </Routes>
