@@ -1352,15 +1352,13 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Enhanced Casino System with Real Orca Pool Funding - COMPLETED"
-    - "CRT Token DEX Listing System - Comprehensive Testing Completed"
-    - "CRT/SOL Orca Pool Creation"
-    - "CRT/USDC Orca Pool Creation"
-    - "Jupiter Aggregator Submission"
-    - "CRT Price Discovery System"
-    - "DEX Listing Status Verification"
-    - "Market Maker Strategy Creation"
-    - "CRT Liquidity Pools Management"
+    - "Trust Wallet SWIFT Account Abstraction Integration - NOT IMPLEMENTED"
+    - "Complete SPL token implementation for USDC and CRT real transfers"
+    - "Test real withdrawals and Orca pool operations"
+  stuck_tasks:
+    - "Trust Wallet SWIFT Integration - Missing /api/swift-wallet endpoints"
+  test_all: false
+  test_priority: "high_first"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
