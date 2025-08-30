@@ -55,7 +55,8 @@
 ##     - "Update real_blockchain_service.py to eliminate all fake hashes"
 ##     - "Test real withdrawals and Orca pool operations"
 ##   stuck_tasks:
-##     - "Task name with persistent issues"
+##     - "FAKE TRANSACTION HASH GENERATION - System producing fake hashes instead of real blockchain transactions"
+##     - "CRT Balance Synchronization - User has 21M CRT on blockchain but only 3K accessible in database"
 ##   test_all: false
 ##   test_priority: "high_first"  # or "sequential" or "stuck_first"
 ##
