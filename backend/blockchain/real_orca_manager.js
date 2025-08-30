@@ -4,9 +4,9 @@
  */
 
 const { Connection, PublicKey, Keypair, Transaction, SystemProgram } = require('@solana/web3.js');
-const { getOrca, OrcaFarmConfig, OrcaPoolConfig } = require('@orca-so/sdk');
-const { Orca, Network } = require('@orca-so/sdk');
-const { getAssociatedTokenAddress, createAssociatedTokenAccountInstruction, createTransferInstruction, TOKEN_PROGRAM_ID } = require('@solana/spl-token');
+const { getOrca, Network } = require('@orca-so/sdk');
+const { getAssociatedTokenAddress, createAssociatedTokenAccountInstruction, TOKEN_PROGRAM_ID } = require('@solana/spl-token');
+const { WhirlpoolContext, buildWhirlpoolClient, ORCA_WHIRLPOOL_PROGRAM_ID } = require('@orca-so/whirlpools-sdk');
 const Decimal = require('decimal.js');
 
 class RealOrcaManager {
