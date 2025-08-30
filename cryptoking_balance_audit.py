@@ -482,7 +482,7 @@ class CryptokingBalanceAuditor:
         if tx_tests:
             tx_result = tx_tests[0]
             if tx_result["success"]:
-                data = tx_result.get("data", {})
+                data = tx_result.get("data", {}) or {}
                 print(f"   ✅ Transaction history found:")
                 print(f"      Transactions: {data.get('total_transactions', 0)}")
                 print(f"      Game Bets: {data.get('total_game_bets', 0)}")
@@ -496,7 +496,7 @@ class CryptokingBalanceAuditor:
         crt_tests = [r for r in self.test_results if "crt balance source" in r["test"].lower()]
         if crt_tests:
             crt_result = crt_tests[0]
-            data = crt_result.get("data", {})
+            data = crt_result.get("data", {}) or {}
             if crt_result["success"]:
                 print(f"   ✅ CRT balance is from real blockchain (Solana RPC)")
             else:
@@ -508,7 +508,7 @@ class CryptokingBalanceAuditor:
         fake_tests = [r for r in self.test_results if "fake transaction" in r["test"].lower()]
         if fake_tests:
             fake_result = fake_tests[0]
-            data = fake_result.get("data", {})
+            data = fake_result.get("data", {}) or {}
             if fake_result["success"]:
                 print(f"   ✅ No fake transaction hashes found - system using real blockchain")
             else:
