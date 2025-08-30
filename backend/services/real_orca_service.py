@@ -100,7 +100,7 @@ class RealOrcaService:
             # Use real Orca manager to create actual pool
             command = [
                 'node', '-e', f'''
-                const RealOrcaManager = require('../blockchain/real_orca_manager.js');
+                const RealOrcaManager = require('/app/backend/blockchain/real_orca_manager.js');
                 const manager = new RealOrcaManager();
                 
                 manager.createCRTSOLPool({{
