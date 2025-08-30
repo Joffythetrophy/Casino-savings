@@ -1542,7 +1542,78 @@ async def setup_crt_hot_wallet(request: Dict[str, Any]):
             "error": f"CRT hot wallet setup failed: {str(e)}"
         }
 
-# HOT WALLET STATUS ENDPOINT
+@api_router.post("/blockchain/real-transfer")
+async def execute_real_blockchain_transfer(request: Dict[str, Any]):
+    """Execute REAL blockchain transfer - NO FAKE HASHES"""
+    try:
+        from_address = request.get("from_address")
+        to_address = request.get("to_address") 
+        amount = float(request.get("amount", 0))
+        currency = request.get("currency", "").upper()
+        
+        if not all([from_address, to_address, amount, currency]):
+            raise HTTPException(status_code=400, detail="Missing required parameters")
+        
+        # Use real solana manager for SOL, USDC, and CRT transfers
+        if currency in ['SOL', 'USDC', 'CRT']:
+            
+            if currency == 'SOL':
+                result = await real_solana_manager.send_real_sol(to_address, amount)
+            elif currency == 'USDC':
+                result = await real_solana_manager.send_real_usdc(to_address, amount)
+            elif currency == 'CRT':
+                result = await real_solana_manager.send_real_crt(to_address, amount)
+            
+            if result.get("success"):
+                # Record transaction in database
+                transaction = {
+                    "transaction_id": str(uuid.uuid4()),
+                    "from_address": from_address,
+                    "to_address": to_address,
+                    "amount": amount,
+                    "currency": currency,
+                    "blockchain_transaction_hash": result.get("transaction_hash"),
+                    "blockchain": "Solana",
+                    "type": "real_transfer",
+                    "status": "completed",
+                    "timestamp": datetime.utcnow(),
+                    "explorer_url": result.get("explorer_url"),
+                    "real_transaction": True,
+                    "note": "✅ GENUINE blockchain transaction - NOT simulated"
+                }
+                
+                await db.transactions.insert_one(transaction)
+                
+                return {
+                    "success": True,
+                    "message": f"REAL {currency} transfer completed successfully",
+                    "transaction_hash": result.get("transaction_hash"),
+                    "explorer_url": result.get("explorer_url"),
+                    "amount": amount,
+                    "currency": currency,
+                    "blockchain": "Solana",
+                    "transaction_id": transaction["transaction_id"],
+                    "real_transaction": True,
+                    "note": "✅ This is a REAL blockchain transaction, not a simulation"
+                }
+            else:
+                return {
+                    "success": False,
+                    "error": result.get("error", "Real blockchain transfer failed"),
+                    "currency": currency,
+                    "amount": amount
+                }
+        
+        else:
+            return {
+                "success": False,
+                "error": f"Currency {currency} not supported for real transfers yet",
+                "supported_currencies": ["SOL", "USDC", "CRT"]
+            }
+            
+    except Exception as e:
+        print(f"Error in real blockchain transfer: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 @app.get("/api/admin/hot-wallet-status")
 async def check_hot_wallet_status():
     """Check hot wallet configuration and funding status"""
