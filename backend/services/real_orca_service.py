@@ -30,7 +30,7 @@ class RealOrcaService:
             }
         }
     
-    async def create_real_crt_usdc_pool(self, crt_amount: float, usdc_amount: float, user_wallet: str) -> Dict[str, Any]:
+    async def create_real_crt_usdc_pool_from_user_balance(self, crt_amount: float, usdc_amount: float, user_wallet: str) -> Dict[str, Any]:
         """Create real CRT/USDC Orca pool using user's existing balances"""
         try:
             # Use real Orca manager to create actual pool
@@ -94,7 +94,7 @@ class RealOrcaService:
                 "error": f"CRT/USDC pool creation failed: {str(e)}"
             }
 
-    async def create_real_crt_sol_pool(self, crt_amount: float, sol_amount: float, user_wallet: str) -> Dict[str, Any]:
+    async def create_real_crt_sol_pool_from_user_balance(self, crt_amount: float, sol_amount: float, user_wallet: str) -> Dict[str, Any]:
         """Create real CRT/SOL Orca pool using user's existing balances"""
         try:
             # Use real Orca manager to create actual pool
