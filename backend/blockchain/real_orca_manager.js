@@ -77,18 +77,6 @@ class RealOrcaManager {
                 };
             }
 
-            // Get Orca pool configuration for CRT/SOL (or create new one)
-            let poolConfig;
-            try {
-                // Try to find existing Orca pool configuration
-                poolConfig = this.orca.getPool(OrcaPoolConfig.CRT_SOL);
-            } catch (error) {
-                console.log('🔧 CRT/SOL pool config not found, creating new pool...');
-                
-                // Create new pool configuration
-                poolConfig = await this.createNewPoolConfig('CRT', 'SOL');
-            }
-
             // Check treasury balances
             const treasuryAddress = this.treasuryKeypair.publicKey;
             const balanceCheck = await this.checkTreasuryBalances(treasuryAddress, initialCRTAmount, initialSOLAmount);
@@ -102,39 +90,29 @@ class RealOrcaManager {
                 };
             }
 
-            // Create the pool transaction
-            const poolTransaction = await this.buildPoolCreationTransaction(
-                poolConfig,
+            // Create pool using Whirlpool (Orca's concentrated liquidity protocol)
+            const poolResult = await this.createWhirlpool(
+                this.tokens.CRT,
+                this.tokens.SOL,
                 initialCRTAmount,
-                initialSOLAmount,
-                'CRT/SOL'
+                initialSOLAmount
             );
 
-            if (!poolTransaction.success) {
+            if (!poolResult.success) {
                 return {
                     success: false,
-                    error: poolTransaction.error
+                    error: poolResult.error
                 };
             }
-
-            // Sign and send the transaction
-            const signature = await this.connection.sendTransaction(
-                poolTransaction.transaction,
-                [this.treasuryKeypair],
-                { skipPreflight: false, preflightCommitment: 'confirmed' }
-            );
-
-            // Wait for confirmation
-            await this.connection.confirmTransaction(signature, 'confirmed');
 
             console.log('✅ CRT/SOL pool created successfully!');
             return {
                 success: true,
                 message: 'CRT/SOL pool created successfully on Orca',
-                pool_address: poolTransaction.poolAddress,
-                transaction_hash: signature,
-                explorer_url: `https://explorer.solana.com/tx/${signature}`,
-                pool_url: `https://www.orca.so/pools/${poolTransaction.poolAddress}`,
+                pool_address: poolResult.poolAddress,
+                transaction_hash: poolResult.transaction_hash,
+                explorer_url: `https://explorer.solana.com/tx/${poolResult.transaction_hash}`,
+                pool_url: `https://www.orca.so/pools/${poolResult.poolAddress}`,
                 initial_liquidity: {
                     crt_amount: initialCRTAmount,
                     sol_amount: initialSOLAmount
