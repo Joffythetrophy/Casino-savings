@@ -82,6 +82,8 @@ export const AuthProvider = ({ children }) => {
         setAuthToken(response.data.token);
         localStorage.setItem('casino_user', JSON.stringify(userData));
         localStorage.setItem('auth_token', response.data.token);
+        localStorage.setItem('casino_auth_token', response.data.token); // Backup key
+        console.log('Login successful - session saved', userData.username);
         return { success: true };
       } else {
         return { success: false, error: response.data.message };
