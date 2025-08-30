@@ -249,8 +249,10 @@ const LoginForm = ({ onClose }) => {
         };
 
         localStorage.setItem('casino_user', JSON.stringify(userData));
-        localStorage.setItem('auth_token', response.data.token);  // Store JWT token
+        localStorage.setItem('auth_token', response.data.token);
+        localStorage.setItem('casino_auth_token', response.data.token); // Backup key
         setUser(userData);
+        console.log('Username login successful - session saved', userData.username);
         return { success: true, username: response.data.username };
       } else {
         return { success: false, error: response.data.message || "Invalid credentials" };
