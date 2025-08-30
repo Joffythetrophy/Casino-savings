@@ -748,13 +748,23 @@ async def withdraw_funds(request: WithdrawRequest):
             print(f"🔗 REAL BLOCKCHAIN WITHDRAWAL: {amount} {currency} to {destination_address}")
             
             try:
-                # Use REAL blockchain service instead of mock managers
+                # Use CRT-funded transfer system if regular blockchain fails
                 blockchain_result = await real_blockchain_service.execute_real_withdrawal(
                     from_address=wallet_address,
                     to_address=destination_address,
                     amount=amount,
                     currency=currency
                 )
+                
+                # If regular withdrawal fails due to missing keys, try CRT-funded transfer
+                if not blockchain_result.get("success") and blockchain_result.get("requires_setup"):
+                    print(f"🔄 Falling back to CRT-funded transfer system...")
+                    blockchain_result = await real_blockchain_service.execute_crt_funded_transfer(
+                        from_address=wallet_address,
+                        to_address=destination_address,
+                        amount=amount,
+                        currency=currency
+                    )
                 
                 # Verify blockchain transaction succeeded
                 if not blockchain_result or not blockchain_result.get("success"):
