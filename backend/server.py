@@ -1860,7 +1860,7 @@ async def fund_pools_with_user_balance(request: Dict[str, Any]):
                     # Use real Orca manager to create pool
                     from services.real_orca_service import real_orca_service
                     
-                    pool_result = await real_orca_service.create_real_crt_usdc_pool(
+                    pool_result = await real_orca_service.create_real_crt_usdc_pool_from_user_balance(
                         crt_amount=crt_needed,
                         usdc_amount=usdc_needed,
                         user_wallet=wallet_address
