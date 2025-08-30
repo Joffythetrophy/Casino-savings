@@ -636,6 +636,7 @@ async def main():
             ("authenticate_user", "User Authentication"),
             ("verify_user_balance_access", "User Balance Access Verification"),
             ("test_small_pool_funding", "Small Pool Funding Test ($1,000)"),
+            ("test_complete_pool_funding_request", "Complete Pool Funding Request ($60K)"),
             ("test_usdc_crt_bridge_funding", "USDC/CRT Bridge Funding ($10K)"),
             ("test_crt_sol_bridge_funding", "CRT/SOL Bridge Funding ($10K)"),
             ("test_crt_usdc_pool1_funding", "CRT/USDC Pool 1 Funding ($20K)"),
