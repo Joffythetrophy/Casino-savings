@@ -22,8 +22,9 @@ from decimal import Decimal
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
-# Import blockchain managers
+# Import real blockchain managers
 from blockchain.solana_manager import SolanaManager, SPLTokenManager, CRTTokenManager, USDCTokenManager
+from blockchain.solana_real_manager import real_solana_manager
 from services.real_withdrawal_service import real_withdrawal_service
 from services.dex_liquidity_manager import dex_liquidity_manager
 from services.real_orca_service import real_orca_service
@@ -31,7 +32,7 @@ from blockchain.tron_manager import TronManager, TronTransactionManager
 from blockchain.doge_manager import DogeManager, DogeTransactionManager
 from auth.wallet_auth import WalletAuthManager, get_authenticated_wallet, ChallengeRequest, VerifyRequest
 
-# Import real blockchain service
+# Import real blockchain service - FIXED FAKE TRANSACTION ISSUE
 from services.real_blockchain_service import real_blockchain_service
 
 # Initialize CoinGecko client for real-time prices
