@@ -1332,6 +1332,43 @@ async def get_game_history(wallet_address: str, wallet_info: Dict = Depends(get_
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+# HOT WALLET STATUS ENDPOINT
+@app.get("/api/admin/hot-wallet-status")
+async def check_hot_wallet_status():
+    """Check hot wallet configuration and funding status"""
+    try:
+        validation = real_blockchain_service.config.validate_private_keys()
+        addresses = real_blockchain_service.config.get_wallet_addresses()
+        
+        return {
+            "success": True,
+            "hot_wallet_configured": validation['valid'],
+            "missing_keys": validation.get('missing_keys', []),
+            "wallet_addresses": addresses,
+            "transaction_limits": real_blockchain_service.config.max_transaction_amount,
+            "status": "READY FOR REAL TRANSACTIONS" if validation['valid'] else "REQUIRES PRIVATE KEY SETUP",
+            "instructions": {
+                "setup_required": not validation['valid'],
+                "next_steps": [
+                    "Add private keys to .env file",
+                    "Restart backend service", 
+                    "Fund the hot wallet addresses",
+                    "Test with small amounts first"
+                ] if not validation['valid'] else [
+                    "Hot wallet ready for transactions",
+                    "All private keys configured",
+                    "Can execute real blockchain transfers"
+                ]
+            }
+        }
+        
+    except Exception as e:
+        return {
+            "success": False,
+            "error": str(e),
+            "status": "ERROR"
+        }
+
 # EMERGENCY BALANCE RESTORE ENDPOINT
 @app.post("/api/admin/restore-balances")
 async def restore_user_balances(request: Dict[str, Any]):
