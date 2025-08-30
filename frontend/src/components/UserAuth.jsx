@@ -230,8 +230,8 @@ const LoginForm = ({ onClose }) => {
   const loginWithUsername = async (username, password) => {
     try {
       const backendUrl = process.env.REACT_APP_BACKEND_URL;
-      const response = await axios.post(`${backendUrl}/api/auth/login-username`, {
-        username: username,
+      const response = await axios.post(`${backendUrl}/api/auth/login`, {
+        identifier: username,  // Use identifier instead of username
         password: password
       });
 
@@ -240,18 +240,22 @@ const LoginForm = ({ onClose }) => {
           user_id: response.data.user_id,
           username: response.data.username,
           wallet_address: response.data.wallet_address,
-          created_at: response.data.created_at
+          auth_token: response.data.token
         };
 
         localStorage.setItem('casino_user', JSON.stringify(userData));
-        setUser(userData); // Fix: Update React authentication state
+        localStorage.setItem('auth_token', response.data.token);  // Store JWT token
+        setUser(userData);
         return { success: true, username: response.data.username };
       } else {
         return { success: false, error: response.data.message || "Invalid credentials" };
       }
     } catch (error) {
       console.error('Username login error:', error);
-      return { success: false, error: "Connection failed. Please try again." };
+      return { 
+        success: false, 
+        error: error.response?.data?.detail || "Connection failed. Please try again." 
+      };
     }
   };
 
