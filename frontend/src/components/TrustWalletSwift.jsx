@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
 import { Separator } from "./ui/separator";
-import { AuthContext } from '../hooks/AuthContext';
+import { useAuth } from './UserAuth';
 import axios from 'axios';
 
 // Trust Wallet SWIFT connector class
