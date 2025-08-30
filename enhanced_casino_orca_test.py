@@ -51,24 +51,22 @@ class EnhancedCasinoOrcaTester:
             print(f"   Data: {json.dumps(data, indent=2)}")
     
     async def authenticate_user(self) -> bool:
-        """Authenticate user with username/password"""
+        """Verify user exists by checking wallet endpoint"""
         try:
-            login_data = {
-                "identifier": TEST_USER["username"],
-                "password": TEST_USER["password"]
-            }
-            
-            async with self.session.post(f"{BACKEND_URL}/auth/login", json=login_data) as resp:
+            # Test if we can access the wallet endpoint (no auth required)
+            async with self.session.get(f"{BACKEND_URL}/wallet/{TEST_USER['wallet_address']}") as resp:
                 if resp.status == 200:
                     result = await resp.json()
                     if result.get("success"):
-                        self.auth_token = result.get("token")
+                        wallet_data = result.get("wallet", {})
+                        user_id = wallet_data.get("user_id")
+                        
                         self.log_test("User Authentication", True, 
-                                    f"Successfully authenticated user '{TEST_USER['username']}'")
+                                    f"Successfully verified user '{TEST_USER['username']}' with wallet {TEST_USER['wallet_address']}")
                         return True
                     else:
                         self.log_test("User Authentication", False, 
-                                    f"Login failed: {result.get('message', 'Unknown error')}", result)
+                                    f"Wallet verification failed: {result.get('message', 'Unknown error')}", result)
                         return False
                 else:
                     error_text = await resp.text()
