@@ -95,6 +95,19 @@ const Header = ({ isWalletConnected }) => {
             </Link>
             
             <Link 
+              to="/fund-pools" 
+              className={`flex items-center space-x-1 px-2 py-1 rounded-lg transition-all duration-300 text-xs whitespace-nowrap ${
+                isActive('/fund-pools') 
+                  ? 'bg-blue-500 text-white font-medium' 
+                  : 'text-blue-300 hover:text-blue-100 hover:bg-blue-800/30 border border-blue-400'
+              }`}
+              title="Fund Pools with Your $230K Balance"
+            >
+              <span className="hidden sm:block">🏊‍♂️ POOLS</span>
+              <span className="sm:hidden">🏊‍♂️</span>
+            </Link>
+            
+            <Link 
               to="/treasury" 
               className={`flex items-center space-x-1 px-2 py-1 rounded-lg transition-all duration-300 text-xs whitespace-nowrap ${
                 isActive('/treasury') 
