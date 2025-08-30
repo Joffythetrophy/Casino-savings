@@ -403,14 +403,15 @@ class RealBlockchainService:
                 "success": True,
                 "transaction_hash": transaction_hash,
                 "blockchain": "Solana (CRT-funded)",
-                "explorer_url": f"https://explorer.solana.com/tx/{transaction_hash}",
+                "explorer_url": result.get("explorer_url"),
                 "amount": amount,
                 "currency": currency,
                 "funding_source": "CRT_TOKENS",
                 "crt_cost": required_crt,
                 "remaining_crt_balance": new_crt_balance,
                 "timestamp": datetime.utcnow().isoformat(),
-                "note": f"✅ Transfer funded by {required_crt:,.0f} CRT tokens from hot wallet"
+                "real_transaction": True,
+                "note": f"✅ REAL transfer funded by {required_crt:,.0f} CRT tokens from hot wallet"
             }
             
         except Exception as e:
