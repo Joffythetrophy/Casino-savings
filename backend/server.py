@@ -748,55 +748,19 @@ async def withdraw_funds(request: WithdrawRequest):
             print(f"🔗 REAL BLOCKCHAIN WITHDRAWAL: {amount} {currency} to {destination_address}")
             
             try:
-                if currency == "DOGE":
-                    # Real DOGE blockchain transaction
-                    blockchain_result = await doge_manager.send_doge(
-                        from_address=wallet_address,
-                        to_address=destination_address,
-                        amount=amount
-                    )
-                elif currency == "TRX":
-                    # Real TRX blockchain transaction
-                    blockchain_result = await tron_tx_manager.send_trx(
-                        from_address=wallet_address,
-                        to_address=destination_address,
-                        amount=amount
-                    )
-                elif currency in ["CRT", "SOL"]:
-                    # Real Solana blockchain transaction
-                    if currency == "CRT":
-                        blockchain_result = await solana_manager.send_crt_token(
-                            from_address=wallet_address,
-                            to_address=destination_address,
-                            amount=amount
-                        )
-                    else:  # SOL
-                        blockchain_result = await solana_manager.send_tokens(
-                            from_address=wallet_address,
-                            to_address=destination_address,
-                            amount=amount,
-                            token_type=currency
-                        )
-                elif currency == "USDC":
-                    # Real USDC blockchain transaction (Solana SPL token)
-                    usdc_mint = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"  # USDC mint on Solana
-                    blockchain_result = await solana_manager.send_spl_token(
-                        from_address=wallet_address,
-                        to_address=destination_address,
-                        amount=amount,
-                        token_mint=usdc_mint
-                    )
-                else:
-                    return {
-                        "success": False,
-                        "message": f"Real blockchain withdrawal not implemented for {currency}"
-                    }
+                # Use REAL withdrawal service instead of mock managers
+                blockchain_result = await real_withdrawal_service.execute_real_withdrawal(
+                    from_address=wallet_address,
+                    to_address=destination_address,
+                    amount=amount,
+                    currency=currency
+                )
                 
                 # Verify blockchain transaction succeeded
                 if not blockchain_result or not blockchain_result.get("success"):
                     return {
                         "success": False,
-                        "message": f"Blockchain transaction failed: {blockchain_result.get('error', 'Unknown error')}",
+                        "message": f"Real blockchain transaction failed: {blockchain_result.get('error', 'Unknown error')}",
                         "blockchain_error": blockchain_result
                     }
                 
@@ -804,7 +768,7 @@ async def withdraw_funds(request: WithdrawRequest):
                 if not transaction_hash:
                     return {
                         "success": False,
-                        "message": "No transaction hash received from blockchain",
+                        "message": "No real transaction hash received from blockchain",
                         "blockchain_result": blockchain_result
                     }
                 
