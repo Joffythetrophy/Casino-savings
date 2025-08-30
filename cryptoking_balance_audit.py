@@ -149,7 +149,7 @@ class CryptokingBalanceAuditor:
     async def verify_transaction_history(self) -> Dict[str, Any]:
         """Verify user's transaction history in database"""
         try:
-            if not self.db:
+            if self.db is None:
                 self.log_test("Transaction History", False, "MongoDB connection not available")
                 return {}
             
