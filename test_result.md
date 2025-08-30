@@ -415,13 +415,16 @@ frontend:
     implemented: true
     working: false
     file: "/app/backend/blockchain/real_orca_manager.js"
-    stuck_count: 0
+    stuck_count: 1
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
         - working: "NA"
           agent: "main"
           comment: "Updated real_orca_manager.js to use proper Orca SDK architecture. Fixed imports, removed mock pool creation methods, implemented createWhirlpool method with proper Solana pool address generation, updated all methods to work with Whirlpool protocol. Dependencies already installed (@orca-so/sdk, @orca-so/whirlpools-sdk). Ready for backend testing to verify the integration works correctly."
+        - working: false
+          agent: "testing"
+          comment: "🌊 REAL ORCA SDK INTEGRATION TESTING COMPLETED - DEPENDENCY COMPATIBILITY ISSUES FOUND! ✅ COMPREHENSIVE TESTING RESULTS (9/11 tests passed, 81.8% success): 1) ✅ Admin Authentication: Successfully authenticated user 'cryptoking' with wallet DwK4nUM8TKWAxEBKTG6mWA6PBRDHFPA3beLB18pwCekq using JWT token system. 2) ✅ Treasury Balance Validation: Treasury balance checks are working correctly - system validates balances before pool creation attempts. 3) ❌ CRITICAL ISSUE - CRT/SOL Pool Creation: Pool creation fails due to Orca SDK dependency compatibility issue - 'Error: Account not found: AdaptiveFeeTier' in @coral-xyz/anchor integration with @orca-so/whirlpools-sdk. 4) ❌ CRITICAL ISSUE - CRT/USDC Pool Creation: Same dependency compatibility issue prevents CRT/USDC pool creation. 5) ✅ Security Controls: Unauthorized access prevention working correctly - non-admin users cannot create pools (403 Forbidden). 6) ✅ Error Handling: Invalid pool pairs correctly rejected with appropriate error messages. 7) ✅ DEX Endpoints: All 4 DEX management endpoints working perfectly (/api/dex/crt-price, /api/dex/listing-status, /api/dex/pools, /api/dex/submit-jupiter-listing). 8) ✅ Real Integration Detection: System shows indicators of real Orca integration vs simulation. 🎯 ROOT CAUSE: The @orca-so/whirlpools-sdk v0.15.0 has compatibility issues with @coral-xyz/anchor - missing 'AdaptiveFeeTier' account type in anchor types. This is a known issue with Solana SDK version mismatches. 🚨 URGENT ACTION REQUIRED: Need to resolve Orca SDK dependency compatibility or implement alternative pool creation method. The system architecture is correct but blocked by third-party dependency conflicts."
 
 backend:
   - task: "Smart Contract Treasury System for USDC Withdrawals"
