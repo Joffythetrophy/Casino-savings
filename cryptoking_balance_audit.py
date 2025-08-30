@@ -100,7 +100,7 @@ class CryptokingBalanceAuditor:
     async def verify_database_user_record(self) -> Dict[str, Any]:
         """Verify user exists in database and get complete record"""
         try:
-            if not self.db:
+            if self.db is None:
                 self.log_test("Database User Record", False, "MongoDB connection not available")
                 return {}
             
