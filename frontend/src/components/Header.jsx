@@ -26,114 +26,84 @@ const Header = ({ isWalletConnected }) => {
             </div>
           </Link>
 
-          {/* Navigation */}
-          <nav className="hidden lg:flex items-center space-x-6">
+          {/* Navigation - Always visible */}
+          <nav className="flex items-center space-x-2 overflow-x-auto">
             <Link 
               to="/" 
-              className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-all duration-300 ${
+              className={`flex items-center space-x-1 px-2 py-1 rounded-lg transition-all duration-300 text-xs whitespace-nowrap ${
                 isActive('/') || isActive('/dashboard')
                   ? 'bg-casino-green-500 text-white font-medium glow-green' 
                   : 'text-casino-green-200 hover:text-casino-green-400 hover:bg-casino-green-800/30'
               }`}
             >
-              <BarChart3 className="w-4 h-4" />
-              <span>Dashboard</span>
+              <BarChart3 className="w-3 h-3" />
+              <span className="hidden sm:block">Dashboard</span>
+              <span className="sm:hidden">📊</span>
             </Link>
             
             <Link 
               to="/games" 
-              className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-all duration-300 ${
+              className={`flex items-center space-x-1 px-2 py-1 rounded-lg transition-all duration-300 text-xs whitespace-nowrap ${
                 isActive('/games') 
                   ? 'bg-casino-green-500 text-white font-medium glow-green' 
                   : 'text-casino-green-200 hover:text-casino-green-400 hover:bg-casino-green-800/30'
               }`}
             >
-              <Gamepad2 className="w-4 h-4" />
-              <span>Casino</span>
-            </Link>
-            
-            <Link 
-              to="/savings" 
-              className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-all duration-300 ${
-                isActive('/savings') 
-                  ? 'bg-gold-500 text-black font-medium' 
-                  : 'text-gray-300 hover:text-gold-400 hover:bg-white/10'
-              }`}
-            >
-              <PiggyBank className="w-4 h-4" />
-              <span>Vault</span>
+              <Gamepad2 className="w-3 h-3" />
+              <span className="hidden sm:block">Casino</span>
+              <span className="sm:hidden">🎮</span>
             </Link>
             
             <Link 
               to="/wallet" 
-              className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-all duration-300 ${
+              className={`flex items-center space-x-1 px-2 py-1 rounded-lg transition-all duration-300 text-xs whitespace-nowrap ${
                 isActive('/wallet') 
                   ? 'bg-casino-green-500 text-white font-medium glow-green' 
                   : 'text-casino-green-200 hover:text-casino-green-400 hover:bg-casino-green-800/30'
               }`}
             >
-              <Wallet className="w-4 h-4" />
-              <span>Wallet</span>
+              <Wallet className="w-3 h-3" />
+              <span className="hidden sm:block">Wallet</span>
+              <span className="sm:hidden">💰</span>
             </Link>
             
             <Link 
               to="/treasury" 
-              className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-all duration-300 ${
+              className={`flex items-center space-x-1 px-2 py-1 rounded-lg transition-all duration-300 text-xs whitespace-nowrap ${
                 isActive('/treasury') 
                   ? 'bg-casino-green-500 text-white font-medium glow-green' 
                   : 'text-casino-green-200 hover:text-casino-green-400 hover:bg-casino-green-800/30'
               }`}
             >
-              <Shield className="w-4 h-4" />
-              <span>🐅 Treasury</span>
+              <Shield className="w-3 h-3" />
+              <span className="hidden sm:block">🐅 Treasury</span>
+              <span className="sm:hidden">🐅</span>
             </Link>
             
             <Link 
               to="/dex" 
-              className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-all duration-300 ${
+              className={`flex items-center space-x-1 px-2 py-1 rounded-lg transition-all duration-300 text-xs whitespace-nowrap ${
                 isActive('/dex') 
                   ? 'bg-casino-green-500 text-white font-medium glow-green' 
                   : 'text-casino-green-200 hover:text-casino-green-400 hover:bg-casino-green-800/30'
               }`}
             >
-              <TrendingUp className="w-4 h-4" />
-              <span>🌊 DEX</span>
+              <TrendingUp className="w-3 h-3" />
+              <span className="hidden sm:block">🌊 DEX</span>
+              <span className="sm:hidden">🌊</span>
             </Link>
             
             <Link 
-              to="/history" 
-              className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-all duration-300 ${
-                isActive('/history') 
-                  ? 'bg-gold-500 text-black font-medium' 
-                  : 'text-gray-300 hover:text-gold-400 hover:bg-white/10'
+              to="/savings" 
+              className={`flex items-center space-x-1 px-2 py-1 rounded-lg transition-all duration-300 text-xs whitespace-nowrap ${
+                isActive('/savings') 
+                  ? 'bg-casino-green-500 text-white font-medium glow-green' 
+                  : 'text-casino-green-200 hover:text-casino-green-400 hover:bg-casino-green-800/30'
               }`}
             >
-              <History className="w-4 h-4" />
-              <span>History</span>
-            </Link>
-            
-            <Link 
-              to="/trading" 
-              className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-all duration-300 ${
-                isActive('/trading') 
-                  ? 'bg-gold-500 text-black font-medium' 
-                  : 'text-gray-300 hover:text-gold-400 hover:bg-white/10'
-              }`}
-            >
-              <TrendingUp className="w-4 h-4" />
-              <span>Trading</span>
-            </Link>
-            
-            <Link 
-              to="/admin" 
-              className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-all duration-300 ${
-                isActive('/admin') 
-                  ? 'bg-red-500 text-white font-medium' 
-                  : 'text-gray-300 hover:text-red-400 hover:bg-white/10'
-              }`}
-            >
-              <Settings className="w-4 h-4" />
-              <span>Admin</span>
+              <PiggyBank className="w-3 h-3" />
+              <span className="hidden sm:block">Vault</span>
+              <span className="sm:hidden">🏦</span>
             </Link>
           </nav>
 
