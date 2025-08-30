@@ -64,7 +64,20 @@ const Header = ({ isWalletConnected }) => {
             >
               <Wallet className="w-3 h-3" />
               <span className="hidden sm:block">Wallet</span>
-              <span className="sm:hidden">💰</span>
+              <span className="sm:hidden">💳</span>
+            </Link>
+            
+            <Link 
+              to="/swift-wallet" 
+              className={`flex items-center space-x-1 px-2 py-1 rounded-lg transition-all duration-300 text-xs whitespace-nowrap ${
+                isActive('/swift-wallet') 
+                  ? 'bg-casino-green-500 text-white font-medium glow-green' 
+                  : 'text-casino-green-200 hover:text-casino-green-400 hover:bg-casino-green-800/30'
+              }`}
+            >
+              <Zap className="w-3 h-3" />
+              <span className="hidden sm:block">🐅 SWIFT</span>
+              <span className="sm:hidden">⚡</span>
             </Link>
             
             <Link 
