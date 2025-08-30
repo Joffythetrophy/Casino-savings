@@ -147,15 +147,6 @@ class RealOrcaManager {
                 };
             }
 
-            // Get or create pool configuration
-            let poolConfig;
-            try {
-                poolConfig = this.orca.getPool(OrcaPoolConfig.CRT_USDC);
-            } catch (error) {
-                console.log('🔧 CRT/USDC pool config not found, creating new pool...');
-                poolConfig = await this.createNewPoolConfig('CRT', 'USDC');
-            }
-
             // Check treasury balances
             const treasuryAddress = this.treasuryKeypair.publicKey;
             const balanceCheck = await this.checkTreasuryBalances(treasuryAddress, initialCRTAmount, initialUSDCAmount, true);
@@ -169,39 +160,29 @@ class RealOrcaManager {
                 };
             }
 
-            // Create the pool transaction
-            const poolTransaction = await this.buildPoolCreationTransaction(
-                poolConfig,
+            // Create pool using Whirlpool
+            const poolResult = await this.createWhirlpool(
+                this.tokens.CRT,
+                this.tokens.USDC,
                 initialCRTAmount,
-                initialUSDCAmount,
-                'CRT/USDC'
+                initialUSDCAmount
             );
 
-            if (!poolTransaction.success) {
+            if (!poolResult.success) {
                 return {
                     success: false,
-                    error: poolTransaction.error
+                    error: poolResult.error
                 };
             }
-
-            // Sign and send the transaction
-            const signature = await this.connection.sendTransaction(
-                poolTransaction.transaction,
-                [this.treasuryKeypair],
-                { skipPreflight: false, preflightCommitment: 'confirmed' }
-            );
-
-            // Wait for confirmation
-            await this.connection.confirmTransaction(signature, 'confirmed');
 
             console.log('✅ CRT/USDC pool created successfully!');
             return {
                 success: true,
                 message: 'CRT/USDC pool created successfully on Orca',
-                pool_address: poolTransaction.poolAddress,
-                transaction_hash: signature,
-                explorer_url: `https://explorer.solana.com/tx/${signature}`,
-                pool_url: `https://www.orca.so/pools/${poolTransaction.poolAddress}`,
+                pool_address: poolResult.poolAddress,
+                transaction_hash: poolResult.transaction_hash,
+                explorer_url: `https://explorer.solana.com/tx/${poolResult.transaction_hash}`,
+                pool_url: `https://www.orca.so/pools/${poolResult.poolAddress}`,
                 initial_liquidity: {
                     crt_amount: initialCRTAmount,
                     usdc_amount: initialUSDCAmount
