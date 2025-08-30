@@ -1332,6 +1332,37 @@ async def get_game_history(wallet_address: str, wallet_info: Dict = Depends(get_
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+# EMERGENCY BALANCE RESTORE ENDPOINT
+@app.post("/api/admin/restore-balances")
+async def restore_user_balances(request: Dict[str, Any]):
+    """Restore user balances after fake transaction issue"""
+    try:
+        wallet_address = request.get("wallet_address")
+        
+        if wallet_address != "DwK4nUM8TKWAxEBKTG6mWA6PBRDHFPA3beLB18pwCekq":
+            return {"success": False, "message": "Admin wallet only"}
+        
+        # Restore the balances that were deducted for fake transactions
+        await db.users.update_one(
+            {"wallet_address": wallet_address},
+            {"$inc": {
+                "winnings_balance.USDC": 50500,  # Restore $50K + $500 USDC
+                "deposit_balance.CRT": 50000     # Restore 50K CRT
+            }}
+        )
+        
+        return {
+            "success": True,
+            "message": "Balances restored due to fake transaction issue",
+            "restored": {
+                "USDC": 50500,
+                "CRT": 50000
+            }
+        }
+        
+    except Exception as e:
+        return {"success": False, "error": str(e)}
+
 # SPECIAL ADMIN FIX ENDPOINT - Add username/password to existing user
 @app.post("/api/admin/fix-user-auth")
 async def fix_user_auth(request: Dict[str, Any]):
