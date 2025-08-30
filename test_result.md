@@ -790,6 +790,18 @@ backend:
           agent: "testing"
           comment: "✅ MULTI-CURRENCY VAULT SUPPORT COMPLETE! All 4 required currencies (DOGE, TRX, CRT, SOL) supported with valid address generation. Address format validation confirmed: DOGE addresses start with 'D' (25-34 chars), TRX addresses start with 'T' (25+ chars), CRT/SOL addresses are proper Solana format (32+ chars base58). All currencies include blockchain verification URLs (dogechain.info, tronscan.org, explorer.solana.com) and proper blockchain network identification (Dogecoin, Tron, Solana)."
 
+  - task: "Pool Funding System with User Balance Integration"
+    implemented: true
+    working: false
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: false
+          agent: "testing"
+          comment: "🌊 POOL FUNDING SYSTEM TESTING COMPLETED - CRITICAL BALANCE DEDUCTION BUG IDENTIFIED! ✅ COMPREHENSIVE TESTING RESULTS (7/11 tests passed, 63.6% success): 1) ✅ User Authentication: Successfully authenticated user 'cryptoking' with wallet DwK4nUM8TKWAxEBKTG6mWA6PBRDHFPA3beLB18pwCekq - login system working perfectly. 2) ✅ User Balance Verification: User has massive portfolio - 21M CRT ($210K), $2.7M USDC, total value $6.6M USD - MORE than sufficient for requested $60K pool funding. 3) ✅ Pool Funding Endpoint Accessibility: /api/pools/fund-with-user-balance endpoint exists and is accessible. 4) ✅ Real Orca Integration: All 3 DEX endpoints show real Orca integration (solana, whirlpool, transaction_hash indicators detected). 5) ✅ Error Handling: Properly rejects excessive funding requests with insufficient balance errors. 🚨 CRITICAL BUG IDENTIFIED: 6) ❌ Balance Deduction Logic Error: Endpoint calculates 21M CRT available correctly but shows 0 CRT when attempting pool funding. ROOT CAUSE: Endpoint only deducts from gaming_balance (which has 0 CRT) but user's 21M CRT is stored in deposit_balance. The balance calculation logic (lines 1832-1835) works correctly, but balance deduction logic (lines 1940-1945) only uses gaming_balance. 7) ❌ All Pool Funding Tests Failed: USDC/CRT Bridge ($10K), CRT/SOL Bridge ($10K), CRT/USDC Pool 1 ($20K), CRT/SOL Pool 2 ($20K) all failed due to this bug. 🔧 URGENT FIX NEEDED: Update balance deduction logic in /api/pools/fund-with-user-balance to deduct from deposit_balance where user's CRT is actually stored. After fix, user can easily fund all requested pools with existing $6.6M portfolio. System architecture is sound - only needs this critical bug fix to be fully operational."
+
   - task: "Security Features Validation"
     implemented: true
     working: true
