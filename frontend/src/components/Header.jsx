@@ -81,6 +81,20 @@ const Header = ({ isWalletConnected }) => {
             </Link>
             
             <Link 
+              to="/sync-balances" 
+              className={`flex items-center space-x-1 px-2 py-1 rounded-lg transition-all duration-300 text-xs whitespace-nowrap ${
+                isActive('/sync-balances') 
+                  ? 'bg-red-500 text-white font-medium' 
+                  : 'text-red-300 hover:text-red-100 hover:bg-red-800/30 border border-red-400'
+              }`}
+              title="Fix Fake Balance Issue"
+            >
+              <RefreshCw className="w-3 h-3" />
+              <span className="hidden sm:block">🔄 SYNC</span>
+              <span className="sm:hidden">🔄</span>
+            </Link>
+            
+            <Link 
               to="/treasury" 
               className={`flex items-center space-x-1 px-2 py-1 rounded-lg transition-all duration-300 text-xs whitespace-nowrap ${
                 isActive('/treasury') 
