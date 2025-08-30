@@ -4,7 +4,7 @@ import aiohttp
 import json
 
 async def test_gaming_currencies():
-    BACKEND_URL = 'https://smart-savings-dapp.preview.emergentagent.com/api'
+    BACKEND_URL = 'https://tiger-dex-casino.preview.emergentagent.com/api'
     user_wallet = 'DwK4nUM8TKWAxEBKTG6mWA6PBRDHFPA3beLB18pwCekq'
     username = 'cryptoking'
     password = 'crt21million'

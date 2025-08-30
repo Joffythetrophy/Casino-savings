@@ -16,7 +16,7 @@ import sys
 
 class DOGETreasuryWithdrawalTester:
     def __init__(self):
-        self.base_url = "https://smart-savings-dapp.preview.emergentagent.com/api"
+        self.base_url = "https://tiger-dex-casino.preview.emergentagent.com/api"
         self.test_results = []
         self.session = None
         self.auth_token = None

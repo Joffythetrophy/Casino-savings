@@ -7,7 +7,7 @@ import asyncio
 import aiohttp
 import json
 
-BACKEND_URL = "https://smart-savings-dapp.preview.emergentagent.com/api"
+BACKEND_URL = "https://tiger-dex-casino.preview.emergentagent.com/api"
 
 async def test_manual_verification():
     user_wallet_address = "DwK4nUM8TKWAxEBKTG6mWA6PBRDHFPA3beLB18pwCekq"

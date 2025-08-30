@@ -11,7 +11,7 @@ import sys
 from datetime import datetime
 from typing import Dict, Any, Optional
 
-BACKEND_URL = "https://smart-savings-dapp.preview.emergentagent.com/api"
+BACKEND_URL = "https://tiger-dex-casino.preview.emergentagent.com/api"
 
 # Test credentials from review request
 TEST_CREDENTIALS = {
