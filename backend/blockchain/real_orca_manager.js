@@ -296,23 +296,26 @@ class RealOrcaManager {
             };
         }
     }
+
+    async findExistingPool(tokenA, tokenB) {
         try {
-            // Search for existing pools in Orca
-            const pools = await this.orca.getPools();
+            // Search for existing whirlpools with our token pair
+            console.log(`🔍 Searching for existing ${tokenA}/${tokenB} pools...`);
             
-            for (const pool of pools) {
-                const poolData = await pool.getTokens();
-                
-                // Check if this pool matches our token pair
-                if ((poolData.tokenA.mint.equals(this.tokens[tokenA]) && poolData.tokenB.mint.equals(this.tokens[tokenB])) ||
-                    (poolData.tokenA.mint.equals(this.tokens[tokenB]) && poolData.tokenB.mint.equals(this.tokens[tokenA]))) {
-                    
-                    return {
-                        address: pool.address,
-                        tokenA: poolData.tokenA,
-                        tokenB: poolData.tokenB
-                    };
-                }
+            // Use Whirlpool client to search for existing pools
+            const pools = await this.whirlpoolClient.getPools({
+                tokenMintA: this.tokens[tokenA],
+                tokenMintB: this.tokens[tokenB]
+            });
+            
+            if (pools && pools.length > 0) {
+                const pool = pools[0]; // Get first matching pool
+                console.log(`✅ Found existing pool: ${pool.address.toString()}`);
+                return {
+                    address: pool.address,
+                    tokenA: pool.tokenMintA,
+                    tokenB: pool.tokenMintB
+                };
             }
             
             return null;
@@ -320,6 +323,7 @@ class RealOrcaManager {
             console.error('❌ Error searching for existing pools:', error);
             return null;
         }
+    }
     }
 
     async createNewPoolConfig(tokenA, tokenB) {
