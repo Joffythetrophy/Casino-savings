@@ -1374,10 +1374,14 @@ metadata:
 
 test_plan:
   current_focus:
+    - "URGENT: Fix CRT balance source - sync with real Solana blockchain instead of database gaming balance"
+    - "URGENT: Eliminate fake transaction hash generation (crt_direct_tx patterns)"
+    - "URGENT: Resolve balance discrepancies between database and blockchain sources"
     - "Trust Wallet SWIFT Account Abstraction Integration - NOT IMPLEMENTED"
     - "Complete SPL token implementation for USDC and CRT real transfers"
-    - "Test real withdrawals and Orca pool operations"
   stuck_tasks:
+    - "CRT Balance Integrity - User's 21M CRT is database gaming balance, not real blockchain"
+    - "Fake Transaction Hash Generation - System still creates fake hashes for CRT operations"
     - "Trust Wallet SWIFT Integration - Missing /api/swift-wallet endpoints"
   test_all: false
   test_priority: "high_first"
