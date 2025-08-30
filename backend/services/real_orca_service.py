@@ -276,5 +276,137 @@ class RealOrcaService:
             logger.error(f"Orca manager call exception: {str(e)}")
             return {"success": False, "error": f"Call failed: {str(e)}"}
 
+    async def add_liquidity_from_losses(self, user_wallet: str, currency: str, amount: float, game_id: str):
+        """Add liquidity to Orca pools from casino game losses"""
+        try:
+            logger.info(f"Adding liquidity from losses: {amount} {currency} from {user_wallet}")
+            
+            # Determine which pool to add liquidity to based on currency
+            if currency == "CRT":
+                # Add to CRT/SOL pool (most liquid pair)
+                pool_pair = "CRT/SOL" 
+                # Convert CRT amount to appropriate liquidity ratio
+                crt_amount = amount
+                sol_amount = amount * 0.0001  # Rough CRT/SOL ratio
+                
+                command = ["node", "-e", f"""
+                    const RealOrcaManager = require('./blockchain/real_orca_manager.js');
+                    const manager = new RealOrcaManager();
+                    manager.addLiquidity('{pool_pair}', {crt_amount}, {sol_amount})
+                    .then(result => console.log(JSON.stringify(result)))
+                    .catch(err => console.log(JSON.stringify({{success: false, error: err.message}})));
+                """]
+            
+            elif currency == "DOGE":
+                # Convert DOGE to CRT first, then add to CRT/SOL pool
+                crt_equivalent = amount * 0.047  # DOGE to CRT rate
+                sol_amount = crt_equivalent * 0.0001
+                
+                command = ["node", "-e", f"""
+                    const RealOrcaManager = require('./blockchain/real_orca_manager.js');
+                    const manager = new RealOrcaManager();
+                    manager.addLiquidity('CRT/SOL', {crt_equivalent}, {sol_amount})
+                    .then(result => console.log(JSON.stringify(result)))
+                    .catch(err => console.log(JSON.stringify({{success: false, error: err.message}})));
+                """]
+            
+            elif currency == "USDC":
+                # Add to CRT/USDC pool
+                crt_amount = amount * 6.67  # USDC to CRT rate
+                
+                command = ["node", "-e", f"""
+                    const RealOrcaManager = require('./blockchain/real_orca_manager.js');
+                    const manager = new RealOrcaManager();
+                    manager.addLiquidity('CRT/USDC', {crt_amount}, {amount})
+                    .then(result => console.log(JSON.stringify(result)))
+                    .catch(err => console.log(JSON.stringify({{success: false, error: err.message}})));
+                """]
+            
+            else:
+                return {"success": False, "error": f"Unsupported currency for pool funding: {currency}"}
+
+            result = await self.call_orca_manager(command)
+            
+            if result.get("success"):
+                logger.info(f"Successfully added liquidity from losses: {result}")
+                return {
+                    "success": True,
+                    "pool_address": result.get("pool_address"),
+                    "transaction_hash": result.get("transaction_hash"),
+                    "amount_added": amount,
+                    "currency": currency,
+                    "game_id": game_id
+                }
+            else:
+                logger.error(f"Failed to add liquidity from losses: {result}")
+                return result
+                
+        except Exception as e:
+            logger.error(f"Exception in add_liquidity_from_losses: {str(e)}")
+            return {"success": False, "error": str(e)}
+
+    async def add_liquidity_to_pool(self, wallet_address: str, currency: str, amount: float, source: str):
+        """Add user liquidity to Orca pools"""
+        try:
+            logger.info(f"Adding user liquidity: {amount} {currency} from {wallet_address}")
+            
+            # Similar logic to add_liquidity_from_losses but for user contributions
+            if currency == "CRT":
+                pool_pair = "CRT/SOL"
+                crt_amount = amount
+                sol_amount = amount * 0.0001  # Rough CRT/SOL ratio
+            
+            elif currency == "DOGE":
+                pool_pair = "CRT/SOL"
+                crt_amount = amount * 0.047  # Convert DOGE to CRT
+                sol_amount = crt_amount * 0.0001
+            
+            elif currency == "USDC":
+                pool_pair = "CRT/USDC"
+                crt_amount = amount * 6.67  # Convert USDC to CRT
+                usdc_amount = amount
+                
+                command = ["node", "-e", f"""
+                    const RealOrcaManager = require('./blockchain/real_orca_manager.js');
+                    const manager = new RealOrcaManager();
+                    manager.addLiquidity('{pool_pair}', {crt_amount}, {usdc_amount})
+                    .then(result => console.log(JSON.stringify(result)))
+                    .catch(err => console.log(JSON.stringify({{success: false, error: err.message}})));
+                """]
+                
+                result = await self.call_orca_manager(command)
+                
+                return {
+                    "success": result.get("success", False),
+                    "pool_address": result.get("pool_address"),
+                    "transaction_hash": result.get("transaction_hash"),
+                    "error": result.get("error") if not result.get("success") else None
+                }
+            
+            else:
+                return {"success": False, "error": f"Unsupported currency: {currency}"}
+
+            # For CRT and DOGE (converted to CRT/SOL)
+            command = ["node", "-e", f"""
+                const RealOrcaManager = require('./blockchain/real_orca_manager.js');
+                const manager = new RealOrcaManager();
+                manager.addLiquidity('{pool_pair}', {crt_amount}, {sol_amount})
+                .then(result => console.log(JSON.stringify(result)))
+                .catch(err => console.log(JSON.stringify({{success: false, error: err.message}})));
+            """]
+            
+            result = await self.call_orca_manager(command)
+            
+            return {
+                "success": result.get("success", False),
+                "pool_address": result.get("pool_address"),
+                "transaction_hash": result.get("transaction_hash"),
+                "error": result.get("error") if not result.get("success") else None
+            }
+                
+        except Exception as e:
+            logger.error(f"Exception in add_liquidity_to_pool: {str(e)}")
+            return {"success": False, "error": str(e)}
+
 # Global service instance
 real_orca_service = RealOrcaService()
