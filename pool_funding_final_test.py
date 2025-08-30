@@ -308,6 +308,70 @@ class PoolFundingFinalTester:
             self.log_test("CRT/USDC Pool 1 Funding ($20K)", False, f"Exception: {str(e)}")
             return False
     
+    async def test_complete_pool_funding_request(self) -> bool:
+        """Test complete user request: Fund ALL pools ($60K total)"""
+        try:
+            headers = self.get_auth_headers()
+            
+            # Complete user request: All pools at once
+            pool_data = {
+                "wallet_address": TEST_USER["wallet_address"],
+                "pool_requests": [
+                    {
+                        "pool_type": "USDC/CRT",
+                        "amount_usd": 10000
+                    },
+                    {
+                        "pool_type": "CRT/SOL", 
+                        "amount_usd": 10000
+                    },
+                    {
+                        "pool_type": "CRT/USDC",
+                        "amount_usd": 20000
+                    },
+                    {
+                        "pool_type": "CRT/SOL",
+                        "amount_usd": 20000
+                    }
+                ]
+            }
+            
+            async with self.session.post(f"{BACKEND_URL}/pools/fund-with-user-balance", 
+                                       json=pool_data, headers=headers) as resp:
+                result = await resp.json()
+                
+                if resp.status == 200 and result.get("success"):
+                    funded_pools = result.get("funded_pools", [])
+                    total_funded = len(funded_pools)
+                    
+                    # Check for real transaction hashes
+                    real_transactions = sum(1 for pool in funded_pools 
+                                          if pool.get("transaction_hash") and 
+                                          len(pool.get("transaction_hash", "")) > 20 and
+                                          not pool.get("transaction_hash", "").startswith("fake"))
+                    
+                    if total_funded >= 4 and real_transactions >= 2:
+                        self.log_test("Complete Pool Funding Request ($60K)", True, 
+                                    f"Successfully funded {total_funded}/4 pools with {real_transactions} real transactions", result)
+                        return True
+                    else:
+                        self.log_test("Complete Pool Funding Request ($60K)", False, 
+                                    f"Partial success: {total_funded}/4 pools, {real_transactions} real transactions", result)
+                        return False
+                else:
+                    error_msg = result.get("error", result.get("message", "Unknown error"))
+                    if "insufficient" in error_msg.lower() and "balance" in error_msg.lower():
+                        self.log_test("Complete Pool Funding Request ($60K)", False, 
+                                    f"CRITICAL BUG: Balance deduction logic still broken - {error_msg}", result)
+                    else:
+                        self.log_test("Complete Pool Funding Request ($60K)", False, 
+                                    f"Complete pool funding failed: {error_msg}", result)
+                    return False
+                    
+        except Exception as e:
+            self.log_test("Complete Pool Funding Request ($60K)", False, f"Exception: {str(e)}")
+            return False
+
     async def test_crt_sol_pool2_funding(self) -> bool:
         """Test CRT/SOL Pool 2 funding ($20K)"""
         try:
