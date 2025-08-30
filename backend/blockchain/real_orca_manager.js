@@ -325,34 +325,28 @@ class RealOrcaManager {
         }
     }
 
-    async createNewPoolConfig(tokenA, tokenB) {
+    async getPoolInfo(poolAddress) {
         try {
-            console.log(`🔧 Creating new pool configuration for ${tokenA}/${tokenB}`);
+            console.log(`🔍 Getting pool info for ${poolAddress}`);
+            const pool = await this.whirlpoolClient.getPool(new PublicKey(poolAddress));
+            const poolData = await pool.getData();
             
-            // This is a simplified pool config creation
-            // In production, you'd need to interact with Orca's pool factory
-            const poolConfig = {
-                address: Keypair.generate().publicKey, // Temporary address
-                nonce: Math.floor(Math.random() * 255),
-                authority: this.treasuryKeypair.publicKey,
-                poolTokenMint: Keypair.generate().publicKey,
-                tokenAccountA: await getAssociatedTokenAddress(this.tokens[tokenA], this.treasuryKeypair.publicKey),
-                tokenAccountB: await getAssociatedTokenAddress(this.tokens[tokenB], this.treasuryKeypair.publicKey),
-                feeAccount: Keypair.generate().publicKey,
-                feeNumerator: 30,
-                feeDenominator: 10000,
-                ownerTradeFeeNumerator: 5,
-                ownerTradeFeeDenominator: 10000,
-                ownerWithdrawFeeNumerator: 0,
-                ownerWithdrawFeeDenominator: 10000,
-                hostFeeNumerator: 20,
-                hostFeeDenominator: 100
+            return {
+                success: true,
+                pool_data: {
+                    address: poolAddress,
+                    token_a: poolData.tokenMintA,
+                    token_b: poolData.tokenMintB,
+                    liquidity: poolData.liquidity.toString(),
+                    tick_current_index: poolData.tickCurrentIndex,
+                    fee_rate: poolData.feeRate
+                }
             };
-
-            return poolConfig;
         } catch (error) {
-            console.error('❌ Failed to create pool config:', error);
-            throw error;
+            return {
+                success: false,
+                error: error.message
+            };
         }
     }
 
