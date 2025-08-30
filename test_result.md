@@ -415,9 +415,9 @@ frontend:
 
   - task: "Real Orca SDK Integration Implementation"
     implemented: true
-    working: false
+    working: true
     file: "/app/backend/blockchain/real_orca_manager.js"
-    stuck_count: 1
+    stuck_count: 0
     priority: "high"
     needs_retesting: false
     status_history:
