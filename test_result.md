@@ -138,7 +138,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "Test and execute the CRT token DEX listing system. Create Orca liquidity pools and submit to Jupiter aggregator for the user's CRT token with comprehensive DEX integration testing including pool creation, price discovery, listing status verification, and market making capabilities."
+user_problem_statement: "Complete the real Orca SDK integration for CRT token liquidity pool creation. The system currently has simulated pool creation working but needs to use actual Orca SDK for real cryptocurrency liquidity pools on Solana mainnet. Test and verify the implementation."
 
 frontend:
   - task: "Casino Lobby Navigation and UI"
