@@ -1332,6 +1332,31 @@ async def get_game_history(wallet_address: str, wallet_info: Dict = Depends(get_
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+# CRT-FUNDED HOT WALLET SETUP
+@app.post("/api/admin/setup-crt-hot-wallet")
+async def setup_crt_hot_wallet(request: Dict[str, Any]):
+    """Set up hot wallet using user's CRT tokens as funding"""
+    try:
+        wallet_address = request.get("wallet_address")
+        crt_amount = float(request.get("crt_amount", 3000000))  # Default 3M CRT
+        
+        if wallet_address != "DwK4nUM8TKWAxEBKTG6mWA6PBRDHFPA3beLB18pwCekq":
+            return {"success": False, "message": "Admin wallet only"}
+        
+        # Set up CRT-funded hot wallet
+        result = await real_blockchain_service.setup_crt_funded_hot_wallet(
+            user_wallet_address=wallet_address,
+            crt_amount=crt_amount
+        )
+        
+        return result
+        
+    except Exception as e:
+        return {
+            "success": False,
+            "error": f"CRT hot wallet setup failed: {str(e)}"
+        }
+
 # HOT WALLET STATUS ENDPOINT
 @app.get("/api/admin/hot-wallet-status")
 async def check_hot_wallet_status():
