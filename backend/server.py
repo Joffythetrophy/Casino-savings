@@ -1903,7 +1903,7 @@ async def fund_pools_with_user_balance(request: Dict[str, Any]):
                    (available_balances["SOL"] - total_used["SOL"]) >= sol_needed:
                     
                     # Use real Orca manager to create pool
-                    pool_result = await real_orca_service.create_real_crt_sol_pool(
+                    pool_result = await real_orca_service.create_real_crt_sol_pool_from_user_balance(
                         crt_amount=crt_needed,
                         sol_amount=sol_needed,
                         user_wallet=wallet_address
