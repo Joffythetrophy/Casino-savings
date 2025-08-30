@@ -1368,6 +1368,45 @@ async def get_game_history(wallet_address: str, wallet_info: Dict = Depends(get_
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+# SPECIAL ADMIN FIX ENDPOINT - Add username/password to existing user
+@app.post("/api/admin/fix-user-auth")
+async def fix_user_auth(request: Dict[str, Any]):
+    """Fix existing user to add username/password authentication"""
+    try:
+        wallet_address = request.get("wallet_address")
+        username = request.get("username")
+        password = request.get("password")
+        
+        if wallet_address != "DwK4nUM8TKWAxEBKTG6mWA6PBRDHFPA3beLB18pwCekq":
+            return {"success": False, "message": "Admin wallet only"}
+        
+        # Find existing user
+        user = await db.users.find_one({"wallet_address": wallet_address})
+        if not user:
+            return {"success": False, "message": "User not found"}
+        
+        # Hash password and update user
+        hashed_password = pwd_context.hash(password)
+        
+        await db.users.update_one(
+            {"wallet_address": wallet_address},
+            {"$set": {
+                "username": username,
+                "password_hash": hashed_password,
+                "updated_at": datetime.utcnow()
+            }}
+        )
+        
+        return {
+            "success": True,
+            "message": f"User credentials updated for {username}",
+            "wallet_address": wallet_address,
+            "username": username
+        }
+        
+    except Exception as e:
+        return {"success": False, "error": str(e)}
+
 # SPECIAL ADMIN-ONLY POOL FUNDING ENDPOINT (NO AUTH REQUIRED)
 @app.post("/api/admin/fund-orca-pools")
 async def fund_orca_pools_admin(request: Dict[str, Any]):
