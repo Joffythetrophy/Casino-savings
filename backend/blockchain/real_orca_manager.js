@@ -495,41 +495,21 @@ class RealOrcaManager {
         }
     }
 
-    async getPoolInfo(poolAddress) {
-        try {
-            const pool = this.orca.getPool(new PublicKey(poolAddress));
-            const poolData = await pool.getData();
-            
-            return {
-                success: true,
-                pool_data: {
-                    address: poolAddress,
-                    token_a: poolData.tokenA,
-                    token_b: poolData.tokenB,
-                    liquidity: poolData.liquidity,
-                    fee: poolData.fee
-                }
-            };
-        } catch (error) {
-            return {
-                success: false,
-                error: error.message
-            };
-        }
-    }
-
     async addLiquidity(poolAddress, tokenAAmount, tokenBAmount) {
         try {
             console.log(`💧 Adding liquidity to pool ${poolAddress}`);
             
-            const pool = this.orca.getPool(new PublicKey(poolAddress));
+            const pool = await this.whirlpoolClient.getPool(new PublicKey(poolAddress));
             
-            // Build add liquidity transaction
-            const addLiquidityTx = await pool.getAddLiquidityTransaction(
-                this.treasuryKeypair.publicKey,
-                new Decimal(tokenAAmount),
-                new Decimal(tokenBAmount)
-            );
+            // Get current position or create new one for adding liquidity
+            const tickLowerIndex = -443636; // Full range
+            const tickUpperIndex = 443636;
+            
+            const addLiquidityTx = await pool.increaseLiquidity({
+                liquidityAmount: new Decimal(Math.min(tokenAAmount, tokenBAmount)),
+                tokenMaxA: new Decimal(tokenAAmount),
+                tokenMaxB: new Decimal(tokenBAmount)
+            });
 
             // Sign and send transaction
             const signature = await this.connection.sendTransaction(addLiquidityTx, [this.treasuryKeypair]);
@@ -548,17 +528,17 @@ class RealOrcaManager {
         }
     }
 
-    async removeLiquidity(poolAddress, lpTokenAmount) {
+    async removeLiquidity(poolAddress, liquidityAmount) {
         try {
             console.log(`💧 Removing liquidity from pool ${poolAddress}`);
             
-            const pool = this.orca.getPool(new PublicKey(poolAddress));
+            const pool = await this.whirlpoolClient.getPool(new PublicKey(poolAddress));
             
-            // Build remove liquidity transaction
-            const removeLiquidityTx = await pool.getRemoveLiquidityTransaction(
-                this.treasuryKeypair.publicKey,
-                new Decimal(lpTokenAmount)
-            );
+            const removeLiquidityTx = await pool.decreaseLiquidity({
+                liquidityAmount: new Decimal(liquidityAmount),
+                tokenMinA: new Decimal(0),
+                tokenMinB: new Decimal(0)
+            });
 
             // Sign and send transaction
             const signature = await this.connection.sendTransaction(removeLiquidityTx, [this.treasuryKeypair]);
@@ -579,19 +559,22 @@ class RealOrcaManager {
 
     async getAllOrcaPools() {
         try {
-            console.log('🔍 Fetching all Orca pools...');
+            console.log('🔍 Fetching all Orca whirlpools...');
             
-            const pools = await this.orca.getPools();
+            // Get all whirlpools
+            const pools = await this.whirlpoolClient.getAllPools();
             const poolList = [];
 
-            for (const pool of pools) {
+            for (const pool of pools.slice(0, 20)) { // Limit to first 20 for performance
                 try {
                     const poolData = await pool.getData();
                     poolList.push({
                         address: pool.address.toString(),
-                        tokens: poolData.tokens,
-                        liquidity: poolData.liquidity,
-                        fee: poolData.fee
+                        tokenMintA: poolData.tokenMintA.toString(),
+                        tokenMintB: poolData.tokenMintB.toString(),
+                        liquidity: poolData.liquidity.toString(),
+                        tickCurrentIndex: poolData.tickCurrentIndex,
+                        feeRate: poolData.feeRate
                     });
                 } catch (error) {
                     // Skip pools that can't be loaded
