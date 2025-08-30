@@ -396,7 +396,7 @@ class CryptokingBalanceAuditor:
     async def check_fake_transaction_elimination(self) -> Dict[str, Any]:
         """Check if fake transaction hash generation has been eliminated"""
         try:
-            if not self.db:
+            if self.db is None:
                 self.log_test("Fake Transaction Check", False, "MongoDB connection not available")
                 return {}
             
