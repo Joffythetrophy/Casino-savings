@@ -270,13 +270,14 @@ class PoolFundingFinalTester:
         try:
             headers = self.get_auth_headers()
             
-            # $20K worth of CRT at $0.01 = 2,000,000 CRT
             pool_data = {
                 "wallet_address": TEST_USER["wallet_address"],
-                "pool_pair": "CRT/USDC",
-                "crt_amount": 2000000,  # $20K worth
-                "funding_type": "pool_funding",
-                "pool_id": "pool_1"
+                "pool_requests": [
+                    {
+                        "pool_type": "CRT/USDC",
+                        "amount_usd": 20000
+                    }
+                ]
             }
             
             async with self.session.post(f"{BACKEND_URL}/pools/fund-with-user-balance", 
