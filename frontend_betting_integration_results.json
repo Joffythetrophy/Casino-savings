@@ -1,0 +1,127 @@
+[
+  {
+    "test": "Frontend Login Flow",
+    "success": true,
+    "details": "Login successful: Login successful! Welcome, cryptoking!, token received: True",
+    "timestamp": "2025-08-30T16:13:34.832827",
+    "data": null
+  },
+  {
+    "test": "Wallet Balance Endpoint",
+    "success": true,
+    "details": "Balance retrieved: DOGE 88,624.72 (matches expected ~88,814)",
+    "timestamp": "2025-08-30T16:13:35.403859",
+    "data": {
+      "doge_balance": 88624.72405788815,
+      "all_balances": {
+        "CRT": 7729657.968,
+        "DOGE": 88624.72405788815,
+        "TRX": 8565.2,
+        "SOL": 0.014885632,
+        "USDC": 30036.563041330315
+      }
+    }
+  },
+  {
+    "test": "CORS Configuration",
+    "success": true,
+    "details": "CORS properly configured: {'Access-Control-Allow-Origin': 'https://tiger-dex-casino.preview.emergentagent.com', 'Access-Control-Allow-Methods': 'DELETE, GET, HEAD, OPTIONS, PATCH, POST, PUT', 'Access-Control-Allow-Headers': 'Content-Type,Authorization'}",
+    "timestamp": "2025-08-30T16:13:35.409659",
+    "data": {
+      "Access-Control-Allow-Origin": "https://tiger-dex-casino.preview.emergentagent.com",
+      "Access-Control-Allow-Methods": "DELETE, GET, HEAD, OPTIONS, PATCH, POST, PUT",
+      "Access-Control-Allow-Headers": "Content-Type,Authorization"
+    }
+  },
+  {
+    "test": "Authenticated Betting - Slot Machine",
+    "success": true,
+    "details": "Bet successful: 10.0 DOGE \u2192 loss, payout: 0",
+    "timestamp": "2025-08-30T16:13:39.885606",
+    "data": null
+  },
+  {
+    "test": "Authenticated Betting - Roulette",
+    "success": true,
+    "details": "Bet successful: 10.0 DOGE \u2192 loss, payout: 0",
+    "timestamp": "2025-08-30T16:13:44.454110",
+    "data": null
+  },
+  {
+    "test": "Authenticated Betting - Dice",
+    "success": true,
+    "details": "Bet successful: 10.0 DOGE \u2192 loss, payout: 0",
+    "timestamp": "2025-08-30T16:13:48.931627",
+    "data": null
+  },
+  {
+    "test": "Authenticated Betting - Plinko",
+    "success": true,
+    "details": "Bet successful: 10.0 DOGE \u2192 loss, payout: 0",
+    "timestamp": "2025-08-30T16:13:53.330120",
+    "data": null
+  },
+  {
+    "test": "Authenticated Betting - Keno",
+    "success": true,
+    "details": "Bet successful: 10.0 DOGE \u2192 loss, payout: 0",
+    "timestamp": "2025-08-30T16:13:57.845926",
+    "data": null
+  },
+  {
+    "test": "Authenticated Betting - Mines",
+    "success": true,
+    "details": "Bet successful: 10.0 DOGE \u2192 loss, payout: 0",
+    "timestamp": "2025-08-30T16:14:02.525206",
+    "data": null
+  },
+  {
+    "test": "Authenticated Betting - Slot Machine",
+    "success": true,
+    "details": "Bet successful: 10.0 DOGE \u2192 loss, payout: 0",
+    "timestamp": "2025-08-30T16:14:07.196859",
+    "data": null
+  },
+  {
+    "test": "Authenticated Betting - Slot Machine",
+    "success": true,
+    "details": "Bet successful: 10.0 DOGE \u2192 loss, payout: 0",
+    "timestamp": "2025-08-30T16:14:12.221320",
+    "data": null
+  },
+  {
+    "test": "Authenticated Betting - Slot Machine",
+    "success": true,
+    "details": "Bet successful: 10.0 DOGE \u2192 loss, payout: 0",
+    "timestamp": "2025-08-30T16:14:17.419627",
+    "data": null
+  },
+  {
+    "test": "Authenticated Betting - Slot Machine",
+    "success": true,
+    "details": "Bet successful: 10.0 DOGE \u2192 loss, payout: 0",
+    "timestamp": "2025-08-30T16:14:22.397419",
+    "data": null
+  },
+  {
+    "test": "Authenticated Betting - Slot Machine",
+    "success": true,
+    "details": "Bet successful: 10.0 DOGE \u2192 loss, payout: 0",
+    "timestamp": "2025-08-30T16:14:27.408846",
+    "data": null
+  },
+  {
+    "test": "Rapid Betting Sequence",
+    "success": true,
+    "details": "All 5 rapid bets successful",
+    "timestamp": "2025-08-30T16:14:27.909730",
+    "data": null
+  },
+  {
+    "test": "Game History Endpoint",
+    "success": true,
+    "details": "Game history accessible: 100 games found",
+    "timestamp": "2025-08-30T16:14:27.926587",
+    "data": null
+  }
+]
