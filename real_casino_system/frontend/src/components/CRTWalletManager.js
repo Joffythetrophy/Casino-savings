@@ -241,10 +241,10 @@ const CRTWalletManager = ({ walletAddress, crtBalance, onBalanceUpdate, backendU
               />
               <button 
                 className="connect-button"
-                onClick={connectWallet}
+                onClick={connectKnownWallet}
                 disabled={isLoadingBalance || !walletInput}
               >
-                {isLoadingBalance ? '🔄 Connecting...' : '🔗 Connect'}
+                {isLoadingBalance ? '🔄 Connecting...' : '🔗 Connect Manual'}
               </button>
             </div>
           </div>
