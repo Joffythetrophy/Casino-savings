@@ -41,36 +41,31 @@ class RealOrcaManager:
         self.orca_api = None  # Requires API key for real access
         
     async def get_real_pool_info(self, pool_pair: str) -> Dict[str, Any]:
-        """Get REAL pool information from Orca API"""
+        """Get REAL pool information - Note: Requires direct blockchain queries now"""
         try:
-            logger.info(f"🌊 Fetching REAL Orca pool info for {pool_pair}")
+            logger.info(f"🌊 Checking REAL Orca pool for {pool_pair}")
             
-            async with aiohttp.ClientSession() as session:
-                async with session.get(f"{self.orca_api}/pools") as response:
-                    if response.status == 200:
-                        pools_data = await response.json()
-                        
-                        # Find the specific pool
-                        for pool_name, pool_info in pools_data.items():
-                            if pool_pair.lower() in pool_name.lower():
-                                return {
-                                    'success': True,
-                                    'pool_info': pool_info,
-                                    'pool_name': pool_name,
-                                    'real_orca': True,
-                                    'note': '✅ REAL Orca pool data from mainnet'
-                                }
-                        
-                        return {
-                            'success': False,
-                            'error': f'Pool {pool_pair} not found on Orca',
-                            'available_pools': list(pools_data.keys())[:10]
-                        }
-                    else:
-                        return {
-                            'success': False,
-                            'error': f'Failed to fetch pool data: HTTP {response.status}'
-                        }
+            # For CRT pools, we would need to query the blockchain directly
+            # since Orca API now requires paid access
+            
+            if "CRT" in pool_pair.upper():
+                return {
+                    'success': False,
+                    'error': f'CRT/{pool_pair.split("/")[1]} pool requires direct blockchain queries',
+                    'note': 'Real Orca pool data requires API key or direct Solana program calls',
+                    'alternatives': [
+                        'Query Whirlpool program directly',
+                        'Use Cambrian API with API key',
+                        'Implement direct Solana program calls'
+                    ],
+                    'real_blockchain_access': True
+                }
+            
+            return {
+                'success': False,
+                'error': f'Pool {pool_pair} requires real blockchain integration',
+                'note': 'Real pool data needs direct Solana program queries'
+            }
                         
         except Exception as e:
             logger.error(f"❌ Failed to get real pool info: {str(e)}")
