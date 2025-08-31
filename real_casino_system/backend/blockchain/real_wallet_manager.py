@@ -223,24 +223,82 @@ class RealWalletManager:
     
     async def _execute_solana_withdrawal(self, from_address: str, to_address: str, 
                                        amount: float, currency: str, private_key: str) -> Dict[str, Any]:
-        """Execute real Solana withdrawal"""
+        """Execute REAL Solana withdrawal - ACTUAL BLOCKCHAIN TRANSACTION"""
         try:
-            # This would implement actual Solana transaction
-            # For now, return structure for real implementation
-            return {
-                'success': True,
-                'transaction_hash': 'REAL_SOLANA_TX_HASH_WOULD_BE_HERE',
-                'amount': amount,
-                'currency': currency,
-                'from_address': from_address,
-                'to_address': to_address,
-                'network': 'solana',
-                'explorer_url': f'https://explorer.solana.com/tx/REAL_TX_HASH',
-                'real_blockchain': True,
-                'note': '✅ REAL Solana blockchain withdrawal executed'
-            }
+            if not private_key:
+                return {
+                    'success': False,
+                    'error': 'Private key required for real blockchain withdrawal'
+                }
+            
+            logger.info(f"🔥 Executing REAL {currency} withdrawal on Solana MAINNET: {amount} from {from_address} to {to_address}")
+            
+            # Create keypair from private key
+            from_keypair = Keypair.from_base58_string(private_key)
+            from_pubkey = from_keypair.pubkey()
+            to_pubkey = Pubkey.from_string(to_address)
+            
+            if currency == 'SOL':
+                # REAL SOL transfer
+                lamports = int(amount * 1_000_000_000)  # Convert SOL to lamports
+                
+                # Create transfer instruction
+                transfer_ix = transfer(
+                    TransferParams(
+                        from_pubkey=from_pubkey,
+                        to_pubkey=to_pubkey,
+                        lamports=lamports
+                    )
+                )
+                
+                # Get recent blockhash
+                recent_blockhash = await self.solana_client.get_latest_blockhash(commitment=self.commitment)
+                
+                # Create and sign transaction
+                transaction = Transaction.new_with_payer([transfer_ix], from_pubkey)
+                transaction.sign([from_keypair], recent_blockhash.value.blockhash)
+                
+                # Send REAL transaction to mainnet
+                tx_result = await self.solana_client.send_transaction(
+                    transaction, 
+                    opts=TxOpts(skip_confirmation=False, skip_preflight=False)
+                )
+                
+                tx_hash = str(tx_result.value)
+                
+                logger.info(f"✅ REAL SOL withdrawal executed on MAINNET! TX: {tx_hash}")
+                
+                return {
+                    'success': True,
+                    'transaction_hash': tx_hash,
+                    'amount': amount,
+                    'currency': currency,
+                    'from_address': from_address,
+                    'to_address': to_address,
+                    'network': 'solana-mainnet',
+                    'explorer_url': f'https://explorer.solana.com/tx/{tx_hash}',
+                    'real_blockchain': True,
+                    'note': '✅ REAL SOL withdrawal executed on Solana MAINNET'
+                }
+                
+            elif currency in ['USDC', 'CRT']:
+                # REAL SPL token transfer
+                token_mint = self.tokens['solana'][currency]
+                
+                # This would require more complex SPL token transfer logic
+                # For now, return structure indicating real implementation needed
+                return {
+                    'success': False,
+                    'error': f'REAL {currency} token transfers require SPL token implementation',
+                    'note': 'SPL token transfers need additional development for real blockchain operations'
+                }
+                
         except Exception as e:
-            return {'success': False, 'error': str(e)}
+            logger.error(f"❌ REAL Solana withdrawal failed: {str(e)}")
+            return {
+                'success': False, 
+                'error': f'Real blockchain withdrawal failed: {str(e)}'
+            }
     
     async def _execute_ethereum_withdrawal(self, from_address: str, to_address: str,
                                          amount: float, currency: str, private_key: str) -> Dict[str, Any]:
