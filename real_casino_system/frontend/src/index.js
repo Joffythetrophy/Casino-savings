@@ -3,20 +3,8 @@ import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
 
-// Solana wallet adapter imports for REAL wallet connections
-import { ConnectionProvider, WalletProvider } from '@solana/wallet-adapter-react';
-import { WalletAdapterNetwork } from '@solana/wallet-adapter-base';
-import { 
-    PhantomWalletAdapter,
-    SolflareWalletAdapter,
-    TorusWalletAdapter,
-    LedgerWalletAdapter,
-} from '@solana/wallet-adapter-wallets';
-import { WalletModalProvider } from '@solana/wallet-adapter-react-ui';
-import { clusterApiUrl } from '@solana/web3.js';
-
-// Import wallet adapter CSS for styling
-import '@solana/wallet-adapter-react-ui/styles.css';
+// Note: Solana wallet adapters temporarily disabled for initial real blockchain testing
+// Will enable once core functionality is working
 
 console.log('🔥 REAL Blockchain Casino Starting...');
 console.log('✅ Connecting to Solana MAINNET');
