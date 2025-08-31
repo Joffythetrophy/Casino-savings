@@ -13,8 +13,8 @@ from datetime import datetime
 from typing import Dict, Any, List
 
 # Test Configuration
-BACKEND_URL = "https://crypto-treasury-app.preview.emergentagent.com/api"
-FRONTEND_URL = "https://crypto-treasury-app.preview.emergentagent.com"
+BACKEND_URL = "https://real-crt-casino.preview.emergentagent.com/api"
+FRONTEND_URL = "https://real-crt-casino.preview.emergentagent.com"
 TEST_USER = {
     "username": "cryptoking",
     "password": "crt21million", 

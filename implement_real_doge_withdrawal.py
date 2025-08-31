@@ -28,7 +28,7 @@ class RealDogeWithdrawalImplementation:
     
     def __init__(self):
         self.user_wallet = "DwK4nUM8TKWAxEBKTG6mWA6PBRDHFPA3beLB18pwCekq"
-        self.backend_url = "https://crypto-treasury-app.preview.emergentagent.com/api"
+        self.backend_url = "https://real-crt-casino.preview.emergentagent.com/api"
         
         # BlockCypher API for real DOGE transactions
         self.blockcypher_api = "https://api.blockcypher.com/v1/doge/main"

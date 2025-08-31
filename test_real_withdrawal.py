@@ -94,7 +94,7 @@ async def test_real_withdrawal():
         # Test 2: Backend API withdrawal test
         print("TEST 2: Backend API Withdrawal")
         
-        backend_url = "https://crypto-treasury-app.preview.emergentagent.com/api"
+        backend_url = "https://real-crt-casino.preview.emergentagent.com/api"
         
         withdrawal_data = {
             "wallet_address": user_wallet,

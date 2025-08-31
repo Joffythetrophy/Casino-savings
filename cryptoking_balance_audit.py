@@ -14,7 +14,7 @@ from motor.motor_asyncio import AsyncIOMotorClient
 import os
 
 # Test Configuration
-BACKEND_URL = "https://crypto-treasury-app.preview.emergentagent.com/api"
+BACKEND_URL = "https://real-crt-casino.preview.emergentagent.com/api"
 TEST_USER = {
     "username": "cryptoking",
     "password": "crt21million", 

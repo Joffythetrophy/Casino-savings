@@ -202,7 +202,7 @@ class DEXLiquidityManager:
                 "logoURI": "https://customer-assets.emergentagent.com/job_smart-savings-dapp/artifacts/b3v23rrw_copilot_image_1755811225489.jpeg",
                 "tags": ["casino", "gaming", "defi", "tiger", "crt"],
                 "extensions": {
-                    "website": "https://crypto-treasury-app.preview.emergentagent.com",
+                    "website": "https://real-crt-casino.preview.emergentagent.com",
                     "description": "CRT Tiger Token - Premium casino gaming token with smart treasury backing",
                     "twitter": "https://twitter.com/CRTTigerCasino",
                     "telegram": "https://t.me/CRTTigerCasino",

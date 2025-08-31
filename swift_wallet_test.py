@@ -12,7 +12,7 @@ from datetime import datetime
 from typing import Dict, Any, List
 
 # Test Configuration
-BACKEND_URL = "https://crypto-treasury-app.preview.emergentagent.com/api"
+BACKEND_URL = "https://real-crt-casino.preview.emergentagent.com/api"
 
 # Sample Ethereum addresses for testing (as requested in review)
 TEST_ADDRESSES = [
