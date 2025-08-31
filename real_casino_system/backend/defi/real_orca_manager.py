@@ -37,8 +37,8 @@ class RealOrcaManager:
             'CRT': Pubkey.from_string('DwK4nUM8TKWAxEBKTG6mWA6PBRDHFPA3beLB18pwCekq')
         }
         
-        # Orca API endpoints
-        self.orca_api = "https://api.orca.so/v1"
+        # Note: Orca API now requires paid access, focusing on direct blockchain operations
+        self.orca_api = None  # Requires API key for real access
         
     async def get_real_pool_info(self, pool_pair: str) -> Dict[str, Any]:
         """Get REAL pool information from Orca API"""
