@@ -10,7 +10,6 @@ pydantic==2.5.0
 # REAL Solana blockchain integration
 solana==0.34.3
 solders==0.21.0
-spl-token==0.2.0
 
 # REAL Web3 and blockchain libraries  
 web3==6.12.0
