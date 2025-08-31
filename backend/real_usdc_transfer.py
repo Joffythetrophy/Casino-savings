@@ -59,9 +59,12 @@ class RealUSDCTransferService:
             target_pubkey = Pubkey.from_string(target_address)
             
             # Check Solana mainnet connectivity
-            health_check = await self.solana_client.get_health()
-            if health_check.value != "ok":
-                raise Exception("Solana mainnet RPC not healthy")
+            try:
+                latest_slot = await self.solana_client.get_slot()
+                if latest_slot.value < 1000:
+                    raise Exception("Invalid slot number from RPC")
+            except Exception as e:
+                raise Exception(f"Solana mainnet RPC not accessible: {str(e)}")
             
             logger.info("✅ Solana mainnet connectivity confirmed")
             
