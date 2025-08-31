@@ -62,7 +62,45 @@ const CRTWalletManager = ({ walletAddress, crtBalance, onBalanceUpdate, backendU
     setIsLoadingBalance(false);
   };
 
-  const connectWallet = async () => {
+  const connectRealPhantomWallet = async () => {
+    if (!phantomWallet) {
+      alert('❌ Phantom wallet not detected. Please install Phantom wallet for REAL blockchain transactions.');
+      window.open('https://phantom.app/', '_blank');
+      return;
+    }
+
+    setIsLoadingBalance(true);
+    try {
+      console.log('🔗 Connecting to REAL Phantom wallet...');
+      
+      // Connect to REAL Phantom wallet
+      const response = await phantomWallet.connect();
+      const realAddress = response.publicKey.toString();
+      
+      console.log(`✅ REAL Phantom wallet connected: ${realAddress}`);
+      
+      // Verify wallet has balances on REAL blockchain
+      const balanceResponse = await fetch(`${backendUrl}/wallet/crt-balance?wallet_address=${realAddress}`);
+      const balanceData = await balanceResponse.json();
+      
+      if (balanceData.success) {
+        onConnect(realAddress);
+        setRealWalletConnection(true);
+        alert(`🎉 REAL Phantom wallet connected!\nAddress: ${realAddress.slice(0, 8)}...${realAddress.slice(-8)}\nCRT Balance: ${balanceData.crt_balance?.toLocaleString() || 0} CRT`);
+      } else {
+        console.warn('⚠️ Could not fetch real balance:', balanceData.error);
+        // Still connect even if balance fetch fails
+        onConnect(realAddress);
+        setRealWalletConnection(true);
+      }
+    } catch (error) {
+      console.error('❌ REAL Phantom wallet connection failed:', error);
+      alert('Failed to connect to REAL Phantom wallet. Please try again.');
+    }
+    setIsLoadingBalance(false);
+  };
+
+  const connectKnownWallet = async () => {
     const addressToConnect = walletInput || KNOWN_CRT_WALLET;
     
     if (!addressToConnect) {
@@ -72,19 +110,22 @@ const CRTWalletManager = ({ walletAddress, crtBalance, onBalanceUpdate, backendU
 
     setIsLoadingBalance(true);
     try {
-      // Verify wallet has CRT balance
+      console.log(`🔍 Connecting to known CRT wallet: ${addressToConnect}`);
+      
+      // Verify wallet has CRT balance on REAL blockchain
       const response = await fetch(`${backendUrl}/wallet/crt-balance?wallet_address=${addressToConnect}`);
       const data = await response.json();
       
       if (data.success) {
         onConnect(addressToConnect);
         setWalletInput('');
+        console.log(`✅ Connected to CRT wallet with ${data.crt_balance?.toLocaleString() || 0} CRT`);
       } else {
-        alert(`Could not connect to wallet: ${data.error}`);
+        alert(`❌ Could not connect to wallet: ${data.error}\n\nThis might mean:\n- Wallet has no CRT tokens\n- Network connection issue\n- Invalid wallet address`);
       }
     } catch (error) {
-      console.error('Wallet connection failed:', error);
-      alert('Wallet connection failed');
+      console.error('❌ Wallet connection failed:', error);
+      alert('Wallet connection failed due to network error');
     }
     setIsLoadingBalance(false);
   };
