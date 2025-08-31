@@ -126,27 +126,118 @@ class RealUSDCToCRTConverter:
     
     async def _execute_usdc_crt_swap(self, wallet_address: str, usdc_amount: float, 
                                    calculation: Dict[str, Any]) -> Dict[str, Any]:
-        """Execute real USDC to CRT swap on DEX"""
+        """Execute REAL USDC to CRT swap using Jupiter aggregator"""
         try:
-            # Choose best DEX for swap
-            selected_dex = 'orca'  # Orca typically has good liquidity
-            dex_config = self.supported_dex[selected_dex]
+            logger.info(f"🚀 Executing REAL Jupiter swap: {usdc_amount} USDC → CRT")
             
-            # This would integrate with real DEX protocols
-            if dex_config['network'] == 'solana':
-                return await self._execute_orca_usdc_crt_swap(
-                    wallet_address, usdc_amount, calculation, selected_dex
-                )
-            else:
-                return {
-                    'success': False,
-                    'error': f'Unsupported network for USDC/CRT swap: {dex_config["network"]}'
-                }
+            # Get REAL quote from Jupiter
+            quote = await self._get_jupiter_quote(usdc_amount)
+            if not quote.get('success'):
+                return quote
+            
+            # Execute REAL swap via Jupiter
+            return await self._execute_jupiter_swap(wallet_address, quote['quote_data'])
                 
         except Exception as e:
+            logger.error(f"❌ Jupiter swap execution failed: {str(e)}")
             return {
                 'success': False,
-                'error': f'DEX swap execution failed: {str(e)}'
+                'error': f'REAL Jupiter swap failed: {str(e)}'
+            }
+    
+    async def _get_jupiter_quote(self, usdc_amount: float) -> Dict[str, Any]:
+        """Get REAL quote from Jupiter aggregator"""
+        try:
+            usdc_amount_micro = int(usdc_amount * 1_000_000)  # Convert to microUSDC
+            
+            async with aiohttp.ClientSession() as session:
+                params = {
+                    'inputMint': str(self.tokens['USDC']),
+                    'outputMint': str(self.tokens['CRT']),
+                    'amount': usdc_amount_micro,
+                    'slippageBps': int(self.slippage_tolerance * 10000)  # Convert to basis points
+                }
+                
+                async with session.get(f"{self.jupiter_api}/quote", params=params) as response:
+                    if response.status == 200:
+                        quote_data = await response.json()
+                        
+                        if 'outAmount' in quote_data:
+                            crt_out = int(quote_data['outAmount']) / 1_000_000  # Convert from micro
+                            
+                            return {
+                                'success': True,
+                                'quote_data': quote_data,
+                                'usdc_in': usdc_amount,
+                                'crt_out': crt_out,
+                                'price_impact': quote_data.get('priceImpactPct', 0),
+                                'route_plan': quote_data.get('routePlan', []),
+                                'real_jupiter_quote': True,
+                                'note': f'✅ REAL Jupiter quote: {usdc_amount} USDC → {crt_out:,.0f} CRT'
+                            }
+                        else:
+                            return {
+                                'success': False,
+                                'error': 'Invalid quote response from Jupiter',
+                                'response': quote_data
+                            }
+                    else:
+                        error_text = await response.text()
+                        return {
+                            'success': False,
+                            'error': f'Jupiter quote failed: HTTP {response.status} - {error_text}'
+                        }
+                        
+        except Exception as e:
+            logger.error(f"❌ Jupiter quote failed: {str(e)}")
+            return {
+                'success': False,
+                'error': f'Failed to get Jupiter quote: {str(e)}'
+            }
+    
+    async def _execute_jupiter_swap(self, wallet_address: str, quote_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Execute REAL swap transaction via Jupiter"""
+        try:
+            # Prepare swap transaction
+            swap_request = {
+                'userPublicKey': wallet_address,
+                'quoteResponse': quote_data
+            }
+            
+            async with aiohttp.ClientSession() as session:
+                async with session.post(
+                    self.jupiter_swap_api,
+                    json=swap_request,
+                    headers={'Content-Type': 'application/json'}
+                ) as response:
+                    if response.status == 200:
+                        swap_data = await response.json()
+                        
+                        # Return swap transaction data (would need signing and submission)
+                        return {
+                            'success': False,  # Not fully implemented yet
+                            'error': 'REAL Jupiter swap requires transaction signing and submission',
+                            'swap_transaction': swap_data.get('swapTransaction'),
+                            'quote_used': quote_data,
+                            'note': 'Jupiter swap transaction prepared but needs wallet signing for REAL execution',
+                            'next_steps': [
+                                'Sign transaction with wallet private key',
+                                'Submit signed transaction to Solana mainnet',
+                                'Wait for transaction confirmation'
+                            ]
+                        }
+                    else:
+                        error_text = await response.text()
+                        return {
+                            'success': False,
+                            'error': f'Jupiter swap API failed: HTTP {response.status} - {error_text}'
+                        }
+                        
+        except Exception as e:
+            logger.error(f"❌ Jupiter swap execution failed: {str(e)}")
+            return {
+                'success': False,
+                'error': f'Jupiter swap execution failed: {str(e)}'
             }
     
     async def _execute_orca_usdc_crt_swap(self, wallet_address: str, usdc_amount: float,
