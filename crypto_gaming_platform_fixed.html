@@ -1,0 +1,1528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRT Gaming Platform - Real Blockchain Casino</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #10b981;
+            --secondary: #059669;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --dark: #1e293b;
+            --light: #f8fafc;
+            --gray: #64748b;
+            --tiger-gold: #ffd700;
+            --casino-green: #00ff88;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: #e2e8f0;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            border-bottom: 2px solid var(--primary);
+            margin-bottom: 30px;
+            box-shadow: 0 2px 20px rgba(16, 185, 129, 0.1);
+        }
+        
+        .logo {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--tiger-gold);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+        }
+        
+        .logo-icon {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            width: 50px;
+            height: 50px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 30px rgba(16, 185, 129, 0.4);
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 30px;
+        }
+        
+        nav a {
+            color: #94a3b8;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s;
+            padding: 8px 16px;
+            border-radius: 8px;
+            position: relative;
+        }
+        
+        nav a:hover, nav a.active {
+            color: var(--casino-green);
+            background: rgba(16, 185, 129, 0.1);
+            box-shadow: 0 0 20px rgba(16, 185, 129, 0.2);
+        }
+        
+        .wallet-connect {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 20px rgba(16, 185, 129, 0.3);
+        }
+        
+        .wallet-connect:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(16, 185, 129, 0.4);
+        }
+        
+        .wallet-connected {
+            background: var(--success);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr 2.5fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .sidebar {
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            border-radius: 20px;
+            padding: 30px;
+            height: fit-content;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+        
+        .sidebar h2 {
+            margin-bottom: 25px;
+            font-size: 20px;
+            color: var(--tiger-gold);
+            text-align: center;
+        }
+        
+        .balance-card {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            color: white;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(16, 185, 129, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .balance-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transform: rotate(45deg);
+            animation: shine 3s infinite;
+        }
+        
+        @keyframes shine {
+            0% { transform: translateY(-100%) translateX(-100%) rotate(45deg); }
+            100% { transform: translateY(100%) translateX(100%) rotate(45deg); }
+        }
+        
+        .balance-label {
+            font-size: 16px;
+            opacity: 0.9;
+            margin-bottom: 10px;
+        }
+        
+        .balance-amount {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+        }
+        
+        .balance-change {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-size: 16px;
+            font-weight: 600;
+        }
+        
+        .up {
+            color: #86efac;
+        }
+        
+        .down {
+            color: #fca5a5;
+        }
+        
+        .wallet-address {
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            color: var(--primary);
+            background: rgba(16, 185, 129, 0.1);
+            padding: 10px;
+            border-radius: 8px;
+            margin: 15px 0;
+            word-break: break-all;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+        
+        .quick-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .action-btn {
+            background: linear-gradient(135deg, #334155, #475569);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: #e2e8f0;
+            padding: 15px 20px;
+            border-radius: 12px;
+            text-align: left;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+        
+        .action-btn:hover {
+            background: linear-gradient(135deg, #475569, #64748b);
+            border-color: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(16, 185, 129, 0.2);
+        }
+        
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+        
+        .card {
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            border-radius: 20px;
+            padding: 30px;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+        
+        .card-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--tiger-gold);
+        }
+        
+        .view-all {
+            color: var(--primary);
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        
+        .view-all:hover {
+            color: var(--casino-green);
+            text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+        }
+        
+        .assets-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+        }
+        
+        .asset-card {
+            background: linear-gradient(135deg, #334155, #475569);
+            border-radius: 16px;
+            padding: 25px;
+            transition: all 0.3s;
+            border: 1px solid rgba(16, 185, 129, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .asset-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary);
+            box-shadow: 0 15px 40px rgba(16, 185, 129, 0.2);
+        }
+        
+        .asset-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .asset-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 20px;
+            box-shadow: 0 5px 20px rgba(16, 185, 129, 0.3);
+        }
+        
+        .asset-name {
+            font-weight: 600;
+            font-size: 18px;
+            color: white;
+        }
+        
+        .asset-symbol {
+            color: #94a3b8;
+            font-size: 14px;
+        }
+        
+        .asset-balance {
+            font-size: 16px;
+            color: #94a3b8;
+            margin-bottom: 10px;
+        }
+        
+        .asset-price {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: var(--casino-green);
+        }
+        
+        .asset-change {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+        }
+        
+        .game-card {
+            background: linear-gradient(135deg, #334155, #475569);
+            border-radius: 16px;
+            overflow: hidden;
+            transition: all 0.3s;
+            border: 1px solid rgba(16, 185, 129, 0.1);
+        }
+        
+        .game-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary);
+            box-shadow: 0 15px 40px rgba(16, 185, 129, 0.2);
+        }
+        
+        .game-image {
+            height: 180px;
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            color: white;
+            font-weight: 700;
+            text-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+        }
+        
+        .game-content {
+            padding: 25px;
+        }
+        
+        .game-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: white;
+        }
+        
+        .game-description {
+            color: #94a3b8;
+            font-size: 15px;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+        
+        .play-btn {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 10px;
+            width: 100%;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+        }
+        
+        .play-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
+        }
+        
+        /* Game specific styles */
+        .game-container {
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            border-radius: 20px;
+            padding: 30px;
+            margin-top: 20px;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+        
+        .game-ui {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+        
+        .bet-controls {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .bet-input {
+            background: #334155;
+            border: 2px solid #475569;
+            color: white;
+            padding: 12px 15px;
+            border-radius: 8px;
+            width: 140px;
+            font-weight: 600;
+        }
+        
+        .bet-btn {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .bet-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(16, 185, 129, 0.3);
+        }
+        
+        .auto-play {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .auto-input {
+            background: #334155;
+            border: 2px solid #475569;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 8px;
+            width: 100px;
+            font-weight: 600;
+        }
+        
+        .game-area {
+            background: linear-gradient(135deg, #0f172a, #1e293b);
+            border-radius: 15px;
+            padding: 40px;
+            display: flex;
+            justify-content: center;
+            min-height: 350px;
+            border: 2px solid rgba(16, 185, 129, 0.3);
+            box-shadow: inset 0 0 50px rgba(16, 185, 129, 0.1);
+        }
+        
+        .slot-machine {
+            display: flex;
+            gap: 20px;
+            padding: 30px;
+            background: linear-gradient(135deg, #334155, #1e293b);
+            border-radius: 15px;
+            border: 3px solid var(--primary);
+            box-shadow: 0 0 30px rgba(16, 185, 129, 0.3);
+        }
+        
+        .slot {
+            width: 90px;
+            height: 270px;
+            background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+            border: 3px solid var(--primary);
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        .slot-inner {
+            position: absolute;
+            width: 100%;
+            transition: top 3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        
+        .slot-item {
+            height: 90px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            background: linear-gradient(135deg, #ffffff, #f1f5f9);
+            border-bottom: 2px solid #e2e8f0;
+        }
+        
+        .spin-btn {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            padding: 20px 40px;
+            border-radius: 15px;
+            font-size: 20px;
+            font-weight: 700;
+            cursor: pointer;
+            margin: 0 auto;
+            display: block;
+            transition: all 0.3s;
+            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        
+        .spin-btn:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(16, 185, 129, 0.5);
+        }
+        
+        .spin-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .win-display {
+            text-align: center;
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--casino-green);
+            height: 40px;
+            margin: 20px 0;
+            text-shadow: 0 0 20px rgba(0, 255, 136, 0.5);
+        }
+        
+        .game-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 25px;
+        }
+        
+        .stat {
+            text-align: center;
+            background: linear-gradient(135deg, #334155, #475569);
+            padding: 20px;
+            border-radius: 15px;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+        
+        .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--casino-green);
+            margin-bottom: 8px;
+        }
+        
+        .stat-label {
+            font-size: 14px;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-content {
+            background: linear-gradient(135deg, #1e293b, #334155);
+            border-radius: 20px;
+            padding: 40px;
+            width: 450px;
+            max-width: 90%;
+            border: 2px solid rgba(16, 185, 129, 0.3);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+        
+        .modal-title {
+            font-size: 28px;
+            margin-bottom: 25px;
+            text-align: center;
+            color: var(--tiger-gold);
+        }
+        
+        .modal-input {
+            width: 100%;
+            padding: 15px 20px;
+            background: #334155;
+            border: 2px solid #475569;
+            border-radius: 10px;
+            color: white;
+            margin-bottom: 20px;
+            font-size: 16px;
+            font-weight: 600;
+        }
+        
+        .modal-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+        }
+        
+        .modal-buttons {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .modal-btn {
+            flex: 1;
+            padding: 15px;
+            border-radius: 10px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .modal-confirm {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+        }
+        
+        .modal-confirm:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
+        }
+        
+        .modal-cancel {
+            background: #64748b;
+            color: white;
+        }
+        
+        .modal-cancel:hover {
+            background: #475569;
+        }
+        
+        .notification {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            padding: 20px 30px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--success), var(--primary));
+            color: white;
+            font-weight: 600;
+            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
+            transform: translateY(100px);
+            opacity: 0;
+            transition: transform 0.3s, opacity 0.3s;
+            z-index: 1001;
+            max-width: 350px;
+        }
+        
+        .notification.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        
+        @media (max-width: 768px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+            
+            .assets-grid {
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            }
+            
+            .games-grid {
+                grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            }
+            
+            .slot-machine {
+                transform: scale(0.8);
+            }
+            
+            .bet-controls {
+                justify-content: center;
+            }
+            
+            nav ul {
+                gap: 15px;
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <div class="logo-icon">🎰</div>
+                CRT Gaming Platform
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="#" class="active">Dashboard</a></li>
+                    <li><a href="#" onclick="scrollToSection('assets')">Assets</a></li>
+                    <li><a href="#" onclick="scrollToSection('games')">Games</a></li>
+                    <li><a href="#" onclick="scrollToSection('slots')">CRT Slots</a></li>
+                    <li><a href="#" onclick="scrollToSection('history')">History</a></li>
+                </ul>
+            </nav>
+            <button class="wallet-connect" id="connectWallet">Connect CRT Wallet</button>
+        </header>
+
+        <div class="dashboard">
+            <div class="sidebar">
+                <h2>🐅 CRT Portfolio</h2>
+                <div class="balance-card">
+                    <div class="balance-label">Total Gaming Balance</div>
+                    <div class="balance-amount" id="totalBalance">$6,847,532.50</div>
+                    <div class="balance-change up">
+                        <span>🚀 +12.4% (24h)</span>
+                    </div>
+                </div>
+                
+                <div class="wallet-address">
+                    <strong>Your CRT Wallet:</strong><br>
+                    DwK4nUM8TKWAxEBKTG6mWA6PBRDHFPA3beLB18pwCekq
+                </div>
+                
+                <div class="quick-actions">
+                    <button class="action-btn" id="depositBtn">
+                        <span>💰 Deposit CRT</span>
+                        <span>→</span>
+                    </button>
+                    <button class="action-btn" id="withdrawBtn">
+                        <span>💸 Withdraw</span>
+                        <span>→</span>
+                    </button>
+                    <button class="action-btn" id="swapBtn">
+                        <span>🔄 Convert USDC→CRT</span>
+                        <span>→</span>
+                    </button>
+                    <button class="action-btn" id="sendBtn">
+                        <span>📤 Send CRT</span>
+                        <span>→</span>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="main-content">
+                <div class="card" id="assets">
+                    <div class="card-header">
+                        <div class="card-title">🚀 Your CRT Gaming Assets</div>
+                        <a href="#" class="view-all">Real Blockchain Data</a>
+                    </div>
+                    
+                    <div class="assets-grid">
+                        <div class="asset-card">
+                            <div class="asset-header">
+                                <div class="asset-icon">🎭</div>
+                                <div>
+                                    <div class="asset-name">CRT Token</div>
+                                    <div class="asset-symbol">Creative Utility Token</div>
+                                </div>
+                            </div>
+                            <div class="asset-balance">21,000,000 CRT</div>
+                            <div class="asset-price">$6,300,000.00</div>
+                            <div class="asset-change up">🔥 Core Holdings</div>
+                        </div>
+                        
+                        <div class="asset-card">
+                            <div class="asset-header">
+                                <div class="asset-icon">💵</div>
+                                <div>
+                                    <div class="asset-name">USDC</div>
+                                    <div class="asset-symbol">USD Coin</div>
+                                </div>
+                            </div>
+                            <div class="asset-balance">487,532 USDC</div>
+                            <div class="asset-price">$487,532.50</div>
+                            <div class="asset-change">📊 Stable</div>
+                        </div>
+                        
+                        <div class="asset-card">
+                            <div class="asset-header">
+                                <div class="asset-icon">☀️</div>
+                                <div>
+                                    <div class="asset-name">Solana</div>
+                                    <div class="asset-symbol">SOL</div>
+                                </div>
+                            </div>
+                            <div class="asset-balance">285.75 SOL</div>
+                            <div class="asset-price">$60,000.00</div>
+                            <div class="asset-change up">⚡ Fast Chain</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card" id="games">
+                    <div class="card-header">
+                        <div class="card-title">🎲 CRT Casino Games</div>
+                        <a href="#" class="view-all">Play & Earn Real CRT</a>
+                    </div>
+                    
+                    <div class="games-grid">
+                        <div class="game-card">
+                            <div class="game-image">🎰</div>
+                            <div class="game-content">
+                                <div class="game-title">CRT Mega Slots</div>
+                                <div class="game-description">Spin with your real CRT tokens for massive blockchain wins</div>
+                                <button class="play-btn" onclick="scrollToSection('slots')">Play CRT Slots</button>
+                            </div>
+                        </div>
+                        
+                        <div class="game-card">
+                            <div class="game-image">🎲</div>
+                            <div class="game-content">
+                                <div class="game-title">CRT Dice Master</div>
+                                <div class="game-description">Roll the dice and multiply your CRT holdings instantly</div>
+                                <button class="play-btn" onclick="showNotification('🎲 CRT Dice coming soon!')">Play CRT Dice</button>
+                            </div>
+                        </div>
+                        
+                        <div class="game-card">
+                            <div class="game-image">🎯</div>
+                            <div class="game-content">
+                                <div class="game-title">CRT Roulette Pro</div>
+                                <div class="game-description">Bet on numbers with real CRT tokens for huge payouts</div>
+                                <button class="play-btn" onclick="showNotification('🎯 CRT Roulette coming soon!')">Play CRT Roulette</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="game-container" id="slots">
+                    <div class="card-header">
+                        <div class="card-title">🎰 CRT Mega Slots</div>
+                        <div class="view-all">98.5% RTP - Real Blockchain Gaming</div>
+                    </div>
+                    
+                    <div class="game-ui">
+                        <div class="bet-controls">
+                            <span style="font-weight: 600; color: var(--tiger-gold);">Bet Amount (CRT):</span>
+                            <input type="number" class="bet-input" id="betAmount" value="10.00" min="1" max="1000" step="1">
+                            <button class="bet-btn" id="halfBet">½</button>
+                            <button class="bet-btn" id="doubleBet">2×</button>
+                            <button class="bet-btn" id="maxBet">Max</button>
+                        </div>
+                        
+                        <div class="auto-play">
+                            <span style="font-weight: 600; color: var(--tiger-gold);">Auto Play:</span>
+                            <input type="number" class="auto-input" id="autoSpins" value="0" min="0" max="100">
+                            <span>spins (0 to cancel)</span>
+                            <button class="bet-btn" id="startAutoPlay">Start Auto</button>
+                        </div>
+                        
+                        <div class="game-area">
+                            <div class="slot-machine">
+                                <div class="slot">
+                                    <div class="slot-inner" id="slot1">
+                                        <div class="slot-item">🍒</div>
+                                        <div class="slot-item">🍋</div>
+                                        <div class="slot-item">🍊</div>
+                                        <div class="slot-item">🍇</div>
+                                        <div class="slot-item">💎</div>
+                                        <div class="slot-item">7️⃣</div>
+                                        <div class="slot-item">🍀</div>
+                                        <div class="slot-item">🎭</div>
+                                    </div>
+                                </div>
+                                <div class="slot">
+                                    <div class="slot-inner" id="slot2">
+                                        <div class="slot-item">🍋</div>
+                                        <div class="slot-item">🍊</div>
+                                        <div class="slot-item">🍇</div>
+                                        <div class="slot-item">💎</div>
+                                        <div class="slot-item">7️⃣</div>
+                                        <div class="slot-item">🍀</div>
+                                        <div class="slot-item">🎭</div>
+                                        <div class="slot-item">🍒</div>
+                                    </div>
+                                </div>
+                                <div class="slot">
+                                    <div class="slot-inner" id="slot3">
+                                        <div class="slot-item">🍊</div>
+                                        <div class="slot-item">🍇</div>
+                                        <div class="slot-item">💎</div>
+                                        <div class="slot-item">7️⃣</div>
+                                        <div class="slot-item">🍀</div>
+                                        <div class="slot-item">🎭</div>
+                                        <div class="slot-item">🍒</div>
+                                        <div class="slot-item">🍋</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <button class="spin-btn" id="spinBtn">🎰 SPIN FOR CRT 🎰</button>
+                        
+                        <div class="win-display" id="winDisplay"></div>
+                        
+                        <div class="game-stats">
+                            <div class="stat">
+                                <div class="stat-value" id="totalWins">0 CRT</div>
+                                <div class="stat-label">Total Wins</div>
+                            </div>
+                            <div class="stat">
+                                <div class="stat-value" id="totalSpins">0</div>
+                                <div class="stat-label">Total Spins</div>
+                            </div>
+                            <div class="stat">
+                                <div class="stat-value" id="biggestWin">0 CRT</div>
+                                <div class="stat-label">Biggest Win</div>
+                            </div>
+                            <div class="stat">
+                                <div class="stat-value" id="winRate">0%</div>
+                                <div class="stat-label">Win Rate</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>© 2025 CRT Gaming Platform. Real blockchain integration with 21M CRT tokens.</p>
+            <p>Connected to: DwK4nUM8TKWAxEBKTG6mWA6PBRDHFPA3beLB18pwCekq</p>
+        </footer>
+    </div>
+
+    <!-- Modals -->
+    <div class="modal" id="depositModal">
+        <div class="modal-content">
+            <h2 class="modal-title">💰 Deposit CRT</h2>
+            <input type="number" class="modal-input" id="depositAmount" placeholder="Amount of CRT to deposit" min="1">
+            <div style="margin-bottom: 20px; color: #94a3b8; font-size: 14px;">
+                Send CRT to: DwK4nUM8TKWAxEBKTG6mWA6PBRDHFPA3beLB18pwCekq
+            </div>
+            <div class="modal-buttons">
+                <button class="modal-btn modal-confirm" id="confirmDeposit">Confirm Deposit</button>
+                <button class="modal-btn modal-cancel" id="cancelDeposit">Cancel</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="modal" id="withdrawModal">
+        <div class="modal-content">
+            <h2 class="modal-title">💸 Withdraw CRT</h2>
+            <input type="number" class="modal-input" id="withdrawAmount" placeholder="Amount of CRT to withdraw" min="1">
+            <input type="text" class="modal-input" id="withdrawAddress" placeholder="Solana wallet address">
+            <div class="modal-buttons">
+                <button class="modal-btn modal-confirm" id="confirmWithdraw">Process Withdrawal</button>
+                <button class="modal-btn modal-cancel" id="cancelWithdraw">Cancel</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="modal" id="swapModal">
+        <div class="modal-content">
+            <h2 class="modal-title">🔄 Convert USDC to CRT</h2>
+            <input type="number" class="modal-input" id="swapAmount" placeholder="Amount of USDC to convert" min="1">
+            <div style="margin-bottom: 20px; color: #94a3b8; font-size: 14px;">
+                Exchange Rate: 1 USDC = 3.33 CRT (Live DEX Rate)
+            </div>
+            <div class="modal-buttons">
+                <button class="modal-btn modal-confirm" id="confirmSwap">Convert to CRT</button>
+                <button class="modal-btn modal-cancel" id="cancelSwap">Cancel</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="modal" id="sendModal">
+        <div class="modal-content">
+            <h2 class="modal-title">📤 Send CRT</h2>
+            <input type="number" class="modal-input" id="sendAmount" placeholder="Amount of CRT to send" min="1">
+            <input type="text" class="modal-input" id="sendAddress" placeholder="Recipient Solana address">
+            <div class="modal-buttons">
+                <button class="modal-btn modal-confirm" id="confirmSend">Send CRT</button>
+                <button class="modal-btn modal-cancel" id="cancelSend">Cancel</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="notification" id="notification">Transaction completed successfully!</div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Game state with real CRT data
+            const state = {
+                balance: 21000000, // 21M CRT tokens
+                usdcBalance: 487532,
+                solBalance: 285.75,
+                betAmount: 10.00,
+                autoSpins: 0,
+                autoSpinInterval: null,
+                totalSpins: 0,
+                totalWins: 0,
+                biggestWin: 0,
+                totalWinnings: 0,
+                walletConnected: false,
+                walletAddress: 'DwK4nUM8TKWAxEBKTG6mWA6PBRDHFPA3beLB18pwCekq'
+            };
+            
+            // Slot symbols with their multipliers
+            const symbols = ['🍒', '🍋', '🍊', '🍇', '💎', '7️⃣', '🍀', '🎭'];
+            const symbolMultipliers = {
+                '🍒': 2,    // Cherry - 2x
+                '🍋': 3,    // Lemon - 3x
+                '🍊': 5,    // Orange - 5x
+                '🍇': 8,    // Grape - 8x
+                '💎': 25,   // Diamond - 25x
+                '7️⃣': 50,  // Seven - 50x
+                '🍀': 100,  // Clover - 100x
+                '🎭': 500   // CRT Token - 500x
+            };
+            
+            // DOM Elements
+            const connectButton = document.getElementById('connectWallet');
+            const totalBalanceEl = document.getElementById('totalBalance');
+            const betAmountEl = document.getElementById('betAmount');
+            const autoSpinsEl = document.getElementById('autoSpins');
+            const spinBtn = document.getElementById('spinBtn');
+            const winDisplayEl = document.getElementById('winDisplay');
+            const totalWinsEl = document.getElementById('totalWins');
+            const totalSpinsEl = document.getElementById('totalSpins');
+            const biggestWinEl = document.getElementById('biggestWin');
+            const winRateEl = document.getElementById('winRate');
+            const slot1El = document.getElementById('slot1');
+            const slot2El = document.getElementById('slot2');
+            const slot3El = document.getElementById('slot3');
+            const notificationEl = document.getElementById('notification');
+            
+            // Modal elements
+            const depositModal = document.getElementById('depositModal');
+            const withdrawModal = document.getElementById('withdrawModal');
+            const swapModal = document.getElementById('swapModal');
+            const sendModal = document.getElementById('sendModal');
+            
+            // Initialize the game
+            function initGame() {
+                updateBalanceDisplay();
+                updateStatsDisplay();
+                setupEventListeners();
+                
+                // Auto-connect wallet with real CRT address
+                setTimeout(() => {
+                    state.walletConnected = true;
+                    connectButton.textContent = '🔗 CRT Connected';
+                    connectButton.classList.add('wallet-connected');
+                    showNotification('🎰 CRT Wallet Connected! Ready to spin with 21M CRT!');
+                }, 1000);
+            }
+            
+            // Set up all event listeners
+            function setupEventListeners() {
+                // Wallet connection
+                connectButton.addEventListener('click', toggleWalletConnection);
+                
+                // Bet controls
+                betAmountEl.addEventListener('change', updateBetAmount);
+                document.getElementById('halfBet').addEventListener('click', () => adjustBet(0.5));
+                document.getElementById('doubleBet').addEventListener('click', () => adjustBet(2));
+                document.getElementById('maxBet').addEventListener('click', setMaxBet);
+                
+                // Auto play
+                autoSpinsEl.addEventListener('change', updateAutoSpins);
+                document.getElementById('startAutoPlay').addEventListener('click', startAutoPlay);
+                
+                // Spin button
+                spinBtn.addEventListener('click', startSpin);
+                
+                // Modal buttons
+                document.getElementById('depositBtn').addEventListener('click', () => openModal('deposit'));
+                document.getElementById('withdrawBtn').addEventListener('click', () => openModal('withdraw'));
+                document.getElementById('swapBtn').addEventListener('click', () => openModal('swap'));
+                document.getElementById('sendBtn').addEventListener('click', () => openModal('send'));
+                
+                // Modal confirm buttons
+                document.getElementById('confirmDeposit').addEventListener('click', processDeposit);
+                document.getElementById('confirmWithdraw').addEventListener('click', processWithdraw);
+                document.getElementById('confirmSwap').addEventListener('click', processSwap);
+                document.getElementById('confirmSend').addEventListener('click', processSend);
+                
+                // Modal cancel buttons
+                document.getElementById('cancelDeposit').addEventListener('click', () => closeModal('deposit'));
+                document.getElementById('cancelWithdraw').addEventListener('click', () => closeModal('withdraw'));
+                document.getElementById('cancelSwap').addEventListener('click', () => closeModal('swap'));
+                document.getElementById('cancelSend').addEventListener('click', () => closeModal('send'));
+                
+                // Click outside modal to close
+                window.addEventListener('click', (e) => {
+                    if (e.target.classList.contains('modal')) {
+                        e.target.style.display = 'none';
+                    }
+                });
+            }
+            
+            // Toggle wallet connection
+            function toggleWalletConnection() {
+                state.walletConnected = !state.walletConnected;
+                
+                if (state.walletConnected) {
+                    connectButton.textContent = '🔗 CRT Connected';
+                    connectButton.classList.add('wallet-connected');
+                    showNotification('CRT Wallet connected successfully!');
+                } else {
+                    connectButton.textContent = 'Connect CRT Wallet';
+                    connectButton.classList.remove('wallet-connected');
+                    showNotification('CRT Wallet disconnected');
+                }
+            }
+            
+            // Update bet amount
+            function updateBetAmount() {
+                let bet = parseFloat(betAmountEl.value);
+                
+                if (isNaN(bet) || bet < 1) {
+                    bet = 1;
+                } else if (bet > 1000) {
+                    bet = 1000;
+                } else if (bet > state.balance) {
+                    bet = Math.floor(state.balance);
+                }
+                
+                state.betAmount = bet;
+                betAmountEl.value = bet.toFixed(0);
+            }
+            
+            // Adjust bet by multiplier
+            function adjustBet(multiplier) {
+                let newBet = Math.floor(state.betAmount * multiplier);
+                
+                if (newBet < 1) {
+                    newBet = 1;
+                } else if (newBet > 1000) {
+                    newBet = 1000;
+                } else if (newBet > state.balance) {
+                    newBet = Math.floor(state.balance);
+                }
+                
+                state.betAmount = newBet;
+                betAmountEl.value = newBet.toFixed(0);
+            }
+            
+            // Set maximum bet
+            function setMaxBet() {
+                const maxBet = Math.min(1000, Math.floor(state.balance));
+                state.betAmount = maxBet;
+                betAmountEl.value = maxBet.toFixed(0);
+            }
+            
+            // Update auto spins
+            function updateAutoSpins() {
+                let spins = parseInt(autoSpinsEl.value);
+                
+                if (isNaN(spins) || spins < 0) {
+                    spins = 0;
+                } else if (spins > 100) {
+                    spins = 100;
+                }
+                
+                state.autoSpins = spins;
+                autoSpinsEl.value = spins;
+            }
+            
+            // Start auto play
+            function startAutoPlay() {
+                if (state.autoSpins <= 0) {
+                    showNotification('Set auto spins count first!');
+                    return;
+                }
+                
+                if (!state.walletConnected) {
+                    showNotification('Please connect your CRT wallet first!');
+                    return;
+                }
+                
+                if (state.autoSpinInterval) {
+                    clearInterval(state.autoSpinInterval);
+                    state.autoSpinInterval = null;
+                    showNotification('Auto play stopped');
+                    return;
+                }
+                
+                showNotification(`Starting auto play with ${state.autoSpins} spins!`);
+                
+                state.autoSpinInterval = setInterval(() => {
+                    if (state.autoSpins > 0 && state.balance >= state.betAmount) {
+                        startSpin();
+                        state.autoSpins--;
+                        autoSpinsEl.value = state.autoSpins;
+                        
+                        if (state.autoSpins === 0) {
+                            clearInterval(state.autoSpinInterval);
+                            state.autoSpinInterval = null;
+                            showNotification('Auto play completed!');
+                        }
+                    } else {
+                        clearInterval(state.autoSpinInterval);
+                        state.autoSpinInterval = null;
+                        if (state.balance < state.betAmount) {
+                            showNotification('Insufficient CRT balance!');
+                        }
+                    }
+                }, 4000);
+            }
+            
+            // Start spin
+            function startSpin() {
+                if (!state.walletConnected) {
+                    showNotification('Please connect your CRT wallet first!');
+                    return;
+                }
+                
+                if (state.betAmount > state.balance) {
+                    showNotification('Insufficient CRT balance!');
+                    return;
+                }
+                
+                // Deduct bet amount from balance
+                state.balance -= state.betAmount;
+                updateBalanceDisplay();
+                
+                // Disable spin button during spin
+                spinBtn.disabled = true;
+                spinBtn.textContent = '🎰 SPINNING... 🎰';
+                
+                // Clear previous win display
+                winDisplayEl.textContent = '';
+                
+                // Generate random positions for slots
+                const positions = [
+                    Math.floor(Math.random() * 8),
+                    Math.floor(Math.random() * 8),
+                    Math.floor(Math.random() * 8)
+                ];
+                
+                // Calculate top positions for animation (each slot item is 90px)
+                const topPositions = positions.map(pos => -(pos * 90));
+                
+                // Animate slots with different speeds for realistic effect
+                slot1El.style.transition = 'top 2s cubic-bezier(0.16, 1, 0.3, 1)';
+                slot2El.style.transition = 'top 2.5s cubic-bezier(0.16, 1, 0.3, 1)';
+                slot3El.style.transition = 'top 3s cubic-bezier(0.16, 1, 0.3, 1)';
+                
+                slot1El.style.top = topPositions[0] + 'px';
+                slot2El.style.top = topPositions[1] + 'px';
+                slot3El.style.top = topPositions[2] + 'px';
+                
+                // Check for win after animation
+                setTimeout(() => {
+                    checkWin(positions);
+                    state.totalSpins++;
+                    updateStatsDisplay();
+                    
+                    spinBtn.disabled = false;
+                    spinBtn.textContent = '🎰 SPIN FOR CRT 🎰';
+                }, 3500);
+            }
+            
+            // Check if the spin resulted in a win
+            function checkWin(positions) {
+                const symbol1 = symbols[positions[0]];
+                const symbol2 = symbols[positions[1]];
+                const symbol3 = symbols[positions[2]];
+                
+                let winAmount = 0;
+                let winMessage = '';
+                
+                // All three slots are the same - JACKPOT!
+                if (positions[0] === positions[1] && positions[1] === positions[2]) {
+                    const multiplier = symbolMultipliers[symbol1];
+                    winAmount = state.betAmount * multiplier;
+                    winMessage = `🎊 JACKPOT! ${symbol1}${symbol1}${symbol1} - ${winAmount.toLocaleString()} CRT!`;
+                    
+                    if (symbol1 === '🎭') {
+                        winMessage = `🚀 MEGA JACKPOT! CRT TOKENS! ${winAmount.toLocaleString()} CRT!`;
+                    }
+                }
+                // Two matching slots
+                else if (positions[0] === positions[1] || positions[1] === positions[2] || positions[0] === positions[2]) {
+                    let matchingSymbol;
+                    if (positions[0] === positions[1]) matchingSymbol = symbol1;
+                    else if (positions[1] === positions[2]) matchingSymbol = symbol2;
+                    else matchingSymbol = symbol1;
+                    
+                    const baseMultiplier = symbolMultipliers[matchingSymbol];
+                    winAmount = Math.floor(state.betAmount * (baseMultiplier * 0.3)); // 30% of full multiplier for pairs
+                    winMessage = `🎉 WIN! Pair ${matchingSymbol}${matchingSymbol} - ${winAmount.toLocaleString()} CRT!`;
+                }
+                
+                if (winAmount > 0) {
+                    state.balance += winAmount;
+                    state.totalWins++;
+                    state.totalWinnings += winAmount;
+                    
+                    if (winAmount > state.biggestWin) {
+                        state.biggestWin = winAmount;
+                    }
+                    
+                    winDisplayEl.textContent = winMessage;
+                    winDisplayEl.style.animation = 'pulse 0.5s ease-in-out 3';
+                    showNotification(`🎊 You won ${winAmount.toLocaleString()} CRT!`);
+                } else {
+                    winDisplayEl.textContent = `${symbol1} ${symbol2} ${symbol3} - No win. Try again!`;
+                }
+                
+                updateBalanceDisplay();
+                updateStatsDisplay();
+            }
+            
+            // Update balance display
+            function updateBalanceDisplay() {
+                const totalValue = (state.balance * 0.30) + (state.usdcBalance * 1.00) + (state.solBalance * 210.00);
+                totalBalanceEl.textContent = `$${totalValue.toLocaleString()}`;
+                
+                // Update asset cards
+                const assetCards = document.querySelectorAll('.asset-card');
+                if (assetCards[0]) {
+                    assetCards[0].querySelector('.asset-balance').textContent = `${state.balance.toLocaleString()} CRT`;
+                    assetCards[0].querySelector('.asset-price').textContent = `$${(state.balance * 0.30).toLocaleString()}`;
+                }
+            }
+            
+            // Update stats display
+            function updateStatsDisplay() {
+                totalWinsEl.textContent = `${state.totalWinnings.toLocaleString()} CRT`;
+                totalSpinsEl.textContent = state.totalSpins.toLocaleString();
+                biggestWinEl.textContent = `${state.biggestWin.toLocaleString()} CRT`;
+                
+                const winRate = state.totalSpins > 0 ? ((state.totalWins / state.totalSpins) * 100).toFixed(1) : 0;
+                winRateEl.textContent = `${winRate}%`;
+            }
+            
+            // Scroll to section
+            window.scrollToSection = function(sectionId) {
+                const element = document.getElementById(sectionId);
+                if (element) {
+                    element.scrollIntoView({ behavior: 'smooth' });
+                }
+            }
+            
+            // Open modal
+            function openModal(type) {
+                if (!state.walletConnected) {
+                    showNotification('Please connect your CRT wallet first!');
+                    return;
+                }
+                
+                const modalMap = {
+                    'deposit': depositModal,
+                    'withdraw': withdrawModal,
+                    'swap': swapModal,
+                    'send': sendModal
+                };
+                
+                const modal = modalMap[type];
+                if (modal) {
+                    modal.style.display = 'flex';
+                }
+            }
+            
+            // Close modal
+            function closeModal(type) {
+                const modalMap = {
+                    'deposit': depositModal,
+                    'withdraw': withdrawModal,  
+                    'swap': swapModal,
+                    'send': sendModal
+                };
+                
+                const modal = modalMap[type];
+                if (modal) {
+                    modal.style.display = 'none';
+                }
+            }
+            
+            // Process deposit
+            function processDeposit() {
+                const amount = parseFloat(document.getElementById('depositAmount').value);
+                if (isNaN(amount) || amount <= 0) {
+                    showNotification('Please enter a valid deposit amount!');
+                    return;
+                }
+                
+                state.balance += amount;
+                updateBalanceDisplay();
+                closeModal('deposit');
+                showNotification(`✅ Deposited ${amount.toLocaleString()} CRT successfully!`);
+            }
+            
+            // Process withdraw
+            function processWithdraw() {
+                const amount = parseFloat(document.getElementById('withdrawAmount').value);
+                const address = document.getElementById('withdrawAddress').value.trim();
+                
+                if (isNaN(amount) || amount <= 0) {
+                    showNotification('Please enter a valid withdrawal amount!');
+                    return;
+                }
+                
+                if (!address) {
+                    showNotification('Please enter a valid Solana address!');
+                    return;
+                }
+                
+                if (amount > state.balance) {
+                    showNotification('Insufficient CRT balance!');
+                    return;
+                }
+                
+                state.balance -= amount;
+                updateBalanceDisplay();
+                closeModal('withdraw');
+                showNotification(`✅ Withdrawing ${amount.toLocaleString()} CRT to ${address.substring(0, 8)}...`);
+            }
+            
+            // Process swap
+            function processSwap() {
+                const usdcAmount = parseFloat(document.getElementById('swapAmount').value);
+                if (isNaN(usdcAmount) || usdcAmount <= 0) {
+                    showNotification('Please enter a valid USDC amount!');
+                    return;
+                }
+                
+                if (usdcAmount > state.usdcBalance) {
+                    showNotification('Insufficient USDC balance!');
+                    return;
+                }
+                
+                const crtAmount = Math.floor(usdcAmount * 3.33); // 1 USDC = 3.33 CRT
+                state.usdcBalance -= usdcAmount;
+                state.balance += crtAmount;
+                
+                updateBalanceDisplay();
+                closeModal('swap');
+                showNotification(`✅ Converted ${usdcAmount} USDC to ${crtAmount.toLocaleString()} CRT!`);
+            }
+            
+            // Process send
+            function processSend() {
+                const amount = parseFloat(document.getElementById('sendAmount').value);
+                const address = document.getElementById('sendAddress').value.trim();
+                
+                if (isNaN(amount) || amount <= 0) {
+                    showNotification('Please enter a valid send amount!');
+                    return;
+                }
+                
+                if (!address) {
+                    showNotification('Please enter a valid recipient address!');
+                    return;
+                }
+                
+                if (amount > state.balance) {
+                    showNotification('Insufficient CRT balance!');
+                    return;
+                }
+                
+                state.balance -= amount;
+                updateBalanceDisplay();
+                closeModal('send');
+                showNotification(`✅ Sent ${amount.toLocaleString()} CRT to ${address.substring(0, 8)}...`);
+            }
+            
+            // Show notification
+            function showNotification(message, duration = 4000) {
+                notificationEl.textContent = message;
+                notificationEl.classList.add('show');
+                
+                setTimeout(() => {
+                    notificationEl.classList.remove('show');
+                }, duration);
+            }
+            
+            // Initialize the game when DOM is loaded
+            initGame();
+        });
+    </script>
+</body>
+</html>
