@@ -1,6 +1,6 @@
 """
 Real Casino Savings System - Backend API
-Built specifically for CRT token integration with Bridge Pool functionality
+Built specifically for CRT token integration with Bridge Pool functionality and USDC/CRT conversion
 """
 
 from fastapi import FastAPI, HTTPException, Depends
@@ -17,6 +17,7 @@ from blockchain.real_wallet_manager import real_wallet_manager
 from casino.real_casino_engine import real_casino_engine
 from savings.real_savings_manager import real_savings_manager
 from bridge.crt_bridge_manager import crt_bridge_manager
+from conversion.real_usdc_crt_converter import real_usdc_crt_converter
 from config.blockchain_config import blockchain_config
 
 # Configure logging
@@ -24,8 +25,8 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 app = FastAPI(
-    title="Real Casino Savings System with CRT Bridge Pools",
-    description="Real cryptocurrency casino with CRT token integration and bridge pools",
+    title="Real Casino Savings System with CRT Bridge Pools and USDC Conversion",
+    description="Real cryptocurrency casino with CRT token integration, bridge pools, and USDC/CRT conversion",
     version="1.0.0"
 )
 
@@ -37,6 +38,106 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# ===============================
+# USDC TO CRT CONVERSION ENDPOINTS
+# ===============================
+
+@app.post("/api/conversion/usdc-to-crt")
+async def convert_usdc_to_crt(request: Dict[str, Any]):
+    """Convert USDC to CRT tokens using real DEX swaps"""
+    try:
+        wallet_address = request.get("wallet_address")
+        usdc_amount = request.get("usdc_amount")  # Optional - if not provided, convert ALL
+        
+        if not wallet_address:
+            raise HTTPException(status_code=400, detail="wallet_address is required")
+        
+        logger.info(f"💱 USDC to CRT conversion request from {wallet_address}")
+        
+        # Get current USDC balance
+        balance_result = await real_usdc_crt_converter.get_current_usdc_balance(wallet_address)
+        if not balance_result.get('success'):
+            raise HTTPException(status_code=400, detail=f"Could not get USDC balance: {balance_result.get('error')}")
+        
+        current_usdc = balance_result.get('usdc_balance', 0.0)
+        
+        if current_usdc <= 0:
+            return {
+                "success": False,
+                "error": "No USDC balance to convert",
+                "current_usdc": current_usdc
+            }
+        
+        # Determine amount to convert
+        if usdc_amount is None:
+            # Convert ALL USDC
+            amount_to_convert = current_usdc
+            conversion_type = "CONVERT_ALL_USDC"
+        else:
+            # Convert specified amount
+            amount_to_convert = float(usdc_amount)
+            conversion_type = "CONVERT_PARTIAL_USDC"
+            
+            if amount_to_convert > current_usdc:
+                raise HTTPException(status_code=400, detail=f"Insufficient USDC: {current_usdc} < {amount_to_convert}")
+        
+        # Execute conversion
+        conversion_result = await real_usdc_crt_converter.convert_all_usdc_to_crt(
+            wallet_address, amount_to_convert
+        )
+        
+        if conversion_result.get('success'):
+            return {
+                "success": True,
+                "conversion_result": conversion_result,
+                "conversion_type": conversion_type,
+                "usdc_converted": amount_to_convert,
+                "crt_received": conversion_result.get('crt_received'),
+                "wallet_address": wallet_address,
+                "real_conversion": True,
+                "note": f"✅ REAL USDC to CRT conversion completed: {amount_to_convert} USDC → {conversion_result.get('crt_received', 0):,.0f} CRT"
+            }
+        else:
+            return {
+                "success": False,
+                "error": conversion_result.get('error', 'Conversion failed'),
+                "usdc_amount": amount_to_convert
+            }
+            
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"❌ USDC to CRT conversion failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/conversion/estimate-usdc-to-crt")
+async def estimate_usdc_to_crt_conversion(usdc_amount: float):
+    """Estimate CRT received for USDC amount"""
+    try:
+        logger.info(f"💡 Estimating USDC to CRT conversion: {usdc_amount} USDC")
+        
+        estimation = await real_usdc_crt_converter.estimate_usdc_to_crt_conversion(usdc_amount)
+        
+        return estimation
+        
+    except Exception as e:
+        logger.error(f"❌ USDC to CRT estimation failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/conversion/current-usdc-balance")
+async def get_current_usdc_balance(wallet_address: str):
+    """Get current USDC balance for conversion"""
+    try:
+        logger.info(f"💰 Getting current USDC balance for {wallet_address}")
+        
+        balance_result = await real_usdc_crt_converter.get_current_usdc_balance(wallet_address)
+        
+        return balance_result
+        
+    except Exception as e:
+        logger.error(f"❌ Failed to get USDC balance: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 # ===============================
 # CRT TOKEN WALLET ENDPOINTS
@@ -502,7 +603,7 @@ async def get_system_status():
     try:
         return {
             "success": True,
-            "system": "Real Casino Savings System with CRT Bridge Pools",
+            "system": "Real Casino Savings System with CRT Bridge Pools and USDC Conversion",
             "version": "1.0.0",
             "primary_currency": "CRT",
             "supported_networks": ["Solana", "Ethereum", "Bitcoin", "TRON"],
@@ -511,6 +612,7 @@ async def get_system_status():
                 "real_blockchain_withdrawals": True,
                 "real_dex_pool_creation": True,
                 "real_bridge_pools": True,
+                "real_usdc_crt_conversion": True,
                 "real_balance_checking": True,
                 "cross_chain_transfers": True,
                 "fake_transactions": False,
@@ -519,9 +621,10 @@ async def get_system_status():
             "casino_games": ["slots", "blackjack", "roulette", "dice"],
             "savings_strategies": ["dex_pools", "yield_farming", "compound_savings"],
             "bridge_pairs": ["CRT/SOL", "CRT/USDC", "CRT/ETH", "CRT/BTC"],
+            "conversion_pairs": ["USDC/CRT"],
             "status": "OPERATIONAL",
             "timestamp": datetime.utcnow().isoformat(),
-            "note": "✅ Real cryptocurrency system with bridge pools - NO SIMULATIONS"
+            "note": "✅ Real cryptocurrency system with bridge pools and USDC conversion - NO SIMULATIONS"
         }
         
     except Exception as e:
@@ -532,11 +635,12 @@ async def get_system_status():
 async def root():
     """Root endpoint"""
     return {
-        "message": "Real Casino Savings System with CRT Bridge Pools API",
+        "message": "Real Casino Savings System with CRT Bridge Pools and USDC Conversion API",
         "status": "OPERATIONAL",
         "primary_currency": "CRT",
         "real_cryptocurrency": True,
-        "bridge_pools_supported": True
+        "bridge_pools_supported": True,
+        "usdc_crt_conversion": True
     }
 
 if __name__ == "__main__":
