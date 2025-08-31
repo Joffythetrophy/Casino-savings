@@ -6,6 +6,7 @@ import CRTWalletManager from './components/CRTWalletManager';
 import CRTCasinoInterface from './components/CRTCasinoInterface';
 import CRTSavingsManager from './components/CRTSavingsManager';
 import CRTBridgeManager from './components/CRTBridgeManager';
+import USDCToCRTConverter from './components/USDCToCRTConverter';
 import RealSystemStatus from './components/RealSystemStatus';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8002/api';
@@ -84,7 +85,7 @@ function App() {
             🎰 Real Casino Savings System
           </h1>
           <div className="header-info">
-            <span className="crt-focus">CRT Token Casino + Bridge Pools</span>
+            <span className="crt-focus">CRT Token Casino + Bridge Pools + USDC Conversion</span>
             {systemStatus && (
               <span className="system-status">
                 {systemStatus.features.real_cryptocurrency_betting ? '✅ REAL' : '❌ FAKE'}
@@ -112,6 +113,12 @@ function App() {
             onClick={() => setCurrentView('bridge')}
           >
             🌉 Bridge
+          </button>
+          <button
+            className={`nav-button ${currentView === 'convert' ? 'active' : ''}`}
+            onClick={() => setCurrentView('convert')}
+          >
+            💱 Convert
           </button>
           <button
             className={`nav-button ${currentView === 'wallet' ? 'active' : ''}`}
@@ -159,7 +166,7 @@ function App() {
         {!isConnected ? (
           <div className="welcome-screen">
             <div className="welcome-card">
-              <h2>🎰 Welcome to Real Casino Savings with Bridge Pools</h2>
+              <h2>🎰 Welcome to Real Casino Savings with Bridge Pools & USDC Conversion</h2>
               <p>
                 A real cryptocurrency casino that uses your <strong>CRT tokens</strong> for:
               </p>
@@ -169,6 +176,7 @@ function App() {
                 <li>✅ Real savings from gaming losses</li>
                 <li>✅ Real DEX pool creation</li>
                 <li>✅ Real cross-chain bridge pools</li>
+                <li>✅ Real USDC to CRT conversion</li>
                 <li>❌ No fake balances or simulations</li>
               </ul>
               
@@ -210,6 +218,14 @@ function App() {
               />
             )}
             
+            {currentView === 'convert' && (
+              <USDCToCRTConverter
+                walletAddress={walletAddress}
+                onBalanceUpdate={refreshBalance}
+                backendUrl={BACKEND_URL}
+              />
+            )}
+            
             {currentView === 'wallet' && (
               <CRTWalletManager
                 walletAddress={walletAddress}
@@ -233,10 +249,10 @@ function App() {
       {/* Footer */}
       <footer className="app-footer">
         <p>
-          🔥 Real Casino Savings System with CRT Bridge Pools - Built for 21M CRT Token Integration
+          🔥 Real Casino Savings System - Built for 21M CRT Token Integration
         </p>
         <p>
-          ✅ Real Cryptocurrency • ❌ No Simulations • 🔗 Solana Blockchain • 🌉 Cross-Chain Bridges
+          ✅ Real Cryptocurrency • ❌ No Simulations • 🔗 Solana Blockchain • 🌉 Cross-Chain Bridges • 💱 USDC Conversion
         </p>
       </footer>
     </div>
