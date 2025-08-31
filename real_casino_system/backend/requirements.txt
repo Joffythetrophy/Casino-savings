@@ -8,7 +8,7 @@ python-multipart==0.0.6
 pydantic==2.5.0
 
 # REAL Solana blockchain integration
-solana==0.34.3
+solana>=0.36.1
 solders==0.21.0
 
 # REAL Web3 and blockchain libraries  
