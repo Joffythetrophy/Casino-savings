@@ -10,12 +10,14 @@ module.exports = {
         crypto: require.resolve('crypto-browserify'),
         stream: require.resolve('stream-browserify'),
         buffer: require.resolve('buffer'),
-        process: require.resolve('process/browser'),
+        process: require.resolve('process'),
         zlib: false,
         fs: false,
         net: false,
         tls: false,
         child_process: false,
+        path: false,
+        os: false,
       };
 
       // Add plugins for Buffer and process
