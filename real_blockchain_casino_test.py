@@ -389,48 +389,49 @@ class RealBlockchainCasinoTester:
             self.log_test("Casino Games Real Betting", False, f"Exception: {str(e)}")
             return False
     
-    async def test_bridge_supported_pairs(self) -> bool:
-        """Test bridge supported pairs for real blockchain operations"""
+    async def test_blockchain_balances_real_data(self) -> bool:
+        """Test blockchain balances endpoint for real data"""
         try:
-            async with self.session.get(f"{BACKEND_URL}/bridge/supported-pairs") as resp:
-                result = await resp.json()
-                
-                if resp.status == 200 and result.get("success"):
-                    pairs = result.get("pairs", [])
+            url = f"{BACKEND_URL}/blockchain/balances?wallet_address={TEST_WALLET_ADDRESS}"
+            async with self.session.get(url) as resp:
+                if resp.status == 200:
+                    result = await resp.json()
                     
-                    if pairs:
-                        # Check for real blockchain pairs
-                        result_str = json.dumps(result).lower()
+                    if result.get("success"):
+                        balances = result.get("balances", {})
+                        errors = result.get("errors", {})
                         
-                        real_chains = ["solana", "ethereum", "polygon", "bsc"]
-                        found_chains = [chain for chain in real_chains if chain in result_str]
+                        # Check for real blockchain sources
+                        real_sources = []
+                        for currency, balance_info in balances.items():
+                            source = balance_info.get("source", "")
+                            if "blockcypher" in source or "trongrid" in source or "solana_rpc" in source:
+                                real_sources.append(f"{currency}: {source}")
                         
-                        if found_chains:
-                            self.log_test("Bridge Supported Pairs", True, 
-                                        f"Real blockchain pairs supported: {len(pairs)} pairs, chains: {', '.join(found_chains)}", result)
+                        if real_sources:
+                            self.log_test("Blockchain Balances Real Data", True, 
+                                        f"Real blockchain data sources: {', '.join(real_sources)}", result)
+                            return True
+                        elif balances:
+                            self.log_test("Blockchain Balances Real Data", True, 
+                                        f"Blockchain balances retrieved for {len(balances)} currencies", result)
                             return True
                         else:
-                            self.log_test("Bridge Supported Pairs", True, 
-                                        f"Bridge pairs available: {len(pairs)} (real blockchain assumed)", result)
-                            return True
+                            self.log_test("Blockchain Balances Real Data", False, 
+                                        "No blockchain balances retrieved", result)
+                            return False
                     else:
-                        self.log_test("Bridge Supported Pairs", False, 
-                                    "No bridge pairs found", result)
+                        self.log_test("Blockchain Balances Real Data", False, 
+                                    "Blockchain balances fetch failed", result)
                         return False
                 else:
-                    # Check if it's a real API limitation
-                    result_str = json.dumps(result).lower()
-                    if "bridge" in result_str or "chain" in result_str:
-                        self.log_test("Bridge Supported Pairs", True, 
-                                    "Real bridge system (may need full configuration)", result)
-                        return True
-                    else:
-                        self.log_test("Bridge Supported Pairs", False, 
-                                    f"Bridge failed: {result.get('message', 'Unknown error')}", result)
-                        return False
+                    error_text = await resp.text()
+                    self.log_test("Blockchain Balances Real Data", False, 
+                                f"HTTP {resp.status}: {error_text}")
+                    return False
                     
         except Exception as e:
-            self.log_test("Bridge Supported Pairs", False, f"Exception: {str(e)}")
+            self.log_test("Blockchain Balances Real Data", False, f"Exception: {str(e)}")
             return False
     
     async def test_jupiter_aggregator_preparation(self) -> bool:
