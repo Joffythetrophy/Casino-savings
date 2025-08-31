@@ -252,13 +252,16 @@ class RealBlockchainCasinoTester:
                     source = result.get("source", "")
                     
                     # Check if it's real price data
-                    if price > 0 and ("orca" in source.lower() or "dex" in source.lower()):
+                    price_usd = result.get("price_usd", 0)
+                    source = result.get("source", "")
+                    
+                    if price_usd > 0 and ("orca" in source.lower() or "dex" in source.lower()):
                         self.log_test("DEX CRT Price", True, 
-                                    f"Real CRT price from DEX: ${price}", result)
+                                    f"Real CRT price from DEX: ${price_usd} (source: {source})", result)
                         return True
-                    elif price > 0:
+                    elif price_usd > 0:
                         self.log_test("DEX CRT Price", True, 
-                                    f"CRT price retrieved: ${price} (source: {source})", result)
+                                    f"CRT price retrieved: ${price_usd} (source: {source})", result)
                         return True
                     else:
                         self.log_test("DEX CRT Price", False, 
