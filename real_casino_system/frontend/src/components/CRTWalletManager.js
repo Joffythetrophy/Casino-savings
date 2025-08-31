@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 
 const CRTWalletManager = ({ walletAddress, crtBalance, onBalanceUpdate, backendUrl, isConnected, onConnect }) => {
   const [allBalances, setAllBalances] = useState({});
@@ -8,9 +8,38 @@ const CRTWalletManager = ({ walletAddress, crtBalance, onBalanceUpdate, backendU
   const [walletInput, setWalletInput] = useState('');
   const [isLoadingBalance, setIsLoadingBalance] = useState(false);
   const [transactionHistory, setTransactionHistory] = useState([]);
+  const [phantomWallet, setPhantomWallet] = useState(null);
+  const [realWalletConnection, setRealWalletConnection] = useState(false);
 
   // Your known CRT wallet address for easy connection
   const KNOWN_CRT_WALLET = 'DwK4nUM8TKWAxEBKTG6mWA6PBRDHFPA3beLB18pwCekq';
+
+  // Check for real Phantom wallet
+  useEffect(() => {
+    const checkPhantomWallet = () => {
+      if (window.solana && window.solana.isPhantom) {
+        setPhantomWallet(window.solana);
+        console.log('✅ REAL Phantom wallet detected');
+      } else {
+        console.log('⚠️ Phantom wallet not detected - install for REAL transactions');
+      }
+    };
+
+    checkPhantomWallet();
+    
+    // Listen for wallet changes
+    if (window.solana) {
+      window.solana.on('connect', () => {
+        console.log('🔗 Phantom wallet connected for REAL transactions');
+        setRealWalletConnection(true);
+      });
+      
+      window.solana.on('disconnect', () => {
+        console.log('❌ Phantom wallet disconnected');
+        setRealWalletConnection(false);
+      });
+    }
+  }, []);
 
   useEffect(() => {
     if (isConnected && walletAddress) {
