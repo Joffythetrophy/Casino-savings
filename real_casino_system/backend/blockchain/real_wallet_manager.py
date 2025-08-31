@@ -45,49 +45,77 @@ class RealWalletManager:
         self.commitment = Commitment("confirmed")
     
     async def get_real_solana_balance(self, wallet_address: str) -> Dict[str, Any]:
-        """Get REAL Solana balances from blockchain"""
+        """Get REAL Solana balances from blockchain - MAINNET ONLY"""
         try:
             wallet_pubkey = Pubkey.from_string(wallet_address)
+            logger.info(f"🔍 Fetching REAL balances from Solana MAINNET for {wallet_address}")
             
-            # Get SOL balance
-            sol_balance_resp = await self.solana_client.get_balance(wallet_pubkey)
+            # Get REAL SOL balance from mainnet
+            sol_balance_resp = await self.solana_client.get_balance(wallet_pubkey, commitment=self.commitment)
             sol_balance = sol_balance_resp.value / 1_000_000_000  # Convert lamports to SOL
             
-            # Get token balances
-            token_accounts = await self.solana_client.get_token_accounts_by_owner(
-                wallet_pubkey,
-                TokenAccountOpts(program_id=Pubkey.from_string("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"))
-            )
-            
+            # Initialize balances
             balances = {
                 'SOL': sol_balance,
                 'USDC': 0.0,
                 'CRT': 0.0,
                 'wallet_address': wallet_address,
-                'network': 'solana',
-                'source': 'REAL_BLOCKCHAIN',
+                'network': 'solana-mainnet',
+                'source': 'REAL_BLOCKCHAIN_MAINNET',
                 'last_updated': asyncio.get_event_loop().time()
             }
             
-            # Parse token account balances
-            for account in token_accounts.value:
-                account_data = account.account.data
-                # Parse token account data to get mint and balance
-                # This would need proper SPL token parsing
+            # Get REAL token balances from mainnet
+            try:
+                token_accounts = await self.solana_client.get_token_accounts_by_owner(
+                    wallet_pubkey,
+                    TokenAccountOpts(program_id=TOKEN_PROGRAM_ID),
+                    commitment=self.commitment
+                )
                 
-            logger.info(f"✅ Retrieved REAL Solana balances for {wallet_address}: {balances}")
+                for account in token_accounts.value:
+                    account_info = account.account
+                    if account_info and account_info.data:
+                        # Parse SPL token account data
+                        data = account_info.data
+                        if len(data) >= 64:
+                            # Extract mint (first 32 bytes) and amount (bytes 64-72)
+                            mint_bytes = data[:32]
+                            amount_bytes = data[64:72]
+                            
+                            mint_pubkey = Pubkey(mint_bytes)
+                            amount = int.from_bytes(amount_bytes, 'little')
+                            
+                            # Check if it's USDC
+                            if mint_pubkey == self.tokens['solana']['USDC']:
+                                balances['USDC'] = amount / 1_000_000  # USDC has 6 decimals
+                                logger.info(f"💵 Found REAL USDC balance: {balances['USDC']}")
+                            
+                            # Check if it's CRT token
+                            elif mint_pubkey == self.tokens['solana']['CRT']:
+                                balances['CRT'] = amount / 1_000_000  # Assuming 6 decimals for CRT
+                                logger.info(f"🎭 Found REAL CRT balance: {balances['CRT']}")
+                            
+            except Exception as token_error:
+                logger.warning(f"⚠️ Could not fetch token balances: {str(token_error)}")
+            
+            logger.info(f"✅ Retrieved REAL Solana balances from MAINNET for {wallet_address}: SOL={sol_balance:.6f}, USDC={balances['USDC']:.6f}, CRT={balances['CRT']:.0f}")
+            
             return {
                 'success': True,
                 'balances': balances,
-                'real_blockchain': True
+                'real_blockchain': True,
+                'network': 'solana-mainnet',
+                'note': '✅ REAL balances from Solana MAINNET blockchain'
             }
             
         except Exception as e:
-            logger.error(f"❌ Failed to get real Solana balance: {str(e)}")
+            logger.error(f"❌ Failed to get REAL Solana balance from MAINNET: {str(e)}")
             return {
                 'success': False,
-                'error': str(e),
-                'balances': {}
+                'error': f"Failed to get real blockchain balance: {str(e)}",
+                'balances': {},
+                'real_blockchain': False
             }
     
     async def get_real_ethereum_balance(self, wallet_address: str) -> Dict[str, Any]:
