@@ -26,8 +26,9 @@ class RealOrcaManager:
         self.commitment = Commitment("confirmed")
         
         # REAL Orca program addresses on mainnet
-        self.orca_program_id = Pubkey.from_string("9W959DqEETiGZocYWCQPaJ6sD0dILjWJgYzs5VBs1v5")
+        self.orca_swap_program_id = Pubkey.from_string("DjVE6JNiYqPL2QXyCUUh8rNjHrbz9hXHNYt99MQ59qw1")
         self.whirlpool_program_id = Pubkey.from_string("whirLbMiicVdio4qvUfM5KAg6Ct8VwpYzGff3uctyCc")
+        self.aquafarm_program_id = Pubkey.from_string("82yxjeMsvaURa4MbZZ7WZZHfobirZYkH1zF8fmeGtyaQ")
         
         # REAL token addresses
         self.tokens = {
