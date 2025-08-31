@@ -242,9 +242,9 @@ class RealBlockchainCasinoTester:
             return False
     
     async def test_orca_crt_price(self) -> bool:
-        """Test Orca CRT price endpoint"""
+        """Test DEX CRT price endpoint"""
         try:
-            async with self.session.get(f"{BACKEND_URL}/orca/crt-price") as resp:
+            async with self.session.get(f"{BACKEND_URL}/dex/crt-price") as resp:
                 result = await resp.json()
                 
                 if resp.status == 200 and result.get("success"):
@@ -253,31 +253,31 @@ class RealBlockchainCasinoTester:
                     
                     # Check if it's real price data
                     if price > 0 and ("orca" in source.lower() or "dex" in source.lower()):
-                        self.log_test("Orca CRT Price", True, 
-                                    f"Real CRT price from Orca: ${price}", result)
+                        self.log_test("DEX CRT Price", True, 
+                                    f"Real CRT price from DEX: ${price}", result)
                         return True
                     elif price > 0:
-                        self.log_test("Orca CRT Price", True, 
+                        self.log_test("DEX CRT Price", True, 
                                     f"CRT price retrieved: ${price} (source: {source})", result)
                         return True
                     else:
-                        self.log_test("Orca CRT Price", False, 
+                        self.log_test("DEX CRT Price", False, 
                                     "Invalid CRT price data", result)
                         return False
                 else:
                     # Check if it's a real API error vs simulation
                     result_str = json.dumps(result).lower()
                     if "api" in result_str or "network" in result_str:
-                        self.log_test("Orca CRT Price", True, 
+                        self.log_test("DEX CRT Price", True, 
                                     "Real API error (expected for real system without full setup)", result)
                         return True
                     else:
-                        self.log_test("Orca CRT Price", False, 
+                        self.log_test("DEX CRT Price", False, 
                                     f"CRT price fetch failed: {result.get('message', 'Unknown error')}", result)
                         return False
                     
         except Exception as e:
-            self.log_test("Orca CRT Price", False, f"Exception: {str(e)}")
+            self.log_test("DEX CRT Price", False, f"Exception: {str(e)}")
             return False
     
     async def test_usdc_to_crt_conversion(self) -> bool:
