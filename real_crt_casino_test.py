@@ -12,7 +12,7 @@ from datetime import datetime
 from typing import Dict, Any, List
 
 # Test Configuration - REAL PRODUCTION ENVIRONMENT
-BACKEND_URL = "https://real-crt-casino.preview.emergentagent.com/api"
+BACKEND_URL = "https://crypto-treasury.preview.emergentagent.com/api"
 REAL_USER_WALLET = "DwK4nUM8TKWAxEBKTG6mWA6PBRDHFPA3beLB18pwCekq"
 TEST_USER = {
     "username": "cryptoking",

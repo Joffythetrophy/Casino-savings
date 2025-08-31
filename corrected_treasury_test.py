@@ -13,7 +13,7 @@ import sys
 
 class CorrectedTreasuryTester:
     def __init__(self):
-        self.base_url = "https://real-crt-casino.preview.emergentagent.com/api"
+        self.base_url = "https://crypto-treasury.preview.emergentagent.com/api"
         self.test_results = []
         self.session = None
         self.auth_token = None

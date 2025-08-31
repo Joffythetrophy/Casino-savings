@@ -25,10 +25,10 @@
   {
     "test": "CORS Configuration",
     "success": true,
-    "details": "CORS properly configured: {'Access-Control-Allow-Origin': 'https://real-crt-casino.preview.emergentagent.com', 'Access-Control-Allow-Methods': 'DELETE, GET, HEAD, OPTIONS, PATCH, POST, PUT', 'Access-Control-Allow-Headers': 'Content-Type,Authorization'}",
+    "details": "CORS properly configured: {'Access-Control-Allow-Origin': 'https://crypto-treasury.preview.emergentagent.com', 'Access-Control-Allow-Methods': 'DELETE, GET, HEAD, OPTIONS, PATCH, POST, PUT', 'Access-Control-Allow-Headers': 'Content-Type,Authorization'}",
     "timestamp": "2025-08-30T16:13:35.409659",
     "data": {
-      "Access-Control-Allow-Origin": "https://real-crt-casino.preview.emergentagent.com",
+      "Access-Control-Allow-Origin": "https://crypto-treasury.preview.emergentagent.com",
       "Access-Control-Allow-Methods": "DELETE, GET, HEAD, OPTIONS, PATCH, POST, PUT",
       "Access-Control-Allow-Headers": "Content-Type,Authorization"
     }

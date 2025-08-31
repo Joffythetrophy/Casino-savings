@@ -10,7 +10,7 @@ import sys
 from datetime import datetime
 
 # Test Configuration
-BACKEND_URL = "https://real-crt-casino.preview.emergentagent.com/api"
+BACKEND_URL = "https://crypto-treasury.preview.emergentagent.com/api"
 TEST_USER = {
     "username": "cryptoking",
     "password": "crt21million",

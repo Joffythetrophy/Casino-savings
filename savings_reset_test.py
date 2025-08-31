@@ -9,7 +9,7 @@ import aiohttp
 import json
 from datetime import datetime
 
-BACKEND_URL = "https://real-crt-casino.preview.emergentagent.com/api"
+BACKEND_URL = "https://crypto-treasury.preview.emergentagent.com/api"
 
 async def test_savings_reset():
     """Test various approaches to reset savings balances"""

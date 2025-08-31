@@ -10,7 +10,7 @@ import json
 from datetime import datetime
 
 # Backend URL from frontend env
-BACKEND_URL = "https://real-crt-casino.preview.emergentagent.com/api"
+BACKEND_URL = "https://crypto-treasury.preview.emergentagent.com/api"
 
 async def test_user_doge_deposit_request():
     """Test the specific DOGE deposit request from the user"""

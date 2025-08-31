@@ -14,7 +14,7 @@ from typing import Dict, Any, Optional
 from decimal import Decimal
 
 # Get backend URL from frontend env
-BACKEND_URL = "https://real-crt-casino.preview.emergentagent.com/api"
+BACKEND_URL = "https://crypto-treasury.preview.emergentagent.com/api"
 
 class USDCRedistributionTester:
     def __init__(self, base_url: str):
