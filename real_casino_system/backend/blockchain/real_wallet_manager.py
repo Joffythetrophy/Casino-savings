@@ -5,12 +5,20 @@ Handles REAL cryptocurrency wallet operations - no simulations
 
 import asyncio
 import json
+import base64
 from typing import Dict, Any, List, Optional
 from web3 import Web3
 from solana.rpc.async_api import AsyncClient
+from solana.rpc.commitment import Commitment
+from solana.rpc.core import RPCException
 from solders.keypair import Keypair
 from solders.pubkey import Pubkey
-from solana.rpc.types import TokenAccountOpts
+from solders.system_program import TransferParams, transfer
+from solders.transaction import Transaction
+from solders.message import to_bytes_versioned
+from solana.rpc.types import TokenAccountOpts, TxOpts
+from spl.token.client import Token
+from spl.token.constants import TOKEN_PROGRAM_ID
 import aiohttp
 import logging
 
@@ -20,18 +28,21 @@ class RealWalletManager:
     """Manages real cryptocurrency wallets and balances"""
     
     def __init__(self):
-        # Real blockchain connections
+        # Real blockchain connections - MAINNET ONLY
         self.solana_client = AsyncClient("https://api.mainnet-beta.solana.com")
         self.ethereum_web3 = Web3(Web3.HTTPProvider("https://mainnet.infura.io/v3/demo"))
         
-        # Token addresses
+        # REAL Token addresses on MAINNET
         self.tokens = {
             'solana': {
                 'USDC': Pubkey.from_string('EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v'),
-                'CRT': Pubkey.from_string('9pjWtc6x88wrRMXTxkBcNB6YtcN7NNcyzDAfUMfRknty'),
+                'CRT': Pubkey.from_string('DwK4nUM8TKWAxEBKTG6mWA6PBRDHFPA3beLB18pwCekq'),  # REAL CRT token address
                 'SOL': Pubkey.from_string('So11111111111111111111111111111111111111112')
             }
         }
+        
+        # Transaction commitment
+        self.commitment = Commitment("confirmed")
     
     async def get_real_solana_balance(self, wallet_address: str) -> Dict[str, Any]:
         """Get REAL Solana balances from blockchain"""
