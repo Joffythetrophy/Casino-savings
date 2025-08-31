@@ -606,10 +606,10 @@ async def main():
             ("test_solana_mainnet_connection", "Solana Mainnet Connection"),
             ("test_real_crt_balance_fetching", "Real CRT Balance Fetching"),
             ("test_orca_pools_integration", "Orca Pools Integration"),
-            ("test_orca_crt_price", "Orca CRT Price"),
+            ("test_orca_crt_price", "DEX CRT Price"),
             ("test_usdc_to_crt_conversion", "USDC to CRT Conversion"),
             ("test_casino_games_real_betting", "Casino Games Real Betting"),
-            ("test_bridge_supported_pairs", "Bridge Supported Pairs"),
+            ("test_blockchain_balances_real_data", "Blockchain Balances Real Data"),
             ("test_jupiter_aggregator_preparation", "Jupiter Aggregator Preparation"),
             ("test_real_blockchain_error_handling", "Real Blockchain Error Handling")
         ]
