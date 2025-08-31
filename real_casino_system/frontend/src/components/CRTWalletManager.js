@@ -194,16 +194,37 @@ const CRTWalletManager = ({ walletAddress, crtBalance, onBalanceUpdate, backendU
           <h2>🎰 Connect Your CRT Wallet</h2>
           <p>Connect your Solana wallet containing CRT tokens to start playing!</p>
           
+          <div className="real-wallet-connect">
+            <h3>🚀 Connect REAL Phantom Wallet (Recommended):</h3>
+            <div className="phantom-connect">
+              <p>Connect your actual Phantom wallet for REAL blockchain transactions</p>
+              <button 
+                className="connect-button phantom-button"
+                onClick={connectRealPhantomWallet}
+                disabled={isLoadingBalance}
+              >
+                {isLoadingBalance ? '🔄 Connecting...' : '👻 Connect REAL Phantom Wallet'}
+              </button>
+              {!phantomWallet && (
+                <p className="install-note">
+                  <a href="https://phantom.app/" target="_blank" rel="noopener noreferrer">
+                    Install Phantom Wallet
+                  </a> for REAL blockchain transactions
+                </p>
+              )}
+            </div>
+          </div>
+
           <div className="quick-connect">
-            <h3>Quick Connect (Your Known Wallet):</h3>
+            <h3>Or Connect Known CRT Wallet:</h3>
             <div className="known-wallet">
               <code>{KNOWN_CRT_WALLET}</code>
               <button 
                 className="connect-button"
-                onClick={connectWallet}
+                onClick={connectKnownWallet}
                 disabled={isLoadingBalance}
               >
-                {isLoadingBalance ? '🔄 Connecting...' : '🔗 Connect'}
+                {isLoadingBalance ? '🔄 Connecting...' : '🔗 Connect Known Wallet'}
               </button>
             </div>
           </div>
