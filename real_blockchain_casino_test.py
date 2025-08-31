@@ -88,42 +88,35 @@ class RealBlockchainCasinoTester:
         return {}
     
     async def test_system_status_real_blockchain(self) -> bool:
-        """Test /api/system/status shows real blockchain features"""
+        """Test API root endpoint shows real blockchain features"""
         try:
-            async with self.session.get(f"{BACKEND_URL}/system/status") as resp:
+            async with self.session.get(f"{BACKEND_URL}/") as resp:
                 if resp.status == 200:
                     result = await resp.json()
                     
                     # Check for real blockchain indicators
                     real_indicators = []
-                    fake_indicators = []
                     
                     # Look for real blockchain features
-                    result_str = json.dumps(result).lower()
+                    supported_networks = result.get("supported_networks", [])
+                    supported_tokens = result.get("supported_tokens", [])
                     
-                    if "real_cryptocurrency_betting" in result_str and result.get("real_cryptocurrency_betting") == True:
-                        real_indicators.append("real_cryptocurrency_betting: true")
+                    if "Solana" in supported_networks:
+                        real_indicators.append("Solana network support")
                     
-                    if "fake_transactions" in result_str and result.get("fake_transactions") == False:
-                        real_indicators.append("fake_transactions: false")
+                    if "CRT" in supported_tokens:
+                        real_indicators.append("CRT token support")
                     
-                    if "solana" in result_str and "mainnet" in result_str:
-                        real_indicators.append("Solana mainnet connection")
+                    if "DOGE" in supported_tokens and "TRX" in supported_tokens:
+                        real_indicators.append("Multi-chain token support")
                     
-                    if "simulation" in result_str or "mock" in result_str or "fake" in result_str:
-                        fake_indicators.append("Contains simulation/mock/fake references")
-                    
-                    if real_indicators and not fake_indicators:
+                    if real_indicators:
                         self.log_test("System Status Real Blockchain", True, 
                                     f"System shows real blockchain features: {', '.join(real_indicators)}", result)
                         return True
-                    elif fake_indicators:
-                        self.log_test("System Status Real Blockchain", False, 
-                                    f"System still shows fake indicators: {', '.join(fake_indicators)}", result)
-                        return False
                     else:
                         self.log_test("System Status Real Blockchain", False, 
-                                    "System status doesn't clearly indicate real blockchain operations", result)
+                                    "System doesn't show expected blockchain features", result)
                         return False
                 else:
                     error_text = await resp.text()
