@@ -291,7 +291,7 @@ class RealBlockchainCasinoTester:
                 "amount": 100
             }
             
-            async with self.session.post(f"{BACKEND_URL}/../wallet/convert", json=conversion_data, headers=headers) as resp:
+            async with self.session.post(f"https://crypto-treasury.preview.emergentagent.com/api/wallet/convert", json=conversion_data, headers=headers) as resp:
                 result = await resp.json()
                 
                 if resp.status == 200 and result.get("success"):
