@@ -26,9 +26,9 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 app = FastAPI(
-    title="Real Casino Savings System with CRT Bridge Pools and USDC Conversion",
-    description="Real cryptocurrency casino with CRT token integration, bridge pools, and USDC/CRT conversion",
-    version="1.0.0"
+    title="REAL Blockchain Casino - NO SIMULATIONS",
+    description="REAL cryptocurrency casino with REAL CRT token integration, REAL bridge pools, and REAL USDC/CRT conversion via Jupiter aggregator",
+    version="2.0.0"
 )
 
 # CORS for frontend
