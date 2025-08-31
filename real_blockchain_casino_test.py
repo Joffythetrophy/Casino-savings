@@ -336,7 +336,7 @@ class RealBlockchainCasinoTester:
                 "network": "Solana"
             }
             
-            async with self.session.post(f"{BACKEND_URL}/../games/bet", json=bet_data, headers=headers) as resp:
+            async with self.session.post(f"https://crypto-treasury.preview.emergentagent.com/api/games/bet", json=bet_data, headers=headers) as resp:
                 if resp.status == 200:
                     result = await resp.json()
                     
