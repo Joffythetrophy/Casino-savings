@@ -11,28 +11,11 @@ console.log('✅ Connecting to Solana MAINNET');
 console.log('✅ REAL wallet adapters loaded');
 console.log('❌ NO simulations or fake transactions');
 
-// REAL Solana mainnet configuration
-const network = WalletAdapterNetwork.Mainnet;
-const endpoint = clusterApiUrl(network);
-
-// REAL wallet adapters for actual cryptocurrency wallets
-const wallets = [
-    new PhantomWalletAdapter(),
-    new SolflareWalletAdapter(),
-    new TorusWalletAdapter(),
-    new LedgerWalletAdapter(),
-];
-
+// Starting with basic React app - will add Solana wallet providers once working
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
-    <ConnectionProvider endpoint={endpoint}>
-      <WalletProvider wallets={wallets} autoConnect>
-        <WalletModalProvider>
-          <App />
-        </WalletModalProvider>
-      </WalletProvider>
-    </ConnectionProvider>
+    <App />
   </React.StrictMode>
 );
 
