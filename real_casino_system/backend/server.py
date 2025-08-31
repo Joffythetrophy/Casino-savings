@@ -12,12 +12,13 @@ import logging
 from datetime import datetime
 import uuid
 
-# Import real system components
+# Import REAL system components - NO SIMULATIONS
 from blockchain.real_wallet_manager import real_wallet_manager
 from casino.real_casino_engine import real_casino_engine
 from savings.real_savings_manager import real_savings_manager
 from bridge.crt_bridge_manager import crt_bridge_manager
 from conversion.real_usdc_crt_converter import real_usdc_crt_converter
+from defi.real_orca_manager import real_orca_manager
 from config.blockchain_config import blockchain_config
 
 # Configure logging
