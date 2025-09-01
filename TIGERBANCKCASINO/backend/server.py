@@ -83,7 +83,8 @@ async def get_user_balance(user_id: str) -> UserBalance:
     return UserBalance(
         user_id=user_id,
         balance=user_data["balance"],
-        savings=user_data["savings"]
+        savings=user_data["savings"],
+        pool_allocation=user_data["pool_allocation"]
     )
 
 @app.post("/api/game/play")
