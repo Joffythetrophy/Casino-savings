@@ -125,7 +125,10 @@ function App() {
             {gameResult.result === 'win' ? (
               <p><strong>Winnings:</strong> ${gameResult.winnings.toFixed(2)}</p>
             ) : (
-              <p><strong>Saved to Piggy Bank:</strong> ${(gameResult.bet_amount * 0.25).toFixed(2)}</p>
+              <div>
+                <p><strong>Saved to Piggy Bank:</strong> ${(gameResult.bet_amount * 0.50).toFixed(2)}</p>
+                <p><strong>Allocated to Pools:</strong> ${(gameResult.bet_amount * 0.50).toFixed(2)}</p>
+              </div>
             )}
           </div>
         )}
