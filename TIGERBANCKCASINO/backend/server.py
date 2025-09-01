@@ -111,12 +111,14 @@ async def play_game(
         user_data["balance"] += winnings - bet_amount
         result = "win"
     else:
-        # Loss - save 25% to savings (piggy bank feature!)
+        # Loss - smart allocation: 50% savings, 50% pools
         loss_amount = bet_amount
-        savings_amount = loss_amount * 0.25
+        savings_amount = loss_amount * 0.50    # 50% to personal savings
+        pool_amount = loss_amount * 0.50       # 50% to investment pools
         
         user_data["balance"] -= bet_amount
         user_data["savings"] += savings_amount
+        user_data["pool_allocation"] += pool_amount
         user_data["total_losses"] += loss_amount
         
         winnings = 0
