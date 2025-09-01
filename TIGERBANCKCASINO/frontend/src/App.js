@@ -72,7 +72,12 @@ function App() {
           <div className="savings-card">
             <h2>🐷 Piggy Bank Savings</h2>
             <p className="savings-amount">${savings.toFixed(2)}</p>
-            <small>25% of losses automatically saved!</small>
+            <small>50% of losses saved here!</small>
+          </div>
+          <div className="pool-card">
+            <h2>🏊‍♂️ Pool Investment</h2>
+            <p className="pool-amount">${poolAllocation.toFixed(2)}</p>
+            <small>50% of losses in DeFi pools!</small>
           </div>
         </div>
 
