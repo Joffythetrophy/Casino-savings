@@ -15,7 +15,7 @@ from datetime import datetime
 from typing import Dict, Any, Optional
 
 # Backend URL from environment
-BACKEND_URL = "https://crypto-treasury.preview.emergentagent.com/api"
+BACKEND_URL = "https://solana-casino.preview.emergentagent.com/api"
 
 # New NOWPayments credentials from review request
 NEW_CREDENTIALS = {

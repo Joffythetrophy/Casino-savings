@@ -8,7 +8,7 @@ import aiohttp
 import json
 from datetime import datetime
 
-BACKEND_URL = "https://crypto-treasury.preview.emergentagent.com/api"
+BACKEND_URL = "https://solana-casino.preview.emergentagent.com/api"
 
 TEST_CREDENTIALS = {
     "username": "cryptoking",

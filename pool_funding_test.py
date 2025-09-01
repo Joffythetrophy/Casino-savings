@@ -12,7 +12,7 @@ from datetime import datetime
 from typing import Dict, Any, List
 
 # Test Configuration
-BACKEND_URL = "https://crypto-treasury.preview.emergentagent.com/api"
+BACKEND_URL = "https://solana-casino.preview.emergentagent.com/api"
 TEST_USER = {
     "username": "cryptoking",
     "password": "crt21million",

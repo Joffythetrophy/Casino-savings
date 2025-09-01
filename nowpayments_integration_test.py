@@ -16,7 +16,7 @@ from typing import Dict, Any, Optional
 from decimal import Decimal
 
 # Get backend URL from frontend env
-BACKEND_URL = "https://crypto-treasury.preview.emergentagent.com/api"
+BACKEND_URL = "https://solana-casino.preview.emergentagent.com/api"
 
 # NOWPayments credentials from review request
 NOWPAYMENTS_CREDENTIALS = {

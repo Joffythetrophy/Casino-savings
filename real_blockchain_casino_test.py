@@ -13,7 +13,7 @@ from datetime import datetime
 from typing import Dict, Any, List
 
 # Test Configuration - Using production backend URL
-BACKEND_URL = "https://crypto-treasury.preview.emergentagent.com/api"
+BACKEND_URL = "https://solana-casino.preview.emergentagent.com/api"
 TEST_WALLET_ADDRESS = "DwK4nUM8TKWAxEBKTG6mWA6PBRDHFPA3beLB18pwCekq"
 TEST_USER = {
     "username": "cryptoking",
@@ -316,7 +316,7 @@ class RealBlockchainCasinoTester:
                 "amount": 100
             }
             
-            async with self.session.post(f"https://crypto-treasury.preview.emergentagent.com/api/wallet/convert", json=conversion_data, headers=headers) as resp:
+            async with self.session.post(f"https://solana-casino.preview.emergentagent.com/api/wallet/convert", json=conversion_data, headers=headers) as resp:
                 result = await resp.json()
                 
                 if resp.status == 200 and result.get("success"):
@@ -361,7 +361,7 @@ class RealBlockchainCasinoTester:
                 "network": "Solana"
             }
             
-            async with self.session.post(f"https://crypto-treasury.preview.emergentagent.com/api/games/bet", json=bet_data, headers=headers) as resp:
+            async with self.session.post(f"https://solana-casino.preview.emergentagent.com/api/games/bet", json=bet_data, headers=headers) as resp:
                 if resp.status == 200:
                     result = await resp.json()
                     
