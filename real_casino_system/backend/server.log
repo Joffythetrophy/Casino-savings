@@ -1,0 +1,26 @@
+/root/.venv/lib/python3.11/site-packages/web3/__init__.py:2: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  import pkg_resources
+INFO:     Started server process [1089]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8002 (Press CTRL+C to quit)
+INFO:     127.0.0.1:38098 - "GET /api/system/status HTTP/1.1" 200 OK
+INFO:__main__:🔍 Getting REAL CRT balance for DwK4nUM8TKWAxEBKTG6mWA6PBRDHFPA3beLB18pwCekq
+INFO:blockchain.real_wallet_manager:🔍 Fetching REAL balances from Solana MAINNET for DwK4nUM8TKWAxEBKTG6mWA6PBRDHFPA3beLB18pwCekq
+INFO:httpx:HTTP Request: POST https://api.mainnet-beta.solana.com "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: POST https://api.mainnet-beta.solana.com "HTTP/1.1 200 OK"
+INFO:blockchain.real_wallet_manager:💵 Found REAL USDC balance: 0.0
+INFO:blockchain.real_wallet_manager:✅ Retrieved REAL Solana balances from MAINNET for DwK4nUM8TKWAxEBKTG6mWA6PBRDHFPA3beLB18pwCekq: SOL=0.014886, USDC=0.000000, CRT=0
+INFO:     127.0.0.1:58034 - "GET /api/wallet/crt-balance?wallet_address=DwK4nUM8TKWAxEBKTG6mWA6PBRDHFPA3beLB18pwCekq HTTP/1.1" 200 OK
+INFO:__main__:🌊 Fetching REAL Orca pools from mainnet
+INFO:defi.real_orca_manager:🌊 Fetching REAL Orca pool info for CRT/SOL
+ERROR:defi.real_orca_manager:❌ Failed to get real pool info: 0, message='Attempt to decode JSON with unexpected mimetype: text/plain;charset=utf-8', url=URL('https://api.orca.so/v1/pools')
+INFO:defi.real_orca_manager:🌊 Fetching REAL Orca pool info for CRT/USDC
+ERROR:defi.real_orca_manager:❌ Failed to get real pool info: 0, message='Attempt to decode JSON with unexpected mimetype: text/plain;charset=utf-8', url=URL('https://api.orca.so/v1/pools')
+INFO:     127.0.0.1:35898 - "GET /api/orca/pools HTTP/1.1" 200 OK
+INFO:     127.0.0.1:39018 - "GET /api/system/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:39030 - "GET /api/system/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44232 - "GET /api/system/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44246 - "GET /api/system/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37120 - "POST /api/auth/login HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:52098 - "POST /api/wallet/withdraw-usdc HTTP/1.1" 404 Not Found

@@ -1,0 +1,73 @@
+🚀 Starting Casino Savings dApp Backend Tests - Focus on Login Functionality
+📡 Testing against: https://crypto-treasury.preview.emergentagent.com/api
+======================================================================
+✅ PASS Basic Connectivity: API accessible, version: 1.0.0
+
+🔐 TESTING LOGIN FUNCTIONALITY (USER COMPLAINT: 'Log in is not working')
+======================================================================
+✅ PASS Authentication Endpoints Availability: ✅ All authentication endpoints are available and responding
+✅ PASS Specific User Login (Wallet): ✅ LOGIN SUCCESSFUL for wallet DwK4nUM8TKWAxEBKTG6mWA6PBRDHFPA3beLB18pwCekq (username: cryptoking)
+❌ FAIL Specific User Login (Username): ❌ USERNAME LOGIN FAILED - HTTP 404: {"detail":"Not Found"}
+✅ PASS Password Hashing Verification: ✅ Password hashing/verification working correctly - bcrypt authentication successful
+✅ PASS Login Error - Invalid Wallet: ✅ Invalid wallet correctly rejected: Wallet address not found
+✅ PASS Login Error - Wrong Password: ✅ Wrong password correctly rejected: Invalid password
+❌ FAIL Login Error - Invalid Username: Expected 200 with error message, got HTTP 404
+❌ FAIL Login Error - Username Wrong Password: Expected 200 with error message, got HTTP 404
+✅ PASS User Registration: User registered successfully: User registered successfully
+❌ FAIL User Login: HTTP 422: {"detail":[{"type":"missing","loc":["body","identifier"],"msg":"Field required","input":{"wallet_address":"RegTestWallet20250825103716","password":"SecureTestPassword123!"}}]}
+✅ PASS Integration Flow: Complete integration flow successful: registration → login → wallet auth → conversion rates
+✅ PASS Real DOGE Balance: Real DOGE balance retrieved: 59204.83199296 DOGE from BlockCypher API
+❌ FAIL DOGE Invalid Address Handling: Expected error for invalid address, got HTTP 200
+✅ PASS Real TRX Balance: Real TRX balance retrieved: 1046142.551464 TRX from TronGrid API
+❌ FAIL TRX Invalid Address Handling: Expected error for invalid address, got HTTP 200
+✅ PASS Real CRT Balance: Real CRT balance retrieved: 0.0 CRT from Solana RPC, mint: 9pjWtc6x88wrRMXTxkBcNB6YtcN7NNcyzDAfUMfRknty
+❌ FAIL CRT Invalid Address Handling: Expected error for invalid address, got HTTP 200
+✅ PASS Real SOL Balance: Real SOL balance retrieved: 0.0 SOL (0 lamports) from Solana RPC
+❌ FAIL All Blockchain Balances: Insufficient blockchain integrations working: only ['CRT', 'SOL']
+❌ FAIL CRT Token Info: CRT token mint/decimals incorrect: mint=9pjWtc6x88wrRMXTxkBcNB6YtcN7NNcyzDAfUMfRknty, decimals=6
+✅ PASS CRT Simulate Deposit: CRT deposit simulation working: Simulated deposit of 1,000,000 CRT to DFvHX8ZdqNqbCLJKnwe4h7qqj3hj4dw3pYvQRzweWnP7
+❌ FAIL CRT Deposit Validation: Expected 400 for invalid payload, got HTTP 500
+✅ PASS Real Crypto Conversion Rates: Real conversion rates working: 12 rates, source: coingecko
+✅ PASS Crypto Price - DOGE: Price: $0.217966, 24h change: -5.277162475486567%
+✅ PASS Crypto Price - TRX: Price: $0.35133, 24h change: -3.6873507977561766%
+✅ PASS Crypto Price - USDC: Price: $0.999805, 24h change: 0.0009112169313860441%
+✅ PASS Crypto Price - CRT: Price: $0.15, 24h change: 2.5%
+✅ PASS Redis Caching: Redis may be working but cache not hit in test timeframe
+✅ PASS Auth Challenge Generation: Challenge generated successfully
+✅ PASS Auth Verification: JWT token generated, expires in 86400s
+✅ PASS Wallet Info: Wallet info retrieved successfully
+✅ PASS Deposit Funds: Deposit successful: Deposited 100.0 CRT
+❌ FAIL Withdraw Funds: Unexpected withdrawal response
+✅ PASS Crypto Conversion: Conversion successful: rate 21.5, amount 215.0
+✅ PASS Game Betting: Real bet placed: loss, payout: 0, savings: 5.0
+✅ PASS Savings System: Savings system working: 4 games, 3 losses, 3 history entries
+❌ FAIL WebSocket Wallet Monitor: WebSocket error: server rejected WebSocket connection: HTTP 404
+✅ PASS Database Integration: Database integration working: 4 games stored with proper fields
+
+======================================================================
+📊 WALLET MANAGEMENT SYSTEM TEST SUMMARY
+======================================================================
+Total Tests: 39
+✅ Passed: 27
+❌ Failed: 12
+Success Rate: 69.2%
+
+🚨 CRITICAL FAILURES:
+  ❌ Specific User Login (Username): ❌ USERNAME LOGIN FAILED - HTTP 404: {"detail":"Not Found"}
+  ❌ User Login: HTTP 422: {"detail":[{"type":"missing","loc":["body","identifier"],"msg":"Field required","input":{"wallet_address":"RegTestWallet20250825103716","password":"SecureTestPassword123!"}}]}
+  ❌ All Blockchain Balances: Insufficient blockchain integrations working: only ['CRT', 'SOL']
+  ❌ CRT Token Info: CRT token mint/decimals incorrect: mint=9pjWtc6x88wrRMXTxkBcNB6YtcN7NNcyzDAfUMfRknty, decimals=6
+
+⚠️  MINOR ISSUES:
+  ⚠️  Login Error - Invalid Username: Expected 200 with error message, got HTTP 404
+  ⚠️  Login Error - Username Wrong Password: Expected 200 with error message, got HTTP 404
+  ⚠️  DOGE Invalid Address Handling: Expected error for invalid address, got HTTP 200
+  ⚠️  TRX Invalid Address Handling: Expected error for invalid address, got HTTP 200
+  ⚠️  CRT Invalid Address Handling: Expected error for invalid address, got HTTP 200
+  ⚠️  CRT Deposit Validation: Expected 400 for invalid payload, got HTTP 500
+  ⚠️  Withdraw Funds: Unexpected withdrawal response
+  ⚠️  WebSocket Wallet Monitor: WebSocket error: server rejected WebSocket connection: HTTP 404
+
+======================================================================
+
+📄 Detailed results saved to: /app/backend_test_results.json
