@@ -45,6 +45,7 @@ class UserBalance(BaseModel):
     user_id: str
     balance: float
     savings: float
+    pool_allocation: float
 
 # Mock database (replace with real database in production)
 mock_db = {
@@ -52,7 +53,8 @@ mock_db = {
         "user123": {
             "balance": 1000.0,
             "savings": 250.0,
-            "total_losses": 750.0
+            "pool_allocation": 250.0,
+            "total_losses": 1000.0
         }
     }
 }
