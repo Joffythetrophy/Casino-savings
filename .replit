@@ -3,6 +3,7 @@ run = "Python"
 
 [nix]
 channel = "stable-25_05"
+packages = ["cargo", "libiconv", "libxcrypt", "openssl", "pkg-config", "rustc"]
 
 [deployment]
 run = ["sh", "-c", "Python"]
