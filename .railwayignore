@@ -1,0 +1,31 @@
+# Railway Ignore File - Exclude test files from deployment
+
+# Test files
+*_test.py
+test_*.py
+*_test_*.py
+*_results.json
+*.log
+
+# Development files
+dump.rdb
+*.pyc
+__pycache__/
+.pytest_cache/
+
+# HTML demo files
+*.html
+
+# Documentation
+*.md
+test_result.md
+contracts.md
+
+# Scripts not needed in production
+execute_*.py
+implement_*.py
+investigate_*.py
+debug_*.py
+urgent_*.py
+final_*.py
+critical_*.py
