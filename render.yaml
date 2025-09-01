@@ -5,3 +5,4 @@ services:
     buildCommand: cd real_casino_system/backend && pip install -r requirements.txt
     startCommand: cd real_casino_system/backend && python -m uvicorn server:app --host 0.0.0.0 --port $PORT
     plan: starter
+    rootDir: real_casino_system/backend
