@@ -12,7 +12,7 @@ cmds = [
 
 [phases.build]
 cmds = [
-    "cd frontend && npm run build"
+    "cd real_casino_system/frontend && npm run build"
 ]
 
 [start]
