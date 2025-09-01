@@ -6,8 +6,8 @@ nixPkgs = ["nodejs", "python3", "pip"]
 
 [phases.install]
 cmds = [
-    "cd backend && pip install -r requirements.txt",
-    "cd frontend && npm install"
+    "cd real_casino_system/backend && pip install -r requirements.txt",
+    "cd real_casino_system/frontend && npm install"
 ]
 
 [phases.build]
