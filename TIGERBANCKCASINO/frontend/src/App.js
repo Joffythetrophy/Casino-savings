@@ -7,6 +7,7 @@ const API_BASE = process.env.REACT_APP_BACKEND_URL || '';
 function App() {
   const [balance, setBalance] = useState(0);
   const [savings, setSavings] = useState(0);
+  const [poolAllocation, setPoolAllocation] = useState(0);
   const [betAmount, setBetAmount] = useState(10);
   const [selectedGame, setSelectedGame] = useState('blackjack');
   const [gameResult, setGameResult] = useState(null);
