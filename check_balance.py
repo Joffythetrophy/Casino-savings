@@ -11,7 +11,7 @@ import json
 from datetime import datetime
 
 # Backend configuration
-BACKEND_URL = "https://crypto-treasury.preview.emergentagent.com/api"
+BACKEND_URL = "http://localhost:8001/api"
 TEST_USER = {
     "username": "cryptoking",
     "password": "crt21million",
