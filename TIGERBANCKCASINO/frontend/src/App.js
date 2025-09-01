@@ -24,6 +24,7 @@ function App() {
       const response = await axios.get(`${API_BASE}/api/user/user123/balance`);
       setBalance(response.data.balance);
       setSavings(response.data.savings);
+      setPoolAllocation(response.data.pool_allocation);
     } catch (error) {
       console.error('Error fetching balance:', error);
     }
