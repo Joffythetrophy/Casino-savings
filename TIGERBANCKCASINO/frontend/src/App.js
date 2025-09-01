@@ -137,9 +137,10 @@ function App() {
           <h3>🏦 How Tiger Bank Works</h3>
           <ul>
             <li>🎯 Play casino games with real bets</li>
-            <li>🐷 25% of every loss goes to your Piggy Bank</li>
-            <li>💰 Your savings grow automatically</li>
-            <li>🔒 Savings are protected from gambling</li>
+            <li>🐷 50% of every loss goes to your Piggy Bank</li>
+            <li>🏊‍♂️ 50% of every loss goes to DeFi investment pools</li>
+            <li>💰 Both savings and investments grow automatically</li>
+            <li>🔒 Your allocated funds are protected from gambling</li>
           </ul>
         </div>
       </main>
