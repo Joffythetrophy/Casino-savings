@@ -14,9 +14,7 @@ import {
   RefreshCw,
   ArrowLeft,
   QrCode,
-  Copy,
-  Shield,
-  Lock
+  Copy
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '../hooks/use-toast';
@@ -266,51 +264,6 @@ const WalletManager = () => {
     }
   };
 
-  const handleExternalWithdraw = async (currency, amount, destinationAddress) => {
-    if (amount <= 0 || !destinationAddress) return;
-    
-    try {
-      // Get user from localStorage for real wallet address
-      const savedUser = localStorage.getItem('casino_user');
-      if (!savedUser) {
-        toast({
-          title: "❌ Error", 
-          description: "User not logged in",
-          variant: "destructive"
-        });
-        return;
-      }
-      
-      const user = JSON.parse(savedUser);
-      const response = await axios.post(`${BACKEND_URL}/api/wallet/external-withdraw`, {
-        wallet_address: user.wallet_address,
-        currency: currency,
-        amount: amount,
-        destination_address: destinationAddress
-      });
-      
-      if (response.data.success) {
-        await fetchWalletBalances(); // Refresh balances
-        toast({
-          title: "🎉 External Withdrawal Initiated!",
-          description: `${amount} ${currency} being sent to ${destinationAddress}`,
-        });
-      } else {
-        toast({
-          title: "External Withdrawal Failed",
-          description: response.data.message || "Failed to process external withdrawal",
-        });
-      }
-    } catch (error) {
-      console.error('External withdrawal error:', error);
-      toast({
-        title: "External Withdrawal Error",
-        description: error.response?.data?.detail || "Failed to process external withdrawal request",
-        variant: "destructive"
-      });
-    }
-  };
-
   const handleConversion = async () => {
     const amount = parseFloat(convertAmount);
     if (!amount || amount <= 0) return;
@@ -369,9 +322,6 @@ const WalletManager = () => {
     const [depositAmount, setDepositAmount] = useState('');
     const [withdrawAmount, setWithdrawAmount] = useState('');
     const [selectedCurrency, setSelectedCurrency] = useState('CRT');
-    const [externalWithdrawAmount, setExternalWithdrawAmount] = useState('');
-    const [destinationAddress, setDestinationAddress] = useState('');
-    const [showExternalWithdraw, setShowExternalWithdraw] = useState(false);
     
     return (
       <Card className={`p-6 bg-gradient-to-br ${color} border border-opacity-20`}>
@@ -444,7 +394,6 @@ const WalletManager = () => {
         
         {(type === 'winnings' || type === 'savings') && (
           <div className="space-y-4">
-            {/* Regular Internal Withdrawal */}
             <div className="flex space-x-2">
               <select 
                 value={selectedCurrency}
@@ -475,112 +424,6 @@ const WalletManager = () => {
                 Withdraw
               </Button>
             </div>
-          </div>
-        )}
-        
-        {/* External Withdrawal Section - Moved to Bottom for Better Visibility */}
-        {(type === 'winnings' || type === 'savings') && (
-          <div className="mt-6 space-y-4">
-            {/* Treasury Smart Contract Withdrawal - Premium Option */}
-            <div className="flex justify-center mb-4">
-              <Button
-                onClick={() => navigate('/treasury')}
-                className="w-full bg-gradient-to-r from-casino-green-500 to-emerald-casino-600 hover:from-casino-green-600 hover:to-emerald-casino-700 text-white font-bold py-3 px-6 glow-green shadow-lg"
-              >
-                <Shield className="w-5 h-5 mr-2" />
-                🐅 Smart Contract Treasury Withdrawal 🐅
-              </Button>
-            </div>
-            
-            {/* External Withdrawal Toggle - Now at Bottom */}
-            <div className="flex justify-center">
-              <Button
-                onClick={() => setShowExternalWithdraw(!showExternalWithdraw)}
-                variant="outline"
-                className="w-full text-yellow-400 border-yellow-400 hover:bg-yellow-400 hover:text-black font-semibold"
-              >
-                🌐 {showExternalWithdraw ? 'Hide External Withdrawal' : 'Withdraw to External Wallet'}
-              </Button>
-            </div>
-            
-            {/* External Withdrawal Form - Always Visible at Bottom */}
-            {showExternalWithdraw && (
-              <div className="space-y-4 p-6 bg-gradient-to-r from-yellow-900/30 to-orange-900/30 rounded-lg border-2 border-yellow-400/50 shadow-lg">
-                <div className="text-center">
-                  <h4 className="text-xl font-bold text-yellow-400 flex items-center justify-center">
-                    🚀 Withdraw to External Wallet
-                  </h4>
-                  <p className="text-gray-300 mt-2">
-                    Send your {selectedCurrency} to any external wallet address
-                  </p>
-                </div>
-                
-                <div className="bg-black/20 p-4 rounded-lg">
-                  <p className="text-sm text-yellow-400 mb-2">
-                    💡 <strong>Minimum amounts:</strong>
-                  </p>
-                  <ul className="text-sm text-gray-300 space-y-1">
-                    <li>• DOGE: 10 minimum</li>
-                    <li>• TRX: 10 minimum</li>
-                    <li>• USDC: 5 minimum</li>
-                    <li>• CRT: 100 minimum</li>
-                  </ul>
-                </div>
-                
-                <div className="space-y-3">
-                  <div>
-                    <label className="block text-sm font-medium text-yellow-400 mb-2">
-                      External {selectedCurrency} Wallet Address:
-                    </label>
-                    <Input
-                      type="text" 
-                      placeholder={`Enter your ${selectedCurrency} wallet address`}
-                      value={destinationAddress}
-                      onChange={(e) => setDestinationAddress(e.target.value)}
-                      className="bg-black/40 border-yellow-400/50 text-white placeholder-gray-400"
-                    />
-                  </div>
-                  
-                  <div>
-                    <label className="block text-sm font-medium text-yellow-400 mb-2">
-                      Amount to Withdraw:
-                    </label>
-                    <div className="flex space-x-2">
-                      <Input
-                        type="number"
-                        placeholder="Amount"
-                        value={externalWithdrawAmount}
-                        onChange={(e) => setExternalWithdrawAmount(e.target.value)}
-                        max={wallet[selectedCurrency]}
-                        className="flex-1 bg-black/40 border-yellow-400/50 text-white"
-                      />
-                      <Button
-                        onClick={() => {
-                          handleExternalWithdraw(
-                            selectedCurrency, 
-                            parseFloat(externalWithdrawAmount), 
-                            destinationAddress
-                          );
-                          setExternalWithdrawAmount('');
-                          setDestinationAddress('');
-                          setShowExternalWithdraw(false);
-                        }}
-                        className="bg-yellow-600 hover:bg-yellow-500 text-black font-bold px-6"
-                        disabled={!destinationAddress || !externalWithdrawAmount}
-                      >
-                        🚀 Send to External Wallet
-                      </Button>
-                    </div>
-                  </div>
-                  
-                  <div className="text-center">
-                    <p className="text-xs text-gray-400">
-                      ⚠️ Double-check your wallet address before sending. External transfers cannot be reversed.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            )}
           </div>
         )}
       </Card>

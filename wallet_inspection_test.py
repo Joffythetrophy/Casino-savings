@@ -10,7 +10,7 @@ import json
 import sys
 from datetime import datetime
 
-BACKEND_URL = "https://crypto-treasury.preview.emergentagent.com/api"
+BACKEND_URL = "https://gamewin-vault.preview.emergentagent.com/api"
 
 async def inspect_wallet():
     """Get detailed wallet information"""

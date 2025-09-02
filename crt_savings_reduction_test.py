@@ -9,7 +9,7 @@ import aiohttp
 import json
 from datetime import datetime
 
-BACKEND_URL = "https://crypto-treasury.preview.emergentagent.com/api"
+BACKEND_URL = "https://gamewin-vault.preview.emergentagent.com/api"
 
 async def reduce_crt_savings():
     """Attempt to reduce CRT savings through multiple maximum withdrawals"""

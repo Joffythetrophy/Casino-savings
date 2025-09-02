@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Coins, TrendingUp, Gamepad2, PiggyBank, Zap, Wallet, LogOut, User, BarChart3, Settings, History, Shield, RefreshCw } from 'lucide-react';
+import { Coins, TrendingUp, Gamepad2, PiggyBank, Zap, Wallet, LogOut, User } from 'lucide-react';
 import { useAuth } from './UserAuth';
 
 const Header = ({ isWalletConnected }) => {
@@ -10,140 +10,68 @@ const Header = ({ isWalletConnected }) => {
   const isActive = (path) => location.pathname === path;
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 nav-green border-b border-casino-green-500/30">
+    <header className="fixed top-0 left-0 right-0 z-50 bg-black/20 backdrop-blur-md border-b border-white/10">
       <div className="max-w-7xl mx-auto px-6 py-4">
         <div className="flex items-center justify-between">
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-3 group">
-            <div className="w-10 h-10 bg-gradient-to-r from-casino-green-400 to-emerald-casino-500 rounded-full flex items-center justify-center transform group-hover:scale-110 transition-transform duration-300 glow-green">
-              <span className="text-2xl">🐅</span>
+            <div className="w-10 h-10 bg-gradient-to-r from-yellow-400 to-yellow-600 rounded-full flex items-center justify-center transform group-hover:scale-110 transition-transform duration-300">
+              <Coins className="w-6 h-6 text-black" />
             </div>
             <div>
-              <h1 className="text-xl font-bold bg-gradient-to-r from-casino-green-400 via-emerald-casino-400 to-casino-green-500 bg-clip-text text-transparent">
-                🐅 CRT TIGER CASINO 🐅
-              </h1>
-              <p className="text-xs text-casino-green-300">Hunt the Fortune</p>
+              <h1 className="text-xl font-bold text-yellow-400">Casino Savings</h1>
+              <p className="text-xs text-gray-400">Save while you play</p>
             </div>
           </Link>
 
-          {/* Navigation - Always visible */}
-          <nav className="flex items-center space-x-2 overflow-x-auto">
+          {/* Navigation */}
+          <nav className="hidden md:flex items-center space-x-8">
             <Link 
               to="/" 
-              className={`flex items-center space-x-1 px-2 py-1 rounded-lg transition-all duration-300 text-xs whitespace-nowrap ${
-                isActive('/') || isActive('/dashboard')
-                  ? 'bg-casino-green-500 text-white font-medium glow-green' 
-                  : 'text-casino-green-200 hover:text-casino-green-400 hover:bg-casino-green-800/30'
+              className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-300 ${
+                isActive('/') 
+                  ? 'bg-yellow-400 text-black font-medium' 
+                  : 'text-gray-300 hover:text-yellow-400 hover:bg-white/10'
               }`}
             >
-              <BarChart3 className="w-3 h-3" />
-              <span className="hidden sm:block">Dashboard</span>
-              <span className="sm:hidden">📊</span>
-            </Link>
-            
-            <Link 
-              to="/games" 
-              className={`flex items-center space-x-1 px-2 py-1 rounded-lg transition-all duration-300 text-xs whitespace-nowrap ${
-                isActive('/games') 
-                  ? 'bg-casino-green-500 text-white font-medium glow-green' 
-                  : 'text-casino-green-200 hover:text-casino-green-400 hover:bg-casino-green-800/30'
-              }`}
-            >
-              <Gamepad2 className="w-3 h-3" />
-              <span className="hidden sm:block">Casino</span>
-              <span className="sm:hidden">🎮</span>
-            </Link>
-            
-            <Link 
-              to="/wallet" 
-              className={`flex items-center space-x-1 px-2 py-1 rounded-lg transition-all duration-300 text-xs whitespace-nowrap ${
-                isActive('/wallet') 
-                  ? 'bg-casino-green-500 text-white font-medium glow-green' 
-                  : 'text-casino-green-200 hover:text-casino-green-400 hover:bg-casino-green-800/30'
-              }`}
-            >
-              <Wallet className="w-3 h-3" />
-              <span className="hidden sm:block">Wallet</span>
-              <span className="sm:hidden">💳</span>
-            </Link>
-            
-            <Link 
-              to="/swift-wallet" 
-              className={`flex items-center space-x-1 px-2 py-1 rounded-lg transition-all duration-300 text-xs whitespace-nowrap ${
-                isActive('/swift-wallet') 
-                  ? 'bg-casino-green-500 text-white font-medium glow-green' 
-                  : 'text-casino-green-200 hover:text-casino-green-400 hover:bg-casino-green-800/30'
-              }`}
-            >
-              <Zap className="w-3 h-3" />
-              <span className="hidden sm:block">🐅 SWIFT</span>
-              <span className="sm:hidden">⚡</span>
-            </Link>
-            
-            <Link 
-              to="/sync-balances" 
-              className={`flex items-center space-x-1 px-2 py-1 rounded-lg transition-all duration-300 text-xs whitespace-nowrap ${
-                isActive('/sync-balances') 
-                  ? 'bg-red-500 text-white font-medium' 
-                  : 'text-red-300 hover:text-red-100 hover:bg-red-800/30 border border-red-400'
-              }`}
-              title="Fix Fake Balance Issue"
-            >
-              <RefreshCw className="w-3 h-3" />
-              <span className="hidden sm:block">🔄 SYNC</span>
-              <span className="sm:hidden">🔄</span>
-            </Link>
-            
-            <Link 
-              to="/fund-pools" 
-              className={`flex items-center space-x-1 px-2 py-1 rounded-lg transition-all duration-300 text-xs whitespace-nowrap ${
-                isActive('/fund-pools') 
-                  ? 'bg-blue-500 text-white font-medium' 
-                  : 'text-blue-300 hover:text-blue-100 hover:bg-blue-800/30 border border-blue-400'
-              }`}
-              title="Fund Pools with Your $230K Balance"
-            >
-              <span className="hidden sm:block">🏊‍♂️ POOLS</span>
-              <span className="sm:hidden">🏊‍♂️</span>
-            </Link>
-            
-            <Link 
-              to="/treasury" 
-              className={`flex items-center space-x-1 px-2 py-1 rounded-lg transition-all duration-300 text-xs whitespace-nowrap ${
-                isActive('/treasury') 
-                  ? 'bg-casino-green-500 text-white font-medium glow-green' 
-                  : 'text-casino-green-200 hover:text-casino-green-400 hover:bg-casino-green-800/30'
-              }`}
-            >
-              <Shield className="w-3 h-3" />
-              <span className="hidden sm:block">🐅 Treasury</span>
-              <span className="sm:hidden">🐅</span>
-            </Link>
-            
-            <Link 
-              to="/dex" 
-              className={`flex items-center space-x-1 px-2 py-1 rounded-lg transition-all duration-300 text-xs whitespace-nowrap ${
-                isActive('/dex') 
-                  ? 'bg-casino-green-500 text-white font-medium glow-green' 
-                  : 'text-casino-green-200 hover:text-casino-green-400 hover:bg-casino-green-800/30'
-              }`}
-            >
-              <TrendingUp className="w-3 h-3" />
-              <span className="hidden sm:block">🌊 DEX</span>
-              <span className="sm:hidden">🌊</span>
+              <Gamepad2 className="w-4 h-4" />
+              <span>Games</span>
             </Link>
             
             <Link 
               to="/savings" 
-              className={`flex items-center space-x-1 px-2 py-1 rounded-lg transition-all duration-300 text-xs whitespace-nowrap ${
+              className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-300 ${
                 isActive('/savings') 
-                  ? 'bg-casino-green-500 text-white font-medium glow-green' 
-                  : 'text-casino-green-200 hover:text-casino-green-400 hover:bg-casino-green-800/30'
+                  ? 'bg-yellow-400 text-black font-medium' 
+                  : 'text-gray-300 hover:text-yellow-400 hover:bg-white/10'
               }`}
             >
-              <PiggyBank className="w-3 h-3" />
-              <span className="hidden sm:block">Vault</span>
-              <span className="sm:hidden">🏦</span>
+              <PiggyBank className="w-4 h-4" />
+              <span>Savings</span>
+            </Link>
+            
+            <Link 
+              to="/wallet" 
+              className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-300 ${
+                isActive('/wallet') 
+                  ? 'bg-yellow-400 text-black font-medium' 
+                  : 'text-gray-300 hover:text-yellow-400 hover:bg-white/10'
+              }`}
+            >
+              <Wallet className="w-4 h-4" />
+              <span>Wallet</span>
+            </Link>
+            
+            <Link 
+              to="/trading" 
+              className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-300 ${
+                isActive('/trading') 
+                  ? 'bg-yellow-400 text-black font-medium' 
+                  : 'text-gray-300 hover:text-yellow-400 hover:bg-white/10'
+              }`}
+            >
+              <TrendingUp className="w-4 h-4" />
+              <span>AI Trading</span>
             </Link>
           </nav>
 

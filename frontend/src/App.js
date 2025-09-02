@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import "./App.css";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { Toaster } from "./components/ui/toaster";
@@ -8,50 +8,11 @@ import CasinoLobby from "./components/CasinoLobby";
 import SavingsPage from "./components/SavingsPage";
 import TradingPage from "./components/TradingPage";
 import WalletManager from "./components/WalletManager";
-import PremiumDashboard from "./components/PremiumDashboard";
-import AdminControlPanel from "./components/AdminControlPanel";
-import ConversionHistoryTracker from "./components/ConversionHistoryTracker";
-import StreamlinedGamingDashboard from "./components/StreamlinedGamingDashboard";
-import MillionaireCasinoInterface from "./components/MillionaireCasinoInterface";
-import SimplifiedCasinoInterface from "./components/SimplifiedCasinoInterface";
-import CleanCasinoInterface from "./components/CleanCasinoInterface";
-import SmartContractTreasuryDashboard from "./components/SmartContractTreasuryDashboard";
-import MultiCurrencyTreasuryManager from "./components/MultiCurrencyTreasuryManager";
-import CRTTokenDEXManager from "./components/CRTTokenDEXManager";
-import TrustWalletSwift from "./components/TrustWalletSwift";
-import RealBalanceSync from "./components/RealBalanceSync";
-import PoolFundingManager from "./components/PoolFundingManager";
 import { AuthProvider, useAuth, AuthModal } from "./components/UserAuth";
 
 function AppContent() {
-  const { user, isAuthenticated, loading } = useAuth();
+  const { isAuthenticated, loading } = useAuth();
   const [showAuthModal, setShowAuthModal] = useState(false);
-  const [userBalance, setUserBalance] = useState(null);
-
-  // Fetch user balance when authenticated
-  useEffect(() => {
-    const fetchBalance = async () => {
-      if (isAuthenticated && user?.wallet_address) {
-        try {
-          const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
-          const response = await fetch(`${backendUrl}/api/wallet/${user.wallet_address}`);
-          if (response.ok) {
-            const data = await response.json();
-            if (data.success && data.wallet) {
-              setUserBalance(data.wallet);
-            }
-          }
-        } catch (error) {
-          console.error('Error fetching balance:', error);
-        }
-      }
-    };
-
-    fetchBalance();
-    // Refresh balance every 10 seconds
-    const interval = setInterval(fetchBalance, 10000);
-    return () => clearInterval(interval);
-  }, [isAuthenticated, user?.wallet_address]);
 
   if (loading) {
     return (
@@ -128,24 +89,17 @@ function AppContent() {
             <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} />
           </>
         ) : (
-          <div className="pt-20"> {/* Add padding-top to account for fixed header */}
-            <Routes>
-              <Route path="/" element={<CleanCasinoInterface userBalance={userBalance} />} />
-              <Route path="/games" element={<CleanCasinoInterface userBalance={userBalance} />} />
-              <Route path="/savings" element={<SavingsPage />} />
-              <Route path="/trading" element={<TradingPage />} />
-              <Route path="/wallet" element={<WalletManager />} />
-              <Route path="/swift-wallet" element={<TrustWalletSwift />} />
-              <Route path="/sync-balances" element={<RealBalanceSync />} />
-              <Route path="/fund-pools" element={<PoolFundingManager />} />
-              <Route path="/dashboard" element={<PremiumDashboard onNavigate={(section) => window.location.href = `/${section}`} />} />
-              <Route path="/treasury" element={<SmartContractTreasuryDashboard user={user} authToken={user?.auth_token || localStorage.getItem('auth_token')} />} />
-              <Route path="/treasury/advanced" element={<MultiCurrencyTreasuryManager user={user} authToken={user?.auth_token || localStorage.getItem('auth_token')} />} />
-              <Route path="/dex" element={<CRTTokenDEXManager user={user} authToken={user?.auth_token || localStorage.getItem('auth_token')} />} />
-              <Route path="/admin" element={<AdminControlPanel />} />
-              <Route path="/history" element={<ConversionHistoryTracker />} />
-            </Routes>
-          </div>
+          <Routes>
+            <Route path="/" element={
+              <>
+                <HeroSection />
+                <CasinoLobby />
+              </>
+            } />
+            <Route path="/savings" element={<SavingsPage />} />
+            <Route path="/trading" element={<TradingPage />} />
+            <Route path="/wallet" element={<WalletManager />} />
+          </Routes>
         )}
       </Router>
       <Toaster />

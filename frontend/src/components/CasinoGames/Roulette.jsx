@@ -108,7 +108,7 @@ const Roulette = ({ onBack }) => {
     return { totalWin, winningBets };
   };
 
-  const spinWheel = async () => {
+  const spin = async () => {
     if (spinning || Object.keys(bets).length === 0) return;
 
     setSpinning(true);
@@ -163,127 +163,18 @@ const Roulette = ({ onBack }) => {
   };
 
   const placeBet = (betType, amount) => {
-    setBets(prev => {
-      const newBets = {
-        ...prev,
-        [betType]: (prev[betType] || 0) + amount
-      };
-      setLastBet(newBets);
-      return newBets;
-    });
+    setBets(prev => ({
+      ...prev,
+      [betType]: (prev[betType] || 0) + amount
+    }));
   };
 
   const clearBets = () => {
     setBets({});
   };
 
-  const [autoPlaySettings, setAutoPlaySettings] = useState({
-    autoBetType: 'red',
-    isAutoPlaying: false
-  });
-
-  const [lastBet, setLastBet] = useState(null);
-
-  // AutoPlay function
-  const handleAutoPlay = async (settings) => {
-    if (!settings.enabled) {
-      setAutoPlaySettings(prev => ({ ...prev, isAutoPlaying: false }));
-      return;
-    }
-
-    setAutoPlaySettings(prev => ({ ...prev, isAutoPlaying: true }));
-    
-    try {
-      // Clear current bets and place auto bet
-      setBets({});
-      const newBets = { [autoPlaySettings.autoBetType]: settings.betAmount };
-      setBets(newBets);
-      setLastBet(newBets);
-      
-      // Trigger spin automatically
-      setTimeout(() => {
-        if (autoPlaySettings.isAutoPlaying) {
-          spinWheel();
-        }
-      }, 100);
-      
-    } catch (error) {
-      console.error('AutoPlay error:', error);
-      setAutoPlaySettings(prev => ({ ...prev, isAutoPlaying: false }));
-    }
-  };
-
-  // Repeat last bet function
-  const repeatLastBet = () => {
-    if (lastBet && Object.keys(lastBet).length > 0) {
-      setBets(lastBet);
-      toast({
-        title: "Bet Repeated",
-        description: "Your previous bet has been placed again!",
-        duration: 2000
-      });
-    } else {
-      toast({
-        title: "No Previous Bet",
-        description: "Place a bet first to use repeat bet feature",
-        duration: 2000,
-        variant: "destructive"
-      });
-    }
-  };
-
   return (
-    <CasinoGameLayout 
-      title="CRT Roulette" 
-      onBack={onBack}
-      stats={stats}
-      rightSidebar={
-        <div className="space-y-4">
-          {/* Currency & Bet Controls */}
-          <div className="bg-gray-800/50 p-4 rounded-lg">
-            <h3 className="text-lg font-bold text-yellow-400 mb-3">Quick Actions</h3>
-            
-            <Button
-              onClick={repeatLastBet}
-              className="w-full mb-2 bg-blue-600 hover:bg-blue-700 text-white"
-              disabled={spinning || !lastBet}
-            >
-              🔄 Repeat Last Bet
-            </Button>
-            
-            <Button
-              onClick={() => setBets({})}
-              className="w-full bg-red-600 hover:bg-red-700 text-white"
-              disabled={spinning}
-            >
-              🗑️ Clear All Bets
-            </Button>
-          </div>
-
-          {/* AutoPlay Panel */}
-          <AutoPlayPanel 
-            onAutoPlay={handleAutoPlay}
-            gameSpecificSettings={
-              <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-300">Auto-Bet Type</label>
-                <select 
-                  value={autoPlaySettings.autoBetType}
-                  onChange={(e) => setAutoPlaySettings(prev => ({ ...prev, autoBetType: e.target.value }))}
-                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white"
-                >
-                  <option value="red">Red (1:1)</option>
-                  <option value="black">Black (1:1)</option>
-                  <option value="odd">Odd (1:1)</option>
-                  <option value="even">Even (1:1)</option>
-                  <option value="low">Low 1-18 (1:1)</option>
-                  <option value="high">High 19-36 (1:1)</option>
-                </select>
-              </div>
-            }
-          />
-        </div>
-      }
-    >
+    <CasinoGameLayout title="Roulette" onBack={onBack} stats={stats}>
       <div className="space-y-6">
         {/* Roulette Wheel */}
         <Card className="p-8 bg-gradient-to-br from-green-900 to-green-800 border-2 border-yellow-400/30">
@@ -428,7 +319,7 @@ const Roulette = ({ onBack }) => {
           {/* Controls */}
           <div className="flex justify-center space-x-4">
             <Button
-              onClick={spinWheel}
+              onClick={spin}
               disabled={spinning || Object.keys(bets).length === 0}
               className="bg-gradient-to-r from-yellow-400 to-yellow-600 text-black font-bold hover:from-yellow-300 hover:to-yellow-500 px-8 py-3"
             >

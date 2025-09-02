@@ -28,38 +28,17 @@ export const useAuth = () => {
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [authToken, setAuthToken] = useState(null);
   const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
   // Check for existing session on app start
   useEffect(() => {
     const savedUser = localStorage.getItem('casino_user');
-    const savedToken = localStorage.getItem('auth_token') || localStorage.getItem('casino_auth_token');
-    
-    console.log('AuthProvider initializing:', { 
-      savedUser: !!savedUser, 
-      savedToken: !!savedToken,
-      userData: savedUser ? savedUser.substring(0, 50) + '...' : 'none',
-      tokenData: savedToken ? savedToken.substring(0, 50) + '...' : 'none'
-    });
-    
-    if (savedUser && savedToken) {
+    if (savedUser) {
       try {
-        const userData = JSON.parse(savedUser);
-        userData.auth_token = savedToken; // Include token in user data
-        setUser(userData);
-        setAuthToken(savedToken);
-        console.log('AuthProvider: User and token restored successfully', userData.username || userData.wallet_address);
+        setUser(JSON.parse(savedUser));
       } catch (e) {
-        console.error('AuthProvider: Error restoring session:', e);
         localStorage.removeItem('casino_user');
-        localStorage.removeItem('auth_token');
-        localStorage.removeItem('casino_auth_token');
-        setUser(null);
-        setAuthToken(null);
       }
-    } else {
-      console.log('AuthProvider: No saved session found');
     }
     setLoading(false);
   }, []);
@@ -67,23 +46,18 @@ export const AuthProvider = ({ children }) => {
   const login = async (walletAddress, password) => {
     try {
       const response = await axios.post(`${BACKEND_URL}/api/auth/login`, {
-        identifier: walletAddress,  // Use identifier instead of wallet_address
+        wallet_address: walletAddress,
         password: password
       });
 
       if (response.data.success) {
         const userData = {
-          wallet_address: response.data.wallet_address,
+          wallet_address: walletAddress,
           user_id: response.data.user_id,
-          username: response.data.username,
-          auth_token: response.data.token
+          created_at: response.data.created_at
         };
         setUser(userData);
-        setAuthToken(response.data.token);
         localStorage.setItem('casino_user', JSON.stringify(userData));
-        localStorage.setItem('auth_token', response.data.token);
-        localStorage.setItem('casino_auth_token', response.data.token); // Backup key
-        console.log('Login successful - session saved', userData.username);
         return { success: true };
       } else {
         return { success: false, error: response.data.message };
@@ -91,30 +65,26 @@ export const AuthProvider = ({ children }) => {
     } catch (error) {
       return { 
         success: false, 
-        error: error.response?.data?.detail || 'Login failed' 
+        error: error.response?.data?.message || 'Login failed' 
       };
     }
   };
 
-  const register = async (walletAddress, password, username = null) => {
+  const register = async (walletAddress, password) => {
     try {
       const response = await axios.post(`${BACKEND_URL}/api/auth/register`, {
         wallet_address: walletAddress,
-        password: password,
-        username: username
+        password: password
       });
 
       if (response.data.success) {
         const userData = {
-          wallet_address: response.data.wallet_address,
+          wallet_address: walletAddress,
           user_id: response.data.user_id,
-          username: response.data.username,
-          auth_token: response.data.token
+          created_at: response.data.created_at
         };
         setUser(userData);
-        setAuthToken(response.data.token);
         localStorage.setItem('casino_user', JSON.stringify(userData));
-        localStorage.setItem('auth_token', response.data.token);
         return { success: true };
       } else {
         return { success: false, error: response.data.message };
@@ -122,7 +92,7 @@ export const AuthProvider = ({ children }) => {
     } catch (error) {
       return { 
         success: false, 
-        error: error.response?.data?.detail || 'Registration failed' 
+        error: error.response?.data?.message || 'Registration failed' 
       };
     }
   };
@@ -130,7 +100,6 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     setUser(null);
     localStorage.removeItem('casino_user');
-    localStorage.removeItem('auth_token'); // Clear JWT token
   };
 
   return (
@@ -235,8 +204,8 @@ const LoginForm = ({ onClose }) => {
   const loginWithUsername = async (username, password) => {
     try {
       const backendUrl = process.env.REACT_APP_BACKEND_URL;
-      const response = await axios.post(`${backendUrl}/api/auth/login`, {
-        identifier: username,  // Use identifier instead of username
+      const response = await axios.post(`${backendUrl}/api/auth/login-username`, {
+        username: username,
         password: password
       });
 
@@ -245,24 +214,18 @@ const LoginForm = ({ onClose }) => {
           user_id: response.data.user_id,
           username: response.data.username,
           wallet_address: response.data.wallet_address,
-          auth_token: response.data.token
+          created_at: response.data.created_at
         };
 
         localStorage.setItem('casino_user', JSON.stringify(userData));
-        localStorage.setItem('auth_token', response.data.token);
-        localStorage.setItem('casino_auth_token', response.data.token); // Backup key
-        setUser(userData);
-        console.log('Username login successful - session saved', userData.username);
+        setUser(userData); // Fix: Update React authentication state
         return { success: true, username: response.data.username };
       } else {
         return { success: false, error: response.data.message || "Invalid credentials" };
       }
     } catch (error) {
       console.error('Username login error:', error);
-      return { 
-        success: false, 
-        error: error.response?.data?.detail || "Connection failed. Please try again." 
-      };
+      return { success: false, error: "Connection failed. Please try again." };
     }
   };
 
