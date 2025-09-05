@@ -43,7 +43,17 @@ function App() {
     fetchSupportedTokens();
     fetchGames();
     fetchCRTStatus();
+    fetchDiversifiedPortfolios();
   }, []);
+
+  const fetchDiversifiedPortfolios = async () => {
+    try {
+      const response = await axios.get(`${API_BASE}/api/tokens/bridge/portfolios`);
+      setDiversifiedPortfolios(response.data);
+    } catch (error) {
+      console.error('Error fetching diversified portfolios:', error);
+    }
+  };
 
   const fetchUserBalance = async () => {
     try {
