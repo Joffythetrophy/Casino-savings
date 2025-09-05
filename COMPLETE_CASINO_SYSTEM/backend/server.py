@@ -98,6 +98,14 @@ SUPPORTED_TOKENS = {
         "decimals": 8,
         "logo": "https://cryptologos.cc/logos/ethereum-eth-logo.png"
     },
+    "CTD": {
+        "address": "CTDtoken1111111111111111111111111111111111",  # You'll need the real address
+        "symbol": "CTD",
+        "name": "CTD Token",
+        "decimals": 9,
+        "logo": "🎯",
+        "target_for_purchase": True
+    },
     "CRT": {
         "address": "CRTtoken1111111111111111111111111111111111",
         "symbol": "CRT",
