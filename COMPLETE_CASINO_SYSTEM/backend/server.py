@@ -583,6 +583,144 @@ async def get_user_withdrawals(user_id: str):
 
 # === CRT BRIDGE SYSTEM (IOU UNTIL LIQUIDITY) ===
 
+class MultiTokenBridgeRequest(BaseModel):
+    source_token: str  # "CRT", "T21M", "T52M"
+    amount: float
+    destination_token: str  # "USDC", "SOL", "BTC", "ETH"
+    user_wallet: str
+    promissory_note: bool = True
+
+@app.post("/api/tokens/bridge")
+async def bridge_any_token(request: MultiTokenBridgeRequest):
+    """Enhanced bridge system for ALL your tokens"""
+    
+    # Validate source token
+    if request.source_token not in SUPPORTED_TOKENS:
+        raise HTTPException(status_code=400, detail="Source token not available for bridging")
+    
+    source_info = SUPPORTED_TOKENS[request.source_token]
+    
+    # Check if token is bridgeable
+    if not source_info.get("bridgeable", False) and request.source_token != "CRT":
+        raise HTTPException(status_code=400, detail="Token not available for bridging")
+    
+    # Validate available balance
+    available_balance = source_info.get("your_balance", 0)
+    if request.amount > available_balance:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Insufficient balance. Available: {available_balance} {request.source_token}"
+        )
+    
+    # Calculate conversion
+    source_price = source_info.get("current_price", 0)
+    if source_price == 0:
+        raise HTTPException(status_code=400, detail="Token price not set - please contact admin")
+    
+    dest_price = TOKEN_EXCHANGE_RATES.get(request.destination_token, 0)
+    if dest_price == 0:
+        raise HTTPException(status_code=400, detail="Invalid destination token")
+    
+    usd_value = request.amount * source_price
+    destination_amount = usd_value / dest_price
+    
+    # Create bridge request
+    bridge_id = f"multi_bridge_{len(mock_db.get('multi_bridge_requests', []))}"
+    
+    bridge_request = {
+        "bridge_id": bridge_id,
+        "source_token": request.source_token,
+        "source_amount": request.amount,
+        "source_value_usd": usd_value,
+        "destination_token": request.destination_token,
+        "destination_amount": destination_amount,
+        "user_wallet": request.user_wallet,
+        "status": "iou_issued" if request.promissory_note else "pending_liquidity",
+        "created_at": datetime.now(),
+        "iou_active": request.promissory_note
+    }
+    
+    if request.promissory_note:
+        # Issue IOU - give user destination tokens immediately
+        user_data = mock_db["users"]["user123"]
+        user_data["balances"][request.destination_token] = user_data["balances"].get(request.destination_token, 0) + destination_amount
+        
+        # Reserve source tokens as collateral
+        source_info["your_balance"] -= request.amount
+        
+        bridge_request["iou_details"] = {
+            "issued_amount": destination_amount,
+            "issued_token": request.destination_token,
+            "collateral_token": request.source_token,
+            "collateral_amount": request.amount,
+            "repayment_terms": f"Repay when {request.source_token} liquidity available",
+            "interest_rate": 0.0
+        }
+    
+    # Store bridge request
+    if "multi_bridge_requests" not in mock_db:
+        mock_db["multi_bridge_requests"] = []
+    mock_db["multi_bridge_requests"].append(bridge_request)
+    
+    return {
+        "bridge_id": bridge_id,
+        "status": bridge_request["status"],
+        "source_token": request.source_token,
+        "source_amount": request.amount,
+        "source_value_usd": usd_value,
+        "destination_token": request.destination_token,
+        "destination_amount": destination_amount,
+        "iou_issued": request.promissory_note,
+        "message": f"Successfully bridged {request.amount:,.0f} {request.source_token} → {destination_amount:,.2f} {request.destination_token}",
+        "remaining_balance": source_info["your_balance"]
+    }
+
+@app.get("/api/tokens/bridge/opportunities")
+async def get_bridge_opportunities():
+    """Get all available bridge opportunities for your tokens"""
+    
+    opportunities = {}
+    total_bridgeable_value = 0
+    
+    for token_symbol, token_info in SUPPORTED_TOKENS.items():
+        if token_info.get("bridgeable", False) or token_symbol == "CRT":
+            balance = token_info.get("your_balance", 0)
+            price = token_info.get("current_price", 0)
+            
+            if balance > 0 and price > 0:
+                max_value_usd = balance * price
+                total_bridgeable_value += max_value_usd
+                
+                # Calculate destination amounts
+                destination_options = {}
+                for dest_token, dest_price in TOKEN_EXCHANGE_RATES.items():
+                    if dest_token in ["USDC", "SOL", "BTC", "ETH"]:  # Only bridgeable destinations
+                        max_dest_amount = max_value_usd / dest_price
+                        destination_options[dest_token] = {
+                            "max_amount": max_dest_amount,
+                            "half_amount": max_dest_amount * 0.5,
+                            "quarter_amount": max_dest_amount * 0.25
+                        }
+                
+                opportunities[token_symbol] = {
+                    "available_balance": balance,
+                    "token_price": price,
+                    "max_bridge_value_usd": max_value_usd,
+                    "total_supply": token_info.get("total_supply", "N/A"),
+                    "destinations": destination_options
+                }
+    
+    return {
+        "total_bridgeable_value_usd": total_bridgeable_value,
+        "opportunities": opportunities,
+        "supported_destinations": ["USDC", "SOL", "BTC", "ETH"],
+        "bridge_terms": {
+            "interest_rate": "0%",
+            "repayment": "When token liquidity becomes available",
+            "instant_access": "Yes - IOU system provides immediate liquidity"
+        }
+    }
+
 @app.post("/api/crt/bridge")
 async def bridge_crt_tokens(request: CRTBridgeRequest):
     """Bridge CRT tokens using IOU system until liquidity available"""
