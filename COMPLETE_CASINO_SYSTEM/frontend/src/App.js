@@ -234,6 +234,9 @@ function App() {
         <button onClick={() => setShowCRTBridge(true)} style={{padding: '12px 24px', backgroundColor: '#f39c12', color: 'white', border: 'none', borderRadius: '8px', fontSize: '16px', cursor: 'pointer'}}>
           🌉 CRT Bridge
         </button>
+        <button onClick={() => setShowDiversifiedBridge(true)} style={{padding: '12px 24px', backgroundColor: '#6f42c1', color: 'white', border: 'none', borderRadius: '8px', fontSize: '16px', cursor: 'pointer'}}>
+          🌈 Diversified Portfolio
+        </button>
       </div>
 
       {/* Token Balances Grid */}
