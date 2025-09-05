@@ -672,6 +672,152 @@ async def bridge_any_token(request: MultiTokenBridgeRequest):
         "remaining_balance": source_info["your_balance"]
     }
 
+# Diversified Portfolio Options
+DIVERSIFIED_PORTFOLIOS = {
+    "taste_test": {
+        "name": "🍽️ Crypto Taste Test",
+        "bridge_amount": 2000000,  # 2M T52M tokens ($200k)
+        "allocation": {
+            "USDC": {"percentage": 0.30, "description": "💵 Stable foundation"},
+            "SOL": {"percentage": 0.25, "description": "⚡ Solana ecosystem"},  
+            "ETH": {"percentage": 0.20, "description": "🔥 DeFi powerhouse"},
+            "BTC": {"percentage": 0.15, "description": "🪙 Digital gold"},
+            "CDT": {"percentage": 0.10, "description": "🎨 Creative Dollar"}
+        }
+    },
+    "balanced": {
+        "name": "🌟 Balanced Explorer", 
+        "bridge_amount": 5000000,  # 5M T52M tokens ($500k)
+        "allocation": {
+            "USDC": {"percentage": 0.30, "description": "💵 Safe harbor"},
+            "SOL": {"percentage": 0.25, "description": "⚡ Fast transactions"},
+            "ETH": {"percentage": 0.20, "description": "🔥 Smart contracts"},
+            "BTC": {"percentage": 0.15, "description": "🪙 Store of value"},
+            "CDT": {"percentage": 0.10, "description": "🎨 Your target coin"}
+        }
+    },
+    "whale": {
+        "name": "🐋 Whale Diversified",
+        "bridge_amount": 20000000,  # 20M T52M tokens ($2M)
+        "allocation": {
+            "USDC": {"percentage": 0.25, "description": "💵 Liquidity base"},
+            "SOL": {"percentage": 0.25, "description": "⚡ Ecosystem play"},
+            "ETH": {"percentage": 0.20, "description": "🔥 DeFi king"},
+            "BTC": {"percentage": 0.15, "description": "🪙 Digital gold"},
+            "CDT": {"percentage": 0.15, "description": "🎨 Major CDT position"}
+        }
+    }
+}
+
+@app.post("/api/tokens/bridge/diversified")
+async def bridge_diversified_portfolio(portfolio_type: str, user_id: str = "user123"):
+    """Bridge tokens into a diversified crypto portfolio"""
+    
+    if portfolio_type not in DIVERSIFIED_PORTFOLIOS:
+        raise HTTPException(status_code=400, detail="Invalid portfolio type")
+    
+    portfolio = DIVERSIFIED_PORTFOLIOS[portfolio_type]
+    bridge_amount = portfolio["bridge_amount"]
+    
+    # Check if user has enough T52M tokens
+    t52m_info = SUPPORTED_TOKENS["T52M"]
+    if bridge_amount > t52m_info.get("your_balance", 0):
+        raise HTTPException(
+            status_code=400, 
+            detail=f"Insufficient T52M balance. Need {bridge_amount:,}, have {t52m_info.get('your_balance', 0):,}"
+        )
+    
+    # Calculate allocations
+    total_usd_value = bridge_amount * t52m_info["current_price"]
+    allocations = {}
+    user_data = mock_db["users"][user_id]
+    
+    for crypto, details in portfolio["allocation"].items():
+        percentage = details["percentage"]
+        usd_amount = total_usd_value * percentage
+        crypto_price = TOKEN_EXCHANGE_RATES.get(crypto, 1.0)
+        crypto_amount = usd_amount / crypto_price
+        
+        # Add to user balance
+        user_data["balances"][crypto] = user_data["balances"].get(crypto, 0) + crypto_amount
+        
+        allocations[crypto] = {
+            "percentage": f"{percentage*100}%",
+            "usd_value": usd_amount,
+            "crypto_amount": crypto_amount,
+            "description": details["description"]
+        }
+    
+    # Reduce T52M balance (collateral for IOU)
+    t52m_info["your_balance"] -= bridge_amount
+    
+    # Create portfolio bridge record
+    portfolio_bridge = {
+        "portfolio_id": f"portfolio_{len(mock_db.get('diversified_bridges', []))}",
+        "portfolio_type": portfolio_type,
+        "portfolio_name": portfolio["name"],
+        "t52m_bridged": bridge_amount,
+        "total_usd_value": total_usd_value,
+        "allocations": allocations,
+        "user_id": user_id,
+        "status": "completed",
+        "created_at": datetime.now()
+    }
+    
+    if "diversified_bridges" not in mock_db:
+        mock_db["diversified_bridges"] = []
+    mock_db["diversified_bridges"].append(portfolio_bridge)
+    
+    return {
+        "success": True,
+        "portfolio_name": portfolio["name"],
+        "t52m_bridged": bridge_amount,
+        "total_usd_value": total_usd_value,
+        "allocations": allocations,
+        "message": f"Successfully created diversified crypto portfolio worth ${total_usd_value:,.0f}",
+        "remaining_t52m": t52m_info["your_balance"]
+    }
+
+@app.get("/api/tokens/bridge/portfolios")
+async def get_diversified_portfolios():
+    """Get available diversified portfolio options"""
+    
+    portfolio_options = {}
+    t52m_price = SUPPORTED_TOKENS["T52M"]["current_price"]
+    
+    for portfolio_id, portfolio in DIVERSIFIED_PORTFOLIOS.items():
+        bridge_amount = portfolio["bridge_amount"]
+        total_usd_value = bridge_amount * t52m_price
+        
+        # Calculate what you'll get
+        breakdown = {}
+        for crypto, details in portfolio["allocation"].items():
+            percentage = details["percentage"]
+            usd_amount = total_usd_value * percentage
+            crypto_price = TOKEN_EXCHANGE_RATES.get(crypto, 1.0)
+            crypto_amount = usd_amount / crypto_price
+            
+            breakdown[crypto] = {
+                "amount": crypto_amount,
+                "usd_value": usd_amount,
+                "percentage": f"{percentage*100}%",
+                "description": details["description"]
+            }
+        
+        portfolio_options[portfolio_id] = {
+            "name": portfolio["name"],
+            "bridge_amount_t52m": bridge_amount,
+            "total_usd_value": total_usd_value,
+            "crypto_breakdown": breakdown,
+            "percentage_of_supply": f"{(bridge_amount / 52000000) * 100:.1f}%"
+        }
+    
+    return {
+        "available_portfolios": portfolio_options,
+        "your_t52m_balance": SUPPORTED_TOKENS["T52M"]["your_balance"],
+        "recommendation": "Start with 'taste_test' to get exposure to all major cryptos"
+    }
+
 @app.get("/api/tokens/bridge/opportunities")
 async def get_bridge_opportunities():
     """Get all available bridge opportunities for your tokens"""
