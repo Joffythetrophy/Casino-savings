@@ -132,17 +132,7 @@ SUPPORTED_TOKENS = {
         "current_price": 0.0,  # UPDATE WITH YOUR ESTIMATED PRICE
         "bridgeable": True
     },
-    "T52M": {
-        "address": "6MPSpfXcbYaZNLczhu53Q9MaqTHPa1B7BRGJSmiU17f4",  # Your 52M supply token
-        "symbol": "T52M", 
-        "name": "Tiger Token 52M Supply",
-        "decimals": 9,
-        "logo": "⚡",
-        "total_supply": 52000000,
-        "your_balance": 52000000,  # You own the entire supply!
-        "current_price": 0.10,  # $0.10 per token
-        "bridgeable": True
-    }
+
 }
 
 # Pydantic models
