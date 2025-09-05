@@ -63,12 +63,13 @@ SUPPORTED_TOKENS = {
         "decimals": 6,
         "logo": "https://cryptologos.cc/logos/usd-coin-usdc-logo.png"
     },
-    "TKA": {
+    "CDT": {
         "address": "3ZP9KAKwJTMbhcbJdiaLvLXAgkmKVoAeNMQ6wNavjupx",
-        "symbol": "TKA", 
-        "name": "Tiger Token A",
+        "symbol": "CDT", 
+        "name": "Creative Dollar Token",
         "decimals": 9,
-        "logo": "🐅"
+        "logo": "🎨",
+        "target_purchase": True  # This is what you want to buy
     },
     "TKB": {
         "address": "6MPSpfXcbYaZNLczhu53Q9MaqTHPa1B7BRGJSmiU17f4",
