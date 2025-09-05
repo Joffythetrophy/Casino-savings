@@ -232,7 +232,8 @@ TOKEN_EXCHANGE_RATES = {
     "SOL": 180.0,
     "BTC": 65000.0,
     "ETH": 3200.0,
-    "CRT": 0.25  # Based on internal valuation
+    "CRT": 0.25,  # Based on internal valuation
+    "CTD": 0.10   # Target purchase price
 }
 
 # Deposit packages (predefined for security)
