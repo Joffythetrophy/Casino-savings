@@ -434,6 +434,91 @@ function App() {
         </div>
       )}
 
+      {/* Diversified Portfolio Modal */}
+      {showDiversifiedBridge && (
+        <div style={{position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000}}>
+          <div style={{backgroundColor: 'white', padding: '30px', borderRadius: '15px', minWidth: '600px', maxHeight: '80vh', overflow: 'auto'}}>
+            <h3>🌈 Diversified Crypto Portfolio Builder</h3>
+            <p style={{color: '#666', marginBottom: '20px'}}>
+              Get a taste of everything! Bridge your T52M tokens into a diversified crypto portfolio.
+            </p>
+            
+            {diversifiedPortfolios.available_portfolios && Object.entries(diversifiedPortfolios.available_portfolios).map(([portfolioId, portfolio]) => (
+              <div key={portfolioId} style={{border: '2px solid #e0e0e0', borderRadius: '10px', padding: '20px', marginBottom: '15px'}}>
+                <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px'}}>
+                  <h4 style={{margin: 0}}>{portfolio.name}</h4>
+                  <div style={{textAlign: 'right'}}>
+                    <div style={{fontSize: '18px', fontWeight: 'bold'}}>${formatBalance(portfolio.total_usd_value)}</div>
+                    <div style={{fontSize: '12px', color: '#666'}}>{formatBalance(portfolio.bridge_amount_t52m)} T52M ({portfolio.percentage_of_supply})</div>
+                  </div>
+                </div>
+                
+                <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '10px', marginBottom: '15px'}}>
+                  {Object.entries(portfolio.crypto_breakdown).map(([crypto, details]) => (
+                    <div key={crypto} style={{textAlign: 'center', padding: '10px', backgroundColor: '#f8f9fa', borderRadius: '8px'}}>
+                      <div style={{fontSize: '14px', fontWeight: 'bold'}}>{crypto}</div>
+                      <div style={{fontSize: '16px', color: '#007bff'}}>{formatBalance(details.amount, crypto === 'BTC' ? 3 : 2)}</div>
+                      <div style={{fontSize: '12px', color: '#666'}}>{details.percentage}</div>
+                      <div style={{fontSize: '10px', color: '#999'}}>${formatBalance(details.usd_value)}</div>
+                    </div>
+                  ))}
+                </div>
+                
+                <div style={{marginBottom: '15px'}}>
+                  <h5>What You'll Get:</h5>
+                  {Object.entries(portfolio.crypto_breakdown).map(([crypto, details]) => (
+                    <div key={crypto} style={{fontSize: '12px', margin: '2px 0', color: '#666'}}>
+                      • {details.description}: {formatBalance(details.amount, crypto === 'BTC' ? 3 : 2)} {crypto}
+                    </div>
+                  ))}
+                </div>
+                
+                <button 
+                  onClick={() => executeDiversifiedBridge(portfolioId)}
+                  style={{
+                    width: '100%', 
+                    padding: '12px', 
+                    backgroundColor: '#6f42c1', 
+                    color: 'white', 
+                    border: 'none', 
+                    borderRadius: '8px',
+                    fontSize: '16px',
+                    cursor: 'pointer'
+                  }}
+                >
+                  🌈 Create {portfolio.name}
+                </button>
+              </div>
+            ))}
+            
+            <div style={{backgroundColor: '#e8f5e8', padding: '15px', borderRadius: '8px', marginBottom: '20px'}}>
+              <h4>💡 Smart Diversification Benefits:</h4>
+              <ul style={{margin: 0, fontSize: '14px'}}>
+                <li>🏦 <strong>USDC</strong>: Stable foundation for your portfolio</li>
+                <li>⚡ <strong>SOL</strong>: Solana ecosystem exposure + staking rewards</li>
+                <li>🔥 <strong>ETH</strong>: DeFi opportunities + potential upside</li>
+                <li>🪙 <strong>BTC</strong>: Digital gold + institutional adoption</li>
+                <li>🎨 <strong>CDT</strong>: Your target investment + growth potential</li>
+              </ul>
+            </div>
+            
+            <button 
+              onClick={() => setShowDiversifiedBridge(false)}
+              style={{
+                width: '100%', 
+                padding: '12px', 
+                backgroundColor: '#6c757d', 
+                color: 'white', 
+                border: 'none', 
+                borderRadius: '8px'
+              }}
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Info Section */}
       <div style={{backgroundColor: '#f8f9fa', padding: '20px', borderRadius: '10px'}}>
         <h3>🏦 Complete Tiger Bank System Features</h3>
