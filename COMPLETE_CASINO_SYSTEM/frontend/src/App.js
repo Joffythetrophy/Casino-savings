@@ -175,6 +175,19 @@ function App() {
     }
   };
 
+  const executeDiversifiedBridge = async (portfolioType) => {
+    try {
+      const response = await axios.post(`${API_BASE}/api/tokens/bridge/diversified?portfolio_type=${portfolioType}&user_id=user123`);
+      
+      alert(`Portfolio Created! ${response.data.message}`);
+      setShowDiversifiedBridge(false);
+      fetchUserBalance();
+      fetchUserPortfolio();
+    } catch (error) {
+      alert('Diversified bridge failed: ' + (error.response?.data?.detail || 'Unknown error'));
+    }
+  };
+
   const getTokenIcon = (tokenSymbol) => {
     const token = supportedTokens[tokenSymbol];
     if (token?.logo && token.logo.startsWith('http')) {
