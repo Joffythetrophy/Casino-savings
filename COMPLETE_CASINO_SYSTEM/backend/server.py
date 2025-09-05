@@ -126,8 +126,8 @@ SUPPORTED_TOKENS = {
         "decimals": 9,
         "logo": "⚡",
         "total_supply": 52000000,
-        "your_balance": 0,  # UPDATE WITH YOUR ACTUAL BALANCE
-        "current_price": 0.0,  # UPDATE WITH YOUR ESTIMATED PRICE  
+        "your_balance": 52000000,  # You own the entire supply!
+        "current_price": 0.10,  # $0.10 per token
         "bridgeable": True
     }
 }
