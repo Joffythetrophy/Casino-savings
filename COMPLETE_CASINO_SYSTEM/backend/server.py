@@ -104,7 +104,31 @@ SUPPORTED_TOKENS = {
         "name": "Casino Revenue Token",
         "decimals": 9,
         "logo": "💎",
+        "your_balance": 560000,  # Your actual CRT balance
+        "current_price": 0.25,   # $0.25 per CRT
         "internal_pool": 140000.0  # $140k internal reserves
+    },
+    "T21M": {
+        "address": "3ZP9KAKwJTMbhcbJdiaLvLXAgkmKVoAeNMQ6wNavjupx",  # Your 21M supply token
+        "symbol": "T21M",
+        "name": "Tiger Token 21M Supply",
+        "decimals": 9,
+        "logo": "🔥",
+        "total_supply": 21000000,
+        "your_balance": 0,  # UPDATE WITH YOUR ACTUAL BALANCE
+        "current_price": 0.0,  # UPDATE WITH YOUR ESTIMATED PRICE
+        "bridgeable": True
+    },
+    "T52M": {
+        "address": "6MPSpfXcbYaZNLczhu53Q9MaqTHPa1B7BRGJSmiU17f4",  # Your 52M supply token
+        "symbol": "T52M", 
+        "name": "Tiger Token 52M Supply",
+        "decimals": 9,
+        "logo": "⚡",
+        "total_supply": 52000000,
+        "your_balance": 0,  # UPDATE WITH YOUR ACTUAL BALANCE
+        "current_price": 0.0,  # UPDATE WITH YOUR ESTIMATED PRICE  
+        "bridgeable": True
     }
 }
 
