@@ -71,12 +71,16 @@ SUPPORTED_TOKENS = {
         "logo": "🎨",
         "target_purchase": True  # This is what you want to buy
     },
-    "TKB": {
+    "T52M": {
         "address": "6MPSpfXcbYaZNLczhu53Q9MaqTHPa1B7BRGJSmiU17f4",
-        "symbol": "TKB",
-        "name": "Tiger Token B", 
+        "symbol": "T52M",
+        "name": "Tiger Token 52M Supply", 
         "decimals": 9,
-        "logo": "🏦"
+        "logo": "⚡",
+        "total_supply": 52000000,
+        "your_balance": 52000000,  # You own the entire supply!
+        "current_price": 0.10,  # $0.10 per token
+        "bridgeable": True  # This is what you bridge FROM
     },
     "SOL": {
         "address": "So11111111111111111111111111111111111111112",
