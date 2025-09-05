@@ -30,10 +30,12 @@ function App() {
   const [withdrawAddress, setWithdrawAddress] = useState('');
   const [withdrawNetwork, setWithdrawNetwork] = useState('solana');
   
-  // CRT Bridge state
+  // Bridge state
+  const [showDiversifiedBridge, setShowDiversifiedBridge] = useState(false);
   const [crtAmount, setCrtAmount] = useState(1000);
   const [crtDestToken, setCrtDestToken] = useState('USDC');
   const [crtStatus, setCrtStatus] = useState(null);
+  const [diversifiedPortfolios, setDiversifiedPortfolios] = useState({});
 
   useEffect(() => {
     fetchUserBalance();
