@@ -232,8 +232,8 @@ mock_db = {
 # Token exchange rates (mock - in real app, fetch from DEX/CoinGecko)
 TOKEN_EXCHANGE_RATES = {
     "USDC": 1.0,
-    "TKA": 0.05,
-    "TKB": 0.10,
+    "CDT": 0.10,      # 1 CDT = $0.10 (target purchase price)
+    "T52M": 0.10,     # 1 T52M = $0.10 (your bridgeable token)
     "SOL": 180.0,
     "BTC": 65000.0,
     "ETH": 3200.0,
