@@ -494,6 +494,268 @@ function App() {
         </div>
       )}
 
+      {/* Development Fund Modal */}
+      {showDevFundModal && devFundOpportunities && (
+        <div style={{
+          position: 'fixed', 
+          top: 0, left: 0, right: 0, bottom: 0,
+          backgroundColor: 'rgba(0,0,0,0.5)', 
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'center', 
+          zIndex: 1000
+        }}>
+          <div style={{
+            backgroundColor: 'white', 
+            padding: '30px', 
+            borderRadius: '15px', 
+            minWidth: '700px',
+            maxHeight: '80vh',
+            overflow: 'auto'
+          }}>
+            <h3>💻 Create App Development Fund</h3>
+            <p style={{color: '#666', marginBottom: '20px'}}>
+              Bridge your tokens into ETH, BTC, and USDC for app development projects
+            </p>
+            
+            {Object.entries(devFundOpportunities.development_fund_options).map(([fundId, fund]) => (
+              <div key={fundId} style={{
+                border: '2px solid #28a745',
+                borderRadius: '12px',
+                padding: '20px',
+                marginBottom: '20px',
+                backgroundColor: '#f8fff8'
+              }}>
+                <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px'}}>
+                  <h4 style={{margin: 0, color: '#28a745'}}>{fund.name}</h4>
+                  <div style={{textAlign: 'right'}}>
+                    <div style={{fontSize: '20px', fontWeight: 'bold'}}>${formatBalance(fund.total_usd)}</div>
+                    <div style={{fontSize: '12px', color: '#666'}}>{fund.percentage_of_portfolio} of portfolio</div>
+                  </div>
+                </div>
+                
+                <div style={{display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '15px', marginBottom: '15px'}}>
+                  {Object.entries(fund.breakdown).map(([token, details]) => (
+                    <div key={token} style={{
+                      padding: '12px',
+                      backgroundColor: '#e8f5e8',
+                      borderRadius: '8px',
+                      textAlign: 'center'
+                    }}>
+                      <div style={{fontSize: '16px', fontWeight: 'bold', color: '#28a745'}}>
+                        {token === 'USDC' ? '💵' : token === 'ETH' ? '🔥' : '🪙'} {token}
+                      </div>
+                      <div style={{fontSize: '14px', margin: '5px 0'}}>
+                        {formatBalance(details.token_amount, token === 'BTC' ? 3 : 2)} {token}
+                      </div>
+                      <div style={{fontSize: '12px', color: '#666'}}>
+                        ${formatBalance(details.usd_amount)} ({details.percentage})
+                      </div>
+                      <div style={{fontSize: '10px', color: '#888', marginTop: '5px'}}>
+                        {details.reason}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                
+                <button 
+                  onClick={() => createDevFund(fundId)}
+                  style={{
+                    width: '100%',
+                    padding: '12px',
+                    backgroundColor: '#28a745',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '8px',
+                    fontSize: '16px',
+                    cursor: 'pointer',
+                    fontWeight: 'bold'
+                  }}
+                >
+                  💻 Create {fund.name}
+                </button>
+              </div>
+            ))}
+            
+            <div style={{backgroundColor: '#fff3cd', padding: '15px', borderRadius: '8px', marginBottom: '20px'}}>
+              <h4>🚀 Development Fund Benefits:</h4>
+              <ul style={{margin: 0, fontSize: '14px'}}>
+                <li><strong>USDC</strong>: Stable funding for team, expenses, and operations</li>
+                <li><strong>ETH</strong>: Smart contract development, DeFi integrations, gas fees</li>
+                <li><strong>BTC</strong>: Long-term treasury, institutional partnerships</li>
+                <li><strong>Direct Withdrawal</strong>: Send to your external wallets immediately</li>
+              </ul>
+            </div>
+            
+            <button 
+              onClick={() => setShowDevFundModal(false)}
+              style={{
+                width: '100%',
+                padding: '12px',
+                backgroundColor: '#6c757d',
+                color: 'white',
+                border: 'none',
+                borderRadius: '8px'
+              }}
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* External Withdrawal Modal */}
+      {showWithdrawModal && portfolio && (
+        <div style={{
+          position: 'fixed', 
+          top: 0, left: 0, right: 0, bottom: 0,
+          backgroundColor: 'rgba(0,0,0,0.5)', 
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'center', 
+          zIndex: 1000
+        }}>
+          <div style={{
+            backgroundColor: 'white', 
+            padding: '30px', 
+            borderRadius: '15px', 
+            minWidth: '500px'
+          }}>
+            <h3>💸 Withdraw to External Wallet</h3>
+            <p style={{color: '#666', marginBottom: '20px'}}>
+              Send crypto directly to your external wallets for app development
+            </p>
+            
+            <div style={{marginBottom: '15px'}}>
+              <label style={{display: 'block', marginBottom: '8px', fontWeight: 'bold'}}>Token:</label>
+              <select 
+                value={withdrawToken} 
+                onChange={(e) => setWithdrawToken(e.target.value)}
+                style={{
+                  width: '100%', 
+                  padding: '12px', 
+                  fontSize: '16px',
+                  borderRadius: '8px',
+                  border: '2px solid #ddd'
+                }}
+              >
+                <option value="USDC">💵 USDC - Stable Development Funding</option>
+                <option value="ETH">🔥 ETH - Smart Contract Development</option>
+                <option value="BTC">🪙 BTC - Treasury Reserve</option>
+                <option value="DOGE">🐕 DOGE - High Liquidity</option>
+                <option value="TRX">⚡ TRX - TRON Ecosystem</option>
+              </select>
+            </div>
+            
+            <div style={{marginBottom: '15px'}}>
+              <label style={{display: 'block', marginBottom: '8px', fontWeight: 'bold'}}>Amount:</label>
+              <input
+                type="number"
+                value={withdrawAmount}
+                onChange={(e) => setWithdrawAmount(parseFloat(e.target.value))}
+                style={{
+                  width: '100%', 
+                  padding: '12px', 
+                  fontSize: '16px',
+                  borderRadius: '8px',
+                  border: '2px solid #ddd'
+                }}
+              />
+              <small style={{color: '#666'}}>
+                Available: {formatBalance(portfolio.tokens[withdrawToken]?.balance || 0)} {withdrawToken}
+              </small>
+            </div>
+            
+            <div style={{marginBottom: '15px'}}>
+              <label style={{display: 'block', marginBottom: '8px', fontWeight: 'bold'}}>Network:</label>
+              <select 
+                value={withdrawNetwork} 
+                onChange={(e) => setWithdrawNetwork(e.target.value)}
+                style={{
+                  width: '100%', 
+                  padding: '12px', 
+                  fontSize: '16px',
+                  borderRadius: '8px',
+                  border: '2px solid #ddd'
+                }}
+              >
+                <option value="ethereum">Ethereum Network</option>
+                <option value="bitcoin">Bitcoin Network</option>
+                <option value="solana">Solana Network</option>
+                <option value="tron">TRON Network</option>
+              </select>
+            </div>
+            
+            <div style={{marginBottom: '20px'}}>
+              <label style={{display: 'block', marginBottom: '8px', fontWeight: 'bold'}}>Destination Address:</label>
+              <input
+                type="text"
+                value={withdrawAddress}
+                onChange={(e) => setWithdrawAddress(e.target.value)}
+                placeholder="Enter your external wallet address"
+                style={{
+                  width: '100%', 
+                  padding: '12px', 
+                  fontSize: '16px',
+                  borderRadius: '8px',
+                  border: '2px solid #ddd'
+                }}
+              />
+            </div>
+            
+            {withdrawAmount > 0 && portfolio.tokens[withdrawToken] && (
+              <div style={{
+                backgroundColor: '#f8f9fa', 
+                padding: '15px', 
+                borderRadius: '8px', 
+                marginBottom: '20px'
+              }}>
+                <h4>📊 Withdrawal Preview:</h4>
+                <p><strong>Amount:</strong> {formatBalance(withdrawAmount)} {withdrawToken}</p>
+                <p><strong>USD Value:</strong> ${formatBalance(withdrawAmount * (portfolio.tokens[withdrawToken]?.price_usd || 0))}</p>
+                <p><strong>Network:</strong> {withdrawNetwork}</p>
+                <p><strong>Purpose:</strong> App Development Fund</p>
+              </div>
+            )}
+            
+            <div style={{display: 'flex', gap: '15px'}}>
+              <button 
+                onClick={executeWithdrawal}
+                disabled={!withdrawAddress || withdrawAmount <= 0}
+                style={{
+                  flex: 1, 
+                  padding: '15px', 
+                  backgroundColor: !withdrawAddress || withdrawAmount <= 0 ? '#ccc' : '#dc3545', 
+                  color: 'white', 
+                  border: 'none', 
+                  borderRadius: '8px',
+                  fontSize: '16px',
+                  cursor: !withdrawAddress || withdrawAmount <= 0 ? 'not-allowed' : 'pointer',
+                  fontWeight: 'bold'
+                }}
+              >
+                💸 Send to External Wallet
+              </button>
+              <button 
+                onClick={() => setShowWithdrawModal(false)}
+                style={{
+                  flex: 1, 
+                  padding: '15px', 
+                  backgroundColor: '#6c757d', 
+                  color: 'white', 
+                  border: 'none', 
+                  borderRadius: '8px',
+                  fontSize: '16px',
+                  cursor: 'pointer'
+                }}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Portfolio Summary */}
       <div style={{
         backgroundColor: '#f8f9fa', 
