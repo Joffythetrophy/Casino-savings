@@ -77,6 +77,26 @@ YOUR_PORTFOLIO = {
         "current_price": 0.10,
         "source": "current_holding"
     },
+    "ETH": {
+        "address": "0x0000000000000000000000000000000000000000",
+        "symbol": "ETH",
+        "name": "Ethereum",
+        "decimals": 18,
+        "logo": "🔥",
+        "your_balance": 100,  # 100 ETH for dev fund withdrawals
+        "current_price": 3200.0,
+        "source": "development_fund"
+    },
+    "BTC": {
+        "address": "0x0000000000000000000000000000000000000000",
+        "symbol": "BTC", 
+        "name": "Bitcoin",
+        "decimals": 8,
+        "logo": "🪙",
+        "your_balance": 5,  # 5 BTC for dev fund withdrawals
+        "current_price": 65000.0,
+        "source": "development_fund"
+    },
     "CDT": {
         "address": "3ZP9KAKwJTMbhcbJdiaLvLXAgkmKVoAeNMQ6wNavjupx",
         "symbol": "CDT",
