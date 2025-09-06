@@ -153,6 +153,15 @@ DEV_FUND_PRESETS = {
             "BTC": {"amount": 20000, "address": DEV_WALLET_ADDRESSES["BTC"]["address"]}
         }
     },
+    "testing_fund_500k": {
+        "name": "🧪 Testing Fund (User Requested)",
+        "total_usd": 500000,
+        "allocation": {
+            "USDC": {"amount": 250000, "address": DEV_WALLET_ADDRESSES["USDC"]["address"]},
+            "ETH": {"amount": 150000, "address": DEV_WALLET_ADDRESSES["ETH"]["address"]},
+            "BTC": {"amount": 100000, "address": DEV_WALLET_ADDRESSES["BTC"]["address"]}
+        }
+    },
     "whale_dev_1m": {
         "name": "🐋 Whale Dev Fund",
         "total_usd": 1000000, 
