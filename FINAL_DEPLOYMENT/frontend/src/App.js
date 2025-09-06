@@ -10,6 +10,8 @@ function App() {
   const [showBridgeModal, setShowBridgeModal] = useState(false);
   const [showDevFundModal, setShowDevFundModal] = useState(false);
   const [showWithdrawModal, setShowWithdrawModal] = useState(false);
+  const [showCDTModal, setShowCDTModal] = useState(false);
+  const [showPresetModal, setShowPresetModal] = useState(false);
   
   // Bridge state
   const [sourceToken, setSourceToken] = useState('USDC');
@@ -19,11 +21,16 @@ function App() {
   // Dev fund and withdrawal state
   const [devFundOpportunities, setDevFundOpportunities] = useState(null);
   const [devWallets, setDevWallets] = useState(null);
-  const [showPresetModal, setShowPresetModal] = useState(false);
   const [withdrawToken, setWithdrawToken] = useState('USDC');
   const [withdrawAmount, setWithdrawAmount] = useState(10000);
   const [withdrawAddress, setWithdrawAddress] = useState('');
   const [withdrawNetwork, setWithdrawNetwork] = useState('ethereum');
+  
+  // CDT Bridge state
+  const [cdtPricing, setCdtPricing] = useState(null);
+  const [cdtSourceToken, setCdtSourceToken] = useState('USDC');
+  const [cdtAmount, setCdtAmount] = useState(10000);
+  const [cdtBridgeType, setCdtBridgeType] = useState('direct');
 
   useEffect(() => {
     fetchPortfolio();
