@@ -16,6 +16,103 @@
 # 
 ## user_problem_statement: {problem_statement}
 ## backend:
+  - task: "Development Fund Withdrawal System - $500K Testing Fund Preset"
+    implemented: false
+    working: false
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: false
+          agent: "testing"
+          comment: "❌ CRITICAL: /api/withdraw/preset endpoint NOT IMPLEMENTED. The requested $500K testing fund preset with distribution ($250k USDC, $150k ETH, $100k BTC) is completely missing from the backend. Current system is a casino gaming platform, not Tiger Bank Games development fund system."
+
+  - task: "Development Wallets Configuration Endpoint"
+    implemented: false
+    working: false
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: false
+          agent: "testing"
+          comment: "❌ CRITICAL: /api/dev-wallets endpoint NOT IMPLEMENTED. No external wallet address configuration system found for USDC, ETH, BTC addresses required for development fund withdrawals."
+
+  - task: "CDT Pricing System"
+    implemented: false
+    working: false
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: false
+          agent: "testing"
+          comment: "❌ CRITICAL: /api/cdt/pricing endpoint NOT IMPLEMENTED. CDT purchase options and pricing structure completely missing from backend system."
+
+  - task: "CDT Bridge Integration - Direct and IOU Methods"
+    implemented: false
+    working: false
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: false
+          agent: "testing"
+          comment: "❌ CRITICAL: /api/cdt/bridge endpoint NOT IMPLEMENTED. Both direct and IOU bridge methods for CDT integration are completely missing. No support for illiquid tokens (CRT, T52M) bridging."
+
+  - task: "CDT IOU Status and Repayment System"
+    implemented: false
+    working: false
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: false
+          agent: "testing"
+          comment: "❌ CRITICAL: /api/cdt/iou-status and /api/cdt/iou-repay endpoints NOT IMPLEMENTED. IOU tracking and repayment system for illiquid tokens completely missing."
+
+  - task: "Portfolio Balance Verification - $12.277M Expected"
+    implemented: true
+    working: false
+    file: "/app/backend/server.py"
+    stuck_count: 1
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: false
+          agent: "testing"
+          comment: "❌ MAJOR DISCREPANCY: Portfolio shows $7.93M instead of expected $12.277M. Current balances: 270K CRT (not 21M), 213K DOGE (not 13M), 28K TRX (not 3.9M), 7.8M USDC (not 319K). Token distribution completely different from Tiger Bank Games requirements. Missing T52M token entirely."
+
+  - task: "User Authentication System"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "✅ SUCCESS: User authentication working correctly. User 'cryptoking' successfully authenticated with password 'crt21million' and wallet DwK4nUM8TKWAxEBKTG6mWA6PBRDHFPA3beLB18pwCekq."
+
+  - task: "Current System Analysis - Available Endpoints"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "✅ ANALYSIS COMPLETE: Current system has 29 working endpoints for casino gaming platform with Orca DEX integration, real blockchain transactions, wallet management, currency conversion, and Trust Wallet SWIFT integration. However, NONE of the Tiger Bank Games specific endpoints are implemented."
+
+backend:
 ##   - task: "Task name"
 ##     implemented: true
 ##     working: true  # or false or "NA"
