@@ -277,7 +277,22 @@ function App() {
           🌉 Bridge Tokens
         </button>
         <button 
-          onClick={() => setShowDevFundModal(true)}
+          onClick={() => setShowCDTModal(true)}
+          style={{
+            padding: '15px 30px', 
+            backgroundColor: '#f39c12', 
+            color: 'white', 
+            border: 'none', 
+            borderRadius: '10px', 
+            fontSize: '18px', 
+            cursor: 'pointer',
+            fontWeight: 'bold'
+          }}
+        >
+          🎨 CDT Bridge
+        </button>
+        <button 
+          onClick={executeQuickDevFund}
           style={{
             padding: '15px 30px', 
             backgroundColor: '#28a745', 
@@ -289,7 +304,22 @@ function App() {
             fontWeight: 'bold'
           }}
         >
-          💻 Dev Fund
+          🧪 $500K Dev Fund
+        </button>
+        <button 
+          onClick={() => setShowDevFundModal(true)}
+          style={{
+            padding: '15px 30px', 
+            backgroundColor: '#6f42c1', 
+            color: 'white', 
+            border: 'none', 
+            borderRadius: '10px', 
+            fontSize: '18px', 
+            cursor: 'pointer',
+            fontWeight: 'bold'
+          }}
+        >
+          💻 Custom Dev Fund
         </button>
         <button 
           onClick={() => setShowWithdrawModal(true)}
@@ -304,7 +334,7 @@ function App() {
             fontWeight: 'bold'
           }}
         >
-          💸 Withdraw
+          💸 Direct Withdraw
         </button>
       </div>
 
