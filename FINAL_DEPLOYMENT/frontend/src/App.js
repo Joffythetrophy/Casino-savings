@@ -26,7 +26,17 @@ function App() {
   useEffect(() => {
     fetchPortfolio();
     fetchTokensSummary();
+    fetchDevFundOpportunities();
   }, []);
+
+  const fetchDevFundOpportunities = async () => {
+    try {
+      const response = await axios.get(`${API_BASE}/api/dev-fund/opportunities`);
+      setDevFundOpportunities(response.data);
+    } catch (error) {
+      console.error('Error fetching dev fund opportunities:', error);
+    }
+  };
 
   const fetchPortfolio = async () => {
     try {
