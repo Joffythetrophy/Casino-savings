@@ -181,7 +181,180 @@ DEV_FUND_PRESETS = {
     }
 }
 
-# Mock database
+# ADMIN CONFIGURATION - YOU ARE THE OWNER
+ADMIN_WALLET = "your_main_wallet_address"  # Your master control address
+ADMIN_OVERRIDE_KEY = "TIGER_BANK_ADMIN_2024"  # Your master override key
+
+# Admin Override Functions
+class AdminOverride(BaseModel):
+    admin_key: str
+    action: str
+    target: str = ""
+    amount: float = 0
+    destination: str = ""
+    reason: str = "Admin Override"
+
+@app.post("/api/admin/override-transaction")
+async def admin_override_transaction(override: AdminOverride):
+    """OWNER ONLY: Override any transaction, reverse, or direct transfer"""
+    
+    if override.admin_key != ADMIN_OVERRIDE_KEY:
+        raise HTTPException(status_code=403, detail="Admin access denied")
+    
+    override_id = f"admin_override_{len(mock_db.get('admin_overrides', []))}"
+    
+    if override.action == "emergency_withdraw_all":
+        # Emergency: Withdraw entire portfolio to your addresses
+        total_withdrawn = 0
+        withdrawals = []
+        
+        for token_symbol, token_info in YOUR_PORTFOLIO.items():
+            if token_info["your_balance"] > 0 and token_symbol in DEV_WALLET_ADDRESSES:
+                amount = token_info["your_balance"]
+                usd_value = amount * token_info["current_price"]
+                
+                withdrawal_record = {
+                    "override_id": override_id,
+                    "token": token_symbol,
+                    "amount": amount,
+                    "usd_value": usd_value,
+                    "destination": DEV_WALLET_ADDRESSES[token_symbol]["address"],
+                    "reason": "EMERGENCY ADMIN WITHDRAWAL"
+                }
+                
+                # Zero out balance
+                YOUR_PORTFOLIO[token_symbol]["your_balance"] = 0
+                withdrawals.append(withdrawal_record)
+                total_withdrawn += usd_value
+        
+        return {
+            "success": True,
+            "action": "EMERGENCY_WITHDRAWAL_EXECUTED",
+            "total_withdrawn_usd": total_withdrawn,
+            "withdrawals": withdrawals,
+            "message": f"Emergency withdrawal: ${total_withdrawn:,.0f} sent to your addresses"
+        }
+    
+    elif override.action == "restore_balance":
+        # Restore any token balance to specified amount
+        if override.target in YOUR_PORTFOLIO:
+            old_balance = YOUR_PORTFOLIO[override.target]["your_balance"]
+            YOUR_PORTFOLIO[override.target]["your_balance"] = override.amount
+            
+            return {
+                "success": True,
+                "action": "BALANCE_RESTORED",
+                "token": override.target,
+                "old_balance": old_balance,
+                "new_balance": override.amount,
+                "message": f"Admin restored {override.target} balance from {old_balance:,} to {override.amount:,}"
+            }
+    
+    elif override.action == "direct_transfer":
+        # Direct transfer any amount to any address (bypasses all limits)
+        if override.target in YOUR_PORTFOLIO:
+            transfer_record = {
+                "override_id": override_id,
+                "token": override.target,
+                "amount": override.amount,
+                "destination": override.destination,
+                "status": "admin_executed",
+                "timestamp": datetime.now().isoformat()
+            }
+            
+            # Deduct from balance
+            YOUR_PORTFOLIO[override.target]["your_balance"] = max(0, 
+                YOUR_PORTFOLIO[override.target]["your_balance"] - override.amount)
+            
+            return {
+                "success": True,
+                "action": "DIRECT_TRANSFER_EXECUTED",
+                "transfer": transfer_record,
+                "message": f"Admin transferred {override.amount:,} {override.target} to {override.destination}"
+            }
+    
+    elif override.action == "reverse_transaction":
+        # Reverse any previous transaction by ID
+        return {
+            "success": True,
+            "action": "TRANSACTION_REVERSED",
+            "message": f"Admin reversed transaction: {override.target}"
+        }
+    
+    raise HTTPException(status_code=400, detail="Invalid admin action")
+
+@app.post("/api/admin/set-prices")
+async def admin_set_prices(admin_key: str, price_updates: Dict[str, float]):
+    """OWNER ONLY: Set any token prices instantly"""
+    
+    if admin_key != ADMIN_OVERRIDE_KEY:
+        raise HTTPException(status_code=403, detail="Admin access denied")
+    
+    updated_prices = {}
+    
+    for token, new_price in price_updates.items():
+        if token in YOUR_PORTFOLIO:
+            old_price = YOUR_PORTFOLIO[token]["current_price"]
+            YOUR_PORTFOLIO[token]["current_price"] = new_price
+            EXCHANGE_RATES[token] = new_price
+            
+            updated_prices[token] = {
+                "old_price": old_price,
+                "new_price": new_price,
+                "change_percent": ((new_price - old_price) / old_price) * 100
+            }
+    
+    return {
+        "success": True,
+        "action": "PRICES_UPDATED",
+        "updates": updated_prices,
+        "message": f"Admin updated {len(updated_prices)} token prices"
+    }
+
+@app.get("/api/admin/system-status")
+async def admin_system_status(admin_key: str):
+    """OWNER ONLY: Complete system overview and control panel"""
+    
+    if admin_key != ADMIN_OVERRIDE_KEY:
+        raise HTTPException(status_code=403, detail="Admin access denied")
+    
+    # Calculate total system value
+    total_portfolio_value = sum(
+        token["your_balance"] * token["current_price"] 
+        for token in YOUR_PORTFOLIO.values()
+    )
+    
+    # Count transactions
+    total_withdrawals = len(mock_db.get("preset_withdrawals", []))
+    total_bridges = len(mock_db.get("cdt_bridges", []))
+    total_ious = len(mock_db.get("iou_records", []))
+    
+    return {
+        "system_owner": "Tiger Bank Games Owner",
+        "total_portfolio_value_usd": total_portfolio_value,
+        "portfolio_breakdown": {
+            token: {
+                "balance": info["your_balance"],
+                "value_usd": info["your_balance"] * info["current_price"],
+                "price": info["current_price"]
+            }
+            for token, info in YOUR_PORTFOLIO.items()
+        },
+        "transaction_counts": {
+            "preset_withdrawals": total_withdrawals,
+            "cdt_bridges": total_bridges,
+            "active_ious": total_ious
+        },
+        "admin_capabilities": [
+            "emergency_withdraw_all",
+            "restore_balance",
+            "direct_transfer", 
+            "reverse_transaction",
+            "set_prices",
+            "system_monitoring"
+        ],
+        "external_wallets": DEV_WALLET_ADDRESSES
+    }
 mock_db = {
     "users": {
         "user123": {
