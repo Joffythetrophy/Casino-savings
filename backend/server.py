@@ -353,6 +353,166 @@ async def convert_currency(request: ConvertRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+@app.get("/api/health")
+async def health_check():
+    """Health check endpoint"""
+    return {
+        "status": "healthy",
+        "service": "tiger-bank-games-dev-fund",
+        "version": "5.0.0",
+        "portfolio_loaded": len(YOUR_PORTFOLIO) > 0
+    }
+
+@app.get("/api/user/{user_id}/portfolio")
+async def get_user_portfolio(user_id: str) -> Portfolio:
+    """Get complete user portfolio with converted tokens"""
+    
+    portfolio_breakdown = {}
+    total_value = 0
+    
+    for token_symbol, token_info in YOUR_PORTFOLIO.items():
+        balance = token_info["your_balance"]
+        price = token_info["current_price"]
+        value_usd = balance * price
+        total_value += value_usd
+        
+        portfolio_breakdown[token_symbol] = {
+            "symbol": token_symbol,
+            "name": token_info["name"],
+            "balance": balance,
+            "price_usd": price,
+            "value_usd": value_usd,
+            "logo": token_info["logo"],
+            "source": token_info["source"],
+            "withdrawable": balance > 0
+        }
+    
+    return Portfolio(
+        user_id=user_id,
+        tokens=portfolio_breakdown,
+        total_value_usd=total_value
+    )
+
+@app.get("/api/tokens/summary")
+async def get_tokens_summary():
+    """Get summary of all your tokens"""
+    
+    converted_tokens = {}
+    current_holdings = {}
+    targets = {}
+    
+    total_converted_value = 0
+    total_current_value = 0
+    
+    for token_symbol, token_info in YOUR_PORTFOLIO.items():
+        balance = token_info["your_balance"]
+        price = token_info["current_price"]
+        value_usd = balance * price
+        
+        token_data = {
+            "symbol": token_symbol,
+            "name": token_info["name"],
+            "balance": balance,
+            "value_usd": value_usd,
+            "logo": token_info["logo"]
+        }
+        
+        if token_info["source"] == "converted_from_previous_portfolio":
+            converted_tokens[token_symbol] = token_data
+            total_converted_value += value_usd
+        elif token_info["source"] == "current_holding":
+            current_holdings[token_symbol] = token_data
+            total_current_value += value_usd
+        elif token_info["source"] == "target_purchase":
+            targets[token_symbol] = token_data
+    
+    return {
+        "converted_portfolio": {
+            "tokens": converted_tokens,
+            "total_value_usd": total_converted_value,
+            "description": "Your previous conversions: 319K USDC + 13M DOGE + 3.9M TRX + 21M CRT"
+        },
+        "current_holdings": {
+            "tokens": current_holdings,
+            "total_value_usd": total_current_value,
+            "description": "Your current T52M token holdings"
+        },
+        "purchase_targets": {
+            "tokens": targets,
+            "description": "Tokens you want to acquire (CDT)"
+        },
+        "grand_total_usd": total_converted_value + total_current_value
+    }
+
+@app.get("/api/dev-wallets")
+async def get_development_wallets():
+    """Get pre-configured development wallet addresses"""
+    return {
+        "dev_wallets": DEV_WALLET_ADDRESSES,
+        "quick_presets": DEV_FUND_PRESETS,
+        "message": "Your development wallet addresses are pre-configured for instant withdrawals"
+    }
+
+@app.post("/api/withdraw/preset")
+async def withdraw_preset_dev_fund(preset_id: str):
+    """Execute preset development fund withdrawal to your addresses"""
+    
+    if preset_id not in DEV_FUND_PRESETS:
+        raise HTTPException(status_code=400, detail="Invalid preset ID")
+    
+    preset = DEV_FUND_PRESETS[preset_id]
+    withdrawals = []
+    total_withdrawn_usd = 0
+    
+    # Execute withdrawals for each allocation
+    for token, details in preset["allocation"].items():
+        amount_usd = details["amount"]
+        destination_address = details["address"]
+        
+        # Calculate token amount
+        token_price = EXCHANGE_RATES.get(token, 1.0)
+        token_amount = amount_usd / token_price
+        
+        # Check if enough balance in portfolio
+        if token in YOUR_PORTFOLIO and YOUR_PORTFOLIO[token]["your_balance"] >= token_amount:
+            # Execute withdrawal
+            withdrawal_id = f"preset_withdraw_{len(mock_db.get('preset_withdrawals', []))}"
+            
+            withdrawal_record = {
+                "withdrawal_id": withdrawal_id,
+                "preset_id": preset_id,
+                "token_symbol": token,
+                "amount": token_amount,
+                "usd_value": amount_usd,
+                "destination_address": destination_address,
+                "network": DEV_WALLET_ADDRESSES[token]["network"],
+                "purpose": "development_fund_preset",
+                "status": "processing",
+                "created_at": datetime.now().isoformat()
+            }
+            
+            # Update balance
+            YOUR_PORTFOLIO[token]["your_balance"] -= token_amount
+            withdrawals.append(withdrawal_record)
+            total_withdrawn_usd += amount_usd
+            
+            if "preset_withdrawals" not in mock_db:
+                mock_db["preset_withdrawals"] = []
+            mock_db["preset_withdrawals"].append(withdrawal_record)
+    
+    return {
+        "success": True,
+        "preset_name": preset["name"],
+        "total_withdrawn_usd": total_withdrawn_usd,
+        "withdrawals": withdrawals,
+        "message": f"Development fund preset executed - ${total_withdrawn_usd:,.0f} sent to your wallets",
+        "wallet_destinations": {
+            "ETH": DEV_WALLET_ADDRESSES["ETH"]["address"],
+            "BTC": DEV_WALLET_ADDRESSES["BTC"]["address"], 
+            "USDC": DEV_WALLET_ADDRESSES["USDC"]["address"]
+        }
+    }
+
 @app.get("/api/development-wallets")
 async def get_development_wallets():
     """Get development wallet addresses"""
