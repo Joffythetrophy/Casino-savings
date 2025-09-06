@@ -354,16 +354,13 @@ metadata:
 
 test_plan:
   current_focus:
-    - "URGENT: Implement Tiger Bank Games development fund withdrawal system"
-    - "CRITICAL: Implement /api/withdraw/preset endpoint for $500K testing fund"
-    - "CRITICAL: Implement /api/dev-wallets endpoint for external address configuration"
-    - "CRITICAL: Implement complete CDT bridge integration (/api/cdt/pricing, /api/cdt/bridge, /api/cdt/iou-status, /api/cdt/iou-repay)"
-    - "CRITICAL: Fix portfolio balances to match expected $12.277M distribution"
-    - "URGENT: Add T52M token support (52M T52M missing from system)"
+    - "URGENT: Add ETH and BTC tokens to YOUR_PORTFOLIO to enable full $500K testing fund withdrawal"
+    - "CRITICAL: Implement missing /api/cdt/iou-status and /api/cdt/iou-repay endpoints"
+    - "CRITICAL: Restore USDC balance from 69K to 319K for proper portfolio verification"
+    - "MEDIUM: Fix balance deduction logic in preset withdrawal to handle missing tokens gracefully"
   stuck_tasks:
-    - "COMPLETE SYSTEM MISMATCH - Current casino gaming system vs required Tiger Bank Games development fund system"
-    - "ALL Tiger Bank Games endpoints missing - 6 critical endpoints not implemented"
-    - "Portfolio balance mismatch - $7.93M actual vs $12.277M expected"
+    - "$500K Testing Fund Preset - Only processes $250K USDC due to missing ETH/BTC tokens in portfolio"
+    - "IOU Management System - Missing status and repayment endpoints for IOU tracking"
   test_all: false
   test_priority: "high_first"
 
