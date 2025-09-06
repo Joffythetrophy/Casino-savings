@@ -121,6 +121,19 @@ const Header = ({ isWalletConnected }) => {
             </Link>
             
             <Link 
+              to="/development-fund" 
+              className={`flex items-center space-x-1 px-2 py-1 rounded-lg transition-all duration-300 text-xs whitespace-nowrap ${
+                isActive('/development-fund') 
+                  ? 'bg-casino-green-500 text-white font-medium glow-green' 
+                  : 'text-casino-green-200 hover:text-casino-green-400 hover:bg-casino-green-800/30'
+              }`}
+            >
+              <Coins className="w-3 h-3" />
+              <span className="hidden sm:block">🏦 Dev Fund</span>
+              <span className="sm:hidden">🏦</span>
+            </Link>
+            
+            <Link 
               to="/dex" 
               className={`flex items-center space-x-1 px-2 py-1 rounded-lg transition-all duration-300 text-xs whitespace-nowrap ${
                 isActive('/dex') 
