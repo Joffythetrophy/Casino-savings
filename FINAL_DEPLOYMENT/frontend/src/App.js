@@ -29,6 +29,7 @@ function App() {
     fetchPortfolio();
     fetchTokensSummary();
     fetchDevFundOpportunities();
+    fetchDevWallets();
   }, []);
 
   const fetchDevFundOpportunities = async () => {
