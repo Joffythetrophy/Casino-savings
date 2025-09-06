@@ -680,8 +680,241 @@ async def get_withdrawal_history():
     return {
         "external_withdrawals": mock_db.get("external_withdrawals", []),
         "development_funds": mock_db.get("development_funds", []),
+        "preset_withdrawals": mock_db.get("preset_withdrawals", []),
         "total_withdrawn_usd": sum(w.get("usd_value", 0) for w in mock_db.get("external_withdrawals", []))
     }
+
+# CDT Bridge and IOU System
+class CDTBridgeRequest(BaseModel):
+    source_token: str
+    amount: float
+    cdt_target_amount: float
+    user_wallet: str
+    bridge_type: str = "direct"  # "direct" or "iou"
+
+@app.get("/api/cdt/pricing")
+async def get_cdt_pricing():
+    """Get current CDT pricing and purchase options"""
+    
+    cdt_price = 0.10  # $0.10 per CDT
+    
+    # Calculate how much CDT you can buy with each token
+    purchase_options = {}
+    
+    for token_symbol, token_info in YOUR_PORTFOLIO.items():
+        if token_info["your_balance"] > 0 and token_symbol != "CDT":
+            max_usd_value = token_info["your_balance"] * token_info["current_price"]
+            max_cdt_amount = max_usd_value / cdt_price
+            
+            purchase_options[token_symbol] = {
+                "available_balance": token_info["your_balance"],
+                "max_usd_value": max_usd_value,
+                "max_cdt_amount": max_cdt_amount,
+                "exchange_rate": f"1 {token_symbol} = {token_info['current_price'] / cdt_price:.2f} CDT",
+                "liquidity_type": "high" if token_symbol in ["USDC", "DOGE", "TRX"] else "medium" if token_symbol == "CRT" else "low"
+            }
+    
+    return {
+        "cdt_price_usd": cdt_price,
+        "purchase_options": purchase_options,
+        "recommended_sources": {
+            "liquid_assets": ["USDC", "DOGE", "TRX"],
+            "illiquid_assets": ["CRT", "T52M"],
+            "bridge_methods": {
+                "direct": "Instant conversion for liquid assets",
+                "iou": "IOU bridge for illiquid assets - immediate CDT access with future repayment"
+            }
+        },
+        "total_purchase_power_cdt": sum(opt["max_cdt_amount"] for opt in purchase_options.values())
+    }
+
+@app.post("/api/cdt/bridge")
+async def bridge_to_cdt(request: CDTBridgeRequest):
+    """Bridge tokens to CDT with IOU support for illiquid assets"""
+    
+    # Validate source token
+    if request.source_token not in YOUR_PORTFOLIO:
+        raise HTTPException(status_code=400, detail="Source token not available")
+    
+    source_info = YOUR_PORTFOLIO[request.source_token]
+    
+    # Check balance
+    if request.amount > source_info["your_balance"]:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Insufficient balance. Available: {source_info['your_balance']:,} {request.source_token}"
+        )
+    
+    # Calculate CDT amount
+    source_usd_value = request.amount * source_info["current_price"]
+    cdt_price = 0.10
+    cdt_amount = source_usd_value / cdt_price
+    
+    # Determine bridge method
+    illiquid_tokens = ["CRT", "T52M"]
+    is_illiquid = request.source_token in illiquid_tokens
+    
+    bridge_method = "iou" if is_illiquid and request.bridge_type == "iou" else "direct"
+    
+    # Create bridge record
+    bridge_id = f"cdt_bridge_{len(mock_db.get('cdt_bridges', []))}"
+    
+    bridge_record = {
+        "bridge_id": bridge_id,
+        "source_token": request.source_token,
+        "source_amount": request.amount,
+        "source_usd_value": source_usd_value,
+        "cdt_amount": cdt_amount,
+        "bridge_method": bridge_method,
+        "user_wallet": request.user_wallet,
+        "status": "completed",
+        "timestamp": datetime.now().isoformat()
+    }
+    
+    # Handle IOU bridge for illiquid assets
+    if bridge_method == "iou":
+        iou_record = {
+            "iou_id": f"iou_{bridge_id}",
+            "debtor_wallet": request.user_wallet,
+            "debt_token": request.source_token,
+            "debt_amount": request.amount,
+            "debt_usd_value": source_usd_value,
+            "collateral_cdt": cdt_amount,
+            "status": "active",
+            "created_at": datetime.now().isoformat(),
+            "repayment_terms": f"Repay {request.amount:,} {request.source_token} or equivalent USD value",
+            "maturity": "flexible - repay when you want"
+        }
+        
+        bridge_record["iou_details"] = iou_record
+        
+        if "iou_records" not in mock_db:
+            mock_db["iou_records"] = []
+        mock_db["iou_records"].append(iou_record)
+        
+        # Don't deduct source balance for IOU (it's collateralized)
+        bridge_record["balance_change"] = "collateralized - no deduction"
+    else:
+        # Direct bridge - deduct source balance
+        YOUR_PORTFOLIO[request.source_token]["your_balance"] -= request.amount
+        bridge_record["balance_change"] = f"deducted {request.amount} {request.source_token}"
+    
+    # Add CDT to portfolio
+    YOUR_PORTFOLIO["CDT"]["your_balance"] += cdt_amount
+    
+    # Store bridge record
+    if "cdt_bridges" not in mock_db:
+        mock_db["cdt_bridges"] = []
+    mock_db["cdt_bridges"].append(bridge_record)
+    
+    return {
+        "success": True,
+        "bridge_id": bridge_id,
+        "method": bridge_method,
+        "message": f"Successfully bridged {request.amount:,} {request.source_token} → {cdt_amount:,.2f} CDT",
+        "cdt_received": cdt_amount,
+        "cdt_total_balance": YOUR_PORTFOLIO["CDT"]["your_balance"],
+        "bridge_details": bridge_record,
+        "iou_active": bridge_method == "iou"
+    }
+
+@app.get("/api/cdt/iou-status")
+async def get_iou_status():
+    """Get status of all IOU bridges"""
+    
+    iou_records = mock_db.get("iou_records", [])
+    
+    active_ious = [iou for iou in iou_records if iou["status"] == "active"]
+    total_debt_usd = sum(iou["debt_usd_value"] for iou in active_ious)
+    total_collateral_cdt = sum(iou["collateral_cdt"] for iou in active_ious)
+    
+    return {
+        "active_ious": active_ious,
+        "summary": {
+            "total_active_ious": len(active_ious),
+            "total_debt_usd": total_debt_usd,
+            "total_collateral_cdt": total_collateral_cdt,
+            "debt_by_token": {}
+        },
+        "repayment_options": {
+            "full_repayment": "Return original tokens to close IOU",
+            "partial_repayment": "Reduce debt amount",
+            "refinance": "Convert to different collateral",
+            "liquidation": "Surrender CDT to close debt (penalty may apply)"
+        }
+    }
+
+@app.post("/api/cdt/iou-repay")
+async def repay_iou(iou_id: str, repayment_type: str = "full"):
+    """Repay IOU bridge debt"""
+    
+    iou_records = mock_db.get("iou_records", [])
+    
+    # Find IOU
+    iou_record = None
+    for iou in iou_records:
+        if iou["iou_id"] == iou_id and iou["status"] == "active":
+            iou_record = iou
+            break
+    
+    if not iou_record:
+        raise HTTPException(status_code=404, detail="IOU record not found or already closed")
+    
+    debt_token = iou_record["debt_token"]
+    debt_amount = iou_record["debt_amount"]
+    collateral_cdt = iou_record["collateral_cdt"]
+    
+    if repayment_type == "full":
+        # Check if user has enough of debt token to repay
+        if YOUR_PORTFOLIO[debt_token]["your_balance"] >= debt_amount:
+            # Deduct debt token
+            YOUR_PORTFOLIO[debt_token]["your_balance"] -= debt_amount
+            
+            # Close IOU
+            iou_record["status"] = "repaid"
+            iou_record["repaid_at"] = datetime.now().isoformat()
+            
+            return {
+                "success": True,
+                "message": f"IOU repaid successfully with {debt_amount:,} {debt_token}",
+                "iou_id": iou_id,
+                "repaid_amount": debt_amount,
+                "repaid_token": debt_token,
+                "cdt_retained": collateral_cdt
+            }
+        else:
+            raise HTTPException(
+                status_code=400, 
+                detail=f"Insufficient {debt_token} balance for repayment. Need: {debt_amount:,}, Have: {YOUR_PORTFOLIO[debt_token]['your_balance']:,}"
+            )
+    
+    elif repayment_type == "liquidation":
+        # Surrender CDT to close debt (with penalty)
+        penalty_rate = 0.10  # 10% penalty
+        cdt_to_surrender = collateral_cdt * (1 + penalty_rate)
+        
+        if YOUR_PORTFOLIO["CDT"]["your_balance"] >= cdt_to_surrender:
+            # Deduct CDT with penalty
+            YOUR_PORTFOLIO["CDT"]["your_balance"] -= cdt_to_surrender
+            
+            # Close IOU
+            iou_record["status"] = "liquidated"
+            iou_record["liquidated_at"] = datetime.now().isoformat()
+            iou_record["penalty_applied"] = penalty_rate
+            
+            return {
+                "success": True,
+                "message": f"IOU liquidated - surrendered {cdt_to_surrender:,.2f} CDT ({penalty_rate*100}% penalty applied)",
+                "iou_id": iou_id,
+                "surrendered_cdt": cdt_to_surrender,
+                "penalty_applied": f"{penalty_rate*100}%",
+                "debt_cleared": True
+            }
+        else:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Insufficient CDT for liquidation. Need: {cdt_to_surrender:,.2f} CDT, Have: {YOUR_PORTFOLIO['CDT']['your_balance']:,.2f} CDT"
+            )
 
 @app.get("/api/games")
 async def get_games():
