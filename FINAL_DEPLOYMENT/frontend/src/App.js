@@ -259,6 +259,183 @@ function App() {
         )}
       </header>
 
+      {/* CDT Bridge Modal */}
+      {showCDTModal && portfolio && cdtPricing && (
+        <div style={{
+          position: 'fixed', 
+          top: 0, left: 0, right: 0, bottom: 0,
+          backgroundColor: 'rgba(0,0,0,0.5)', 
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'center', 
+          zIndex: 1000
+        }}>
+          <div style={{
+            backgroundColor: 'white', 
+            padding: '30px', 
+            borderRadius: '15px', 
+            minWidth: '600px',
+            maxHeight: '80vh',
+            overflow: 'auto'
+          }}>
+            <h3>🎨 CDT Bridge System</h3>
+            <p style={{color: '#666', marginBottom: '20px'}}>
+              Bridge any token to CDT with instant access via IOU for illiquid assets
+            </p>
+            
+            <div style={{
+              backgroundColor: '#f8f9fa',
+              padding: '15px',
+              borderRadius: '8px',
+              marginBottom: '20px'
+            }}>
+              <h4>💰 CDT Price: ${cdtPricing.cdt_price_usd} per token</h4>
+              <p style={{margin: '5px 0'}}>
+                <strong>Total Purchase Power:</strong> {formatBalance(cdtPricing.total_purchase_power_cdt)} CDT
+              </p>
+              <p style={{margin: '0', fontSize: '14px', color: '#666'}}>
+                Convert any of your {Object.keys(cdtPricing.purchase_options).length} available tokens to CDT
+              </p>
+            </div>
+            
+            <div style={{marginBottom: '20px'}}>
+              <label style={{display: 'block', marginBottom: '8px', fontWeight: 'bold'}}>Source Token:</label>
+              <select 
+                value={cdtSourceToken} 
+                onChange={(e) => setCdtSourceToken(e.target.value)}
+                style={{
+                  width: '100%', 
+                  padding: '12px', 
+                  fontSize: '16px',
+                  borderRadius: '8px',
+                  border: '2px solid #ddd'
+                }}
+              >
+                {Object.entries(cdtPricing.purchase_options).map(([symbol, info]) => (
+                  <option key={symbol} value={symbol}>
+                    {symbol} - {formatBalance(info.available_balance)} available → Max {formatBalance(info.max_cdt_amount)} CDT
+                  </option>
+                ))}
+              </select>
+              <small style={{color: '#666'}}>
+                {cdtPricing.purchase_options[cdtSourceToken]?.liquidity_type === 'low' ? 
+                  '⚠️ Illiquid asset - IOU bridge recommended' : 
+                  '✅ Liquid asset - Direct bridge available'
+                }
+              </small>
+            </div>
+            
+            <div style={{marginBottom: '20px'}}>
+              <label style={{display: 'block', marginBottom: '8px', fontWeight: 'bold'}}>Amount to Bridge:</label>
+              <input
+                type="number"
+                value={cdtAmount}
+                onChange={(e) => setCdtAmount(parseFloat(e.target.value))}
+                max={cdtPricing.purchase_options[cdtSourceToken]?.available_balance || 0}
+                style={{
+                  width: '100%', 
+                  padding: '12px', 
+                  fontSize: '16px',
+                  borderRadius: '8px',
+                  border: '2px solid #ddd'
+                }}
+              />
+              <small style={{color: '#666'}}>
+                Available: {formatBalance(cdtPricing.purchase_options[cdtSourceToken]?.available_balance || 0)} {cdtSourceToken}
+              </small>
+            </div>
+            
+            <div style={{marginBottom: '20px'}}>
+              <label style={{display: 'block', marginBottom: '8px', fontWeight: 'bold'}}>Bridge Method:</label>
+              <div style={{display: 'flex', gap: '15px'}}>
+                <label style={{display: 'flex', alignItems: 'center', gap: '8px'}}>
+                  <input
+                    type="radio"
+                    value="direct"
+                    checked={cdtBridgeType === 'direct'}
+                    onChange={(e) => setCdtBridgeType(e.target.value)}
+                  />
+                  <span>🔄 Direct Bridge</span>
+                </label>
+                <label style={{display: 'flex', alignItems: 'center', gap: '8px'}}>
+                  <input
+                    type="radio"
+                    value="iou"
+                    checked={cdtBridgeType === 'iou'}
+                    onChange={(e) => setCdtBridgeType(e.target.value)}
+                  />
+                  <span>📋 IOU Bridge (Keep original tokens)</span>
+                </label>
+              </div>
+              <small style={{color: '#666'}}>
+                {cdtBridgeType === 'iou' ? 
+                  'IOU: Get CDT instantly, repay later with original tokens' :
+                  'Direct: Convert tokens immediately to CDT'
+                }
+              </small>
+            </div>
+            
+            {cdtAmount > 0 && cdtPricing.purchase_options[cdtSourceToken] && (
+              <div style={{
+                backgroundColor: '#f8f9fa', 
+                padding: '15px', 
+                borderRadius: '8px', 
+                marginBottom: '20px'
+              }}>
+                <h4>📊 CDT Bridge Preview:</h4>
+                <p>
+                  <strong>Bridge:</strong> {formatBalance(cdtAmount)} {cdtSourceToken}
+                </p>
+                <p>
+                  <strong>USD Value:</strong> ${formatBalance(cdtAmount * (portfolio.tokens[cdtSourceToken]?.price_usd || 0))}
+                </p>
+                <p>
+                  <strong>CDT Received:</strong> {formatBalance((cdtAmount * (portfolio.tokens[cdtSourceToken]?.price_usd || 0)) / 0.10)} CDT
+                </p>
+                <p>
+                  <strong>Method:</strong> {cdtBridgeType === 'iou' ? 'IOU Bridge (collateralized)' : 'Direct Conversion'}
+                </p>
+              </div>
+            )}
+            
+            <div style={{display: 'flex', gap: '15px'}}>
+              <button 
+                onClick={executeCDTBridge}
+                disabled={loading || cdtAmount <= 0}
+                style={{
+                  flex: 1, 
+                  padding: '15px', 
+                  backgroundColor: loading ? '#ccc' : '#f39c12', 
+                  color: 'white', 
+                  border: 'none', 
+                  borderRadius: '8px',
+                  fontSize: '16px',
+                  cursor: loading ? 'not-allowed' : 'pointer',
+                  fontWeight: 'bold'
+                }}
+              >
+                {loading ? 'Processing...' : `🎨 Bridge to CDT`}
+              </button>
+              <button 
+                onClick={() => setShowCDTModal(false)}
+                style={{
+                  flex: 1, 
+                  padding: '15px', 
+                  backgroundColor: '#6c757d', 
+                  color: 'white', 
+                  border: 'none', 
+                  borderRadius: '8px',
+                  fontSize: '16px',
+                  cursor: 'pointer'
+                }}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Action Buttons */}
       <div style={{display: 'flex', justifyContent: 'center', gap: '15px', marginBottom: '30px', flexWrap: 'wrap'}}>
         <button 
