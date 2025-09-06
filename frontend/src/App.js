@@ -21,6 +21,7 @@ import CRTTokenDEXManager from "./components/CRTTokenDEXManager";
 import TrustWalletSwift from "./components/TrustWalletSwift";
 import RealBalanceSync from "./components/RealBalanceSync";
 import PoolFundingManager from "./components/PoolFundingManager";
+import DevelopmentFundDashboard from "./components/DevelopmentFundDashboard";
 import { AuthProvider, useAuth, AuthModal } from "./components/UserAuth";
 
 function AppContent() {
