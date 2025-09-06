@@ -18,6 +18,8 @@ function App() {
   
   // Dev fund and withdrawal state
   const [devFundOpportunities, setDevFundOpportunities] = useState(null);
+  const [devWallets, setDevWallets] = useState(null);
+  const [showPresetModal, setShowPresetModal] = useState(false);
   const [withdrawToken, setWithdrawToken] = useState('USDC');
   const [withdrawAmount, setWithdrawAmount] = useState(10000);
   const [withdrawAddress, setWithdrawAddress] = useState('');
