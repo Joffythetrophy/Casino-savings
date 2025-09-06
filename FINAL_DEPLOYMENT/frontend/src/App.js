@@ -41,6 +41,28 @@ function App() {
     }
   };
 
+  const fetchDevWallets = async () => {
+    try {
+      const response = await axios.get(`${API_BASE}/api/dev-wallets`);
+      setDevWallets(response.data);
+    } catch (error) {
+      console.error('Error fetching dev wallets:', error);
+    }
+  };
+
+  const executePresetWithdrawal = async (presetId) => {
+    try {
+      const response = await axios.post(`${API_BASE}/api/withdraw/preset?preset_id=${presetId}`);
+      
+      alert(`Development Fund Created! ${response.data.message}`);
+      setShowPresetModal(false);
+      fetchPortfolio();
+      fetchTokensSummary();
+    } catch (error) {
+      alert('Preset withdrawal failed: ' + (error.response?.data?.detail || 'Unknown error'));
+    }
+  };
+
   const fetchPortfolio = async () => {
     try {
       const response = await axios.get(`${API_BASE}/api/user/user123/portfolio`);
