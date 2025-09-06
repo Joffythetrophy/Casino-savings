@@ -37,7 +37,55 @@ function App() {
     fetchTokensSummary();
     fetchDevFundOpportunities();
     fetchDevWallets();
+    fetchCDTPricing();
   }, []);
+
+  const fetchCDTPricing = async () => {
+    try {
+      const response = await axios.get(`${API_BASE}/api/cdt/pricing`);
+      setCdtPricing(response.data);
+    } catch (error) {
+      console.error('Error fetching CDT pricing:', error);
+    }
+  };
+
+  const executeQuickDevFund = async () => {
+    if (window.confirm('Create $500,000 Testing Development Fund?\n\nThis will send:\n• $250k USDC\n• $150k ETH\n• $100k BTC\n\nTo your external development wallets for safekeeping.')) {
+      await executePresetWithdrawal('testing_fund_500k');
+    }
+  };
+
+  const executeCDTBridge = async () => {
+    if (!portfolio?.tokens[cdtSourceToken]) {
+      alert('Source token not available');
+      return;
+    }
+
+    if (cdtAmount > portfolio.tokens[cdtSourceToken].balance) {
+      alert('Insufficient balance');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const response = await axios.post(`${API_BASE}/api/cdt/bridge`, {
+        source_token: cdtSourceToken,
+        amount: cdtAmount,
+        cdt_target_amount: cdtAmount * (portfolio.tokens[cdtSourceToken].price_usd / 0.10),
+        user_wallet: 'your_wallet_address',
+        bridge_type: cdtBridgeType
+      });
+      
+      alert(`CDT Bridge Success: ${response.data.message}\n\nMethod: ${response.data.method}\nCDT Received: ${response.data.cdt_received.toLocaleString()}`);
+      setShowCDTModal(false);
+      fetchPortfolio();
+      fetchTokensSummary();
+    } catch (error) {
+      alert('CDT Bridge failed: ' + (error.response?.data?.detail || 'Unknown error'));
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const fetchDevFundOpportunities = async () => {
     try {
