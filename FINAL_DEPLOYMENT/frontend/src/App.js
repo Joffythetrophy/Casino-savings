@@ -196,6 +196,36 @@ function App() {
         >
           🌉 Bridge Tokens
         </button>
+        <button 
+          onClick={() => setShowDevFundModal(true)}
+          style={{
+            padding: '15px 30px', 
+            backgroundColor: '#28a745', 
+            color: 'white', 
+            border: 'none', 
+            borderRadius: '10px', 
+            fontSize: '18px', 
+            cursor: 'pointer',
+            fontWeight: 'bold'
+          }}
+        >
+          💻 Dev Fund
+        </button>
+        <button 
+          onClick={() => setShowWithdrawModal(true)}
+          style={{
+            padding: '15px 30px', 
+            backgroundColor: '#dc3545', 
+            color: 'white', 
+            border: 'none', 
+            borderRadius: '10px', 
+            fontSize: '18px', 
+            cursor: 'pointer',
+            fontWeight: 'bold'
+          }}
+        >
+          💸 Withdraw
+        </button>
       </div>
 
       {/* Token Categories */}
