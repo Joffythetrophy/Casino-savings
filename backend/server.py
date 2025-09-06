@@ -121,7 +121,59 @@ DEV_WALLET_ADDRESSES = {
     }
 }
 
-# Request models
+# Quick Development Fund Presets
+DEV_FUND_PRESETS = {
+    "quick_start_50k": {
+        "name": "🚀 Quick Start Fund",
+        "total_usd": 50000,
+        "allocation": {
+            "USDC": {"amount": 30000, "address": DEV_WALLET_ADDRESSES["USDC"]["address"]},
+            "ETH": {"amount": 15000, "address": DEV_WALLET_ADDRESSES["ETH"]["address"]}, 
+            "BTC": {"amount": 5000, "address": DEV_WALLET_ADDRESSES["BTC"]["address"]}
+        }
+    },
+    "serious_dev_200k": {
+        "name": "💻 Serious Dev Fund", 
+        "total_usd": 200000,
+        "allocation": {
+            "USDC": {"amount": 120000, "address": DEV_WALLET_ADDRESSES["USDC"]["address"]},
+            "ETH": {"amount": 60000, "address": DEV_WALLET_ADDRESSES["ETH"]["address"]},
+            "BTC": {"amount": 20000, "address": DEV_WALLET_ADDRESSES["BTC"]["address"]}
+        }
+    },
+    "testing_fund_500k": {
+        "name": "🧪 Testing Fund (User Requested)",
+        "total_usd": 500000,
+        "allocation": {
+            "USDC": {"amount": 250000, "address": DEV_WALLET_ADDRESSES["USDC"]["address"]},
+            "ETH": {"amount": 150000, "address": DEV_WALLET_ADDRESSES["ETH"]["address"]},
+            "BTC": {"amount": 100000, "address": DEV_WALLET_ADDRESSES["BTC"]["address"]}
+        }
+    },
+    "whale_dev_1m": {
+        "name": "🐋 Whale Dev Fund",
+        "total_usd": 1000000, 
+        "allocation": {
+            "USDC": {"amount": 500000, "address": DEV_WALLET_ADDRESSES["USDC"]["address"]},
+            "ETH": {"amount": 350000, "address": DEV_WALLET_ADDRESSES["ETH"]["address"]},
+            "BTC": {"amount": 150000, "address": DEV_WALLET_ADDRESSES["BTC"]["address"]}
+        }
+    }
+}
+
+# Mock database
+mock_db = {
+    "users": {
+        "user123": {
+            "balances": {token: info["your_balance"] for token, info in YOUR_PORTFOLIO.items()},
+            "dev_wallets": DEV_WALLET_ADDRESSES
+        }
+    },
+    "bridge_requests": [],
+    "preset_withdrawals": [],
+    "cdt_bridges": [],
+    "iou_records": []
+}
 class WithdrawRequest(BaseModel):
     currency: str
     amount: float
