@@ -17,20 +17,23 @@
 ## user_problem_statement: {problem_statement}
 ## backend:
   - task: "Development Fund Withdrawal System - $500K Testing Fund Preset"
-    implemented: false
+    implemented: true
     working: false
     file: "/app/backend/server.py"
-    stuck_count: 0
+    stuck_count: 1
     priority: "high"
     needs_retesting: false
     status_history:
         - working: false
           agent: "testing"
           comment: "❌ CRITICAL: /api/withdraw/preset endpoint NOT IMPLEMENTED. The requested $500K testing fund preset with distribution ($250k USDC, $150k ETH, $100k BTC) is completely missing from the backend. Current system is a casino gaming platform, not Tiger Bank Games development fund system."
+        - working: false
+          agent: "testing"
+          comment: "❌ PARTIAL IMPLEMENTATION: /api/withdraw/preset endpoint EXISTS but only withdraws $250K USDC instead of full $500K ($250k USDC, $150k ETH, $100k BTC). Issue: ETH and BTC tokens missing from YOUR_PORTFOLIO, so preset can only process USDC allocation. Backend needs ETH/BTC tokens added to portfolio or conversion logic to handle missing tokens."
 
   - task: "Development Wallets Configuration Endpoint"
-    implemented: false
-    working: false
+    implemented: true
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
@@ -39,10 +42,13 @@
         - working: false
           agent: "testing"
           comment: "❌ CRITICAL: /api/dev-wallets endpoint NOT IMPLEMENTED. No external wallet address configuration system found for USDC, ETH, BTC addresses required for development fund withdrawals."
+        - working: true
+          agent: "testing"
+          comment: "✅ SUCCESS: /api/dev-wallets endpoint IMPLEMENTED and working correctly. Returns configured ETH, BTC, USDC wallet addresses and all development fund presets including testing_fund_500k. Wallet addresses properly configured with network information."
 
   - task: "CDT Pricing System"
-    implemented: false
-    working: false
+    implemented: true
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
@@ -51,10 +57,13 @@
         - working: false
           agent: "testing"
           comment: "❌ CRITICAL: /api/cdt/pricing endpoint NOT IMPLEMENTED. CDT purchase options and pricing structure completely missing from backend system."
+        - working: true
+          agent: "testing"
+          comment: "✅ SUCCESS: /api/cdt/pricing endpoint IMPLEMENTED and working perfectly. Returns CDT price at $0.10, purchase options for 5 tokens (USDC, DOGE, TRX, CRT, T52M), total purchase power of $120.27M, and proper categorization of liquid vs illiquid assets with bridge method recommendations."
 
   - task: "CDT Bridge Integration - Direct and IOU Methods"
-    implemented: false
-    working: false
+    implemented: true
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
@@ -63,18 +72,24 @@
         - working: false
           agent: "testing"
           comment: "❌ CRITICAL: /api/cdt/bridge endpoint NOT IMPLEMENTED. Both direct and IOU bridge methods for CDT integration are completely missing. No support for illiquid tokens (CRT, T52M) bridging."
+        - working: true
+          agent: "testing"
+          comment: "✅ SUCCESS: /api/cdt/bridge endpoint IMPLEMENTED and working perfectly. Both direct bridge method (liquid assets like USDC) and IOU bridge method (illiquid assets like CRT) working correctly. Direct bridge: 10,000 CDT received for 1000 USDC. IOU bridge: 25,000 CDT received for 10,000 CRT with proper IOU record creation."
 
   - task: "CDT IOU Status and Repayment System"
     implemented: false
     working: false
     file: "/app/backend/server.py"
-    stuck_count: 0
+    stuck_count: 1
     priority: "high"
     needs_retesting: false
     status_history:
         - working: false
           agent: "testing"
           comment: "❌ CRITICAL: /api/cdt/iou-status and /api/cdt/iou-repay endpoints NOT IMPLEMENTED. IOU tracking and repayment system for illiquid tokens completely missing."
+        - working: false
+          agent: "testing"
+          comment: "❌ STILL MISSING: /api/cdt/iou-status and /api/cdt/iou-repay endpoints NOT IMPLEMENTED. While IOU records are created during bridge operations, there are no endpoints to check IOU status or process repayments. Users cannot track or repay their IOU debts."
 
   - task: "Portfolio Balance Verification - $12.277M Expected"
     implemented: true
@@ -87,6 +102,9 @@
         - working: false
           agent: "testing"
           comment: "❌ MAJOR DISCREPANCY: Portfolio shows $7.93M instead of expected $12.277M. Current balances: 270K CRT (not 21M), 213K DOGE (not 13M), 28K TRX (not 3.9M), 7.8M USDC (not 319K). Token distribution completely different from Tiger Bank Games requirements. Missing T52M token entirely."
+        - working: false
+          agent: "testing"
+          comment: "❌ BALANCE DISCREPANCY: Portfolio shows $12.027M (close to expected $12.277M) but USDC balance is 69K instead of expected 319K. Other tokens correct: 21M CRT, 13M DOGE, 3.9M TRX, 52M T52M all present. USDC shortage likely due to previous withdrawals during testing. Portfolio structure is correct but USDC balance needs restoration."
 
   - task: "User Authentication System"
     implemented: true
