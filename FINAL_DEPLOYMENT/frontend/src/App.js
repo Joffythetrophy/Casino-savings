@@ -87,6 +87,49 @@ function App() {
     }
   };
 
+  const createDevFund = async (fundType) => {
+    // Use a balanced source allocation for demo
+    const sourceTokens = {
+      "DOGE": 1000000,  // 1M DOGE
+      "T52M": 2000000,  // 2M T52M
+      "TRX": 500000     // 500K TRX
+    };
+
+    try {
+      const response = await axios.post(`${API_BASE}/api/dev-fund/create?fund_type=${fundType}`, sourceTokens);
+      
+      alert(`Development Fund Created! ${response.data.message}`);
+      setShowDevFundModal(false);
+      fetchPortfolio();
+      fetchTokensSummary();
+    } catch (error) {
+      alert('Dev fund creation failed: ' + (error.response?.data?.detail || 'Unknown error'));
+    }
+  };
+
+  const executeWithdrawal = async () => {
+    if (!withdrawAddress) {
+      alert('Please enter withdrawal address');
+      return;
+    }
+
+    try {
+      const response = await axios.post(`${API_BASE}/api/withdraw/external`, {
+        token_symbol: withdrawToken,
+        amount: withdrawAmount,
+        destination_address: withdrawAddress,
+        network: withdrawNetwork,
+        purpose: "app_development"
+      });
+      
+      alert(`Withdrawal Success! ${response.data.message}`);
+      setShowWithdrawModal(false);
+      fetchPortfolio();
+    } catch (error) {
+      alert('Withdrawal failed: ' + (error.response?.data?.detail || 'Unknown error'));
+    }
+  };
+
   const formatBalance = (amount, decimals = 2) => {
     return amount ? amount.toLocaleString(undefined, { 
       minimumFractionDigits: decimals, 
