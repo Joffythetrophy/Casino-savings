@@ -336,13 +336,16 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Fix CRT balance synchronization - user has 21M CRT but only 1,572 showing"
-    - "Resolve pool funding treasury balance issues for $10K bridge liquidity transfer"
-    - "Implement backend endpoints for conversion rates and liquidity pool data"
-    - "Verify bridge address integration for Aay7He9wCubaREq8EGm4BvEZiL77rPC2BfnjgJ5qzdxu"
+    - "URGENT: Implement Tiger Bank Games development fund withdrawal system"
+    - "CRITICAL: Implement /api/withdraw/preset endpoint for $500K testing fund"
+    - "CRITICAL: Implement /api/dev-wallets endpoint for external address configuration"
+    - "CRITICAL: Implement complete CDT bridge integration (/api/cdt/pricing, /api/cdt/bridge, /api/cdt/iou-status, /api/cdt/iou-repay)"
+    - "CRITICAL: Fix portfolio balances to match expected $12.277M distribution"
+    - "URGENT: Add T52M token support (52M T52M missing from system)"
   stuck_tasks:
-    - "CRT Balance Display - persistent issue with balance synchronization between blockchain and database"
-    - "Bridge Liquidity Transfer - pool funding blocked by treasury balance validation"
+    - "COMPLETE SYSTEM MISMATCH - Current casino gaming system vs required Tiger Bank Games development fund system"
+    - "ALL Tiger Bank Games endpoints missing - 6 critical endpoints not implemented"
+    - "Portfolio balance mismatch - $7.93M actual vs $12.277M expected"
   test_all: false
   test_priority: "high_first"
 
