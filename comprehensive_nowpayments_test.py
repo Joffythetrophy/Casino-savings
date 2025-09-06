@@ -13,7 +13,7 @@ from datetime import datetime
 from typing import Dict, Any, Optional
 
 # Get backend URL from frontend env
-BACKEND_URL = "https://solana-casino.preview.emergentagent.com/api"
+BACKEND_URL = "https://blockchain-slots.preview.emergentagent.com/api"
 
 # NOWPayments credentials from review request
 NOWPAYMENTS_CREDENTIALS = {
@@ -330,7 +330,7 @@ class ComprehensiveNOWPaymentsTester:
                         "address": USER_CREDENTIALS["withdrawal_wallet"],
                         "currency": "doge",
                         "amount": TEST_AMOUNTS["payout_test"],
-                        "ipn_callback_url": "https://solana-casino.preview.emergentagent.com/api/nowpayments/ipn"
+                        "ipn_callback_url": "https://blockchain-slots.preview.emergentagent.com/api/nowpayments/ipn"
                     }
                 ]
             }

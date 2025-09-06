@@ -17,7 +17,7 @@ from datetime import datetime
 from typing import Dict, Any, Optional
 
 # Get backend URL from frontend env
-BACKEND_URL = "https://solana-casino.preview.emergentagent.com/api"
+BACKEND_URL = "https://blockchain-slots.preview.emergentagent.com/api"
 
 class UrgentDogeDepositTester:
     def __init__(self, base_url: str):

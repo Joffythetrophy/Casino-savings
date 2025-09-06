@@ -8,7 +8,7 @@ import aiohttp
 import json
 from datetime import datetime, timedelta
 
-BACKEND_URL = "https://solana-casino.preview.emergentagent.com/api"
+BACKEND_URL = "https://blockchain-slots.preview.emergentagent.com/api"
 
 async def check_cooldown_details():
     """Check detailed cooldown information"""

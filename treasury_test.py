@@ -12,7 +12,7 @@ from datetime import datetime
 from typing import Dict, Any
 
 # Test Configuration
-BASE_URL = "https://solana-casino.preview.emergentagent.com/api"
+BASE_URL = "https://blockchain-slots.preview.emergentagent.com/api"
 TEST_USER = "cryptoking"
 TEST_PASSWORD = "crt21million"
 TEST_WALLET = "DwK4nUM8TKWAxEBKTG6mWA6PBRDHFPA3beLB18pwCekq"

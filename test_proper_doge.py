@@ -7,7 +7,7 @@ import asyncio
 import aiohttp
 import json
 
-BACKEND_URL = "https://solana-casino.preview.emergentagent.com/api"
+BACKEND_URL = "https://blockchain-slots.preview.emergentagent.com/api"
 
 async def test_proper_doge():
     user_wallet_address = "DwK4nUM8TKWAxEBKTG6mWA6PBRDHFPA3beLB18pwCekq"

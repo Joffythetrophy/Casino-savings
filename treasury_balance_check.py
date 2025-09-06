@@ -11,7 +11,7 @@ from datetime import datetime, timedelta
 
 class TreasuryBalanceChecker:
     def __init__(self):
-        self.base_url = "https://solana-casino.preview.emergentagent.com/api"
+        self.base_url = "https://blockchain-slots.preview.emergentagent.com/api"
         self.session = None
         self.auth_token = None
         

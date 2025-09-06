@@ -8,7 +8,7 @@ import asyncio
 import aiohttp
 import json
 
-BACKEND_URL = "https://solana-casino.preview.emergentagent.com/api"
+BACKEND_URL = "https://blockchain-slots.preview.emergentagent.com/api"
 TEST_USER = {
     "username": "cryptoking",
     "password": "crt21million",
