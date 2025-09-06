@@ -1,165 +1,1093 @@
-import React, { useState, useEffect } from "react";
-import "./App.css";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import { Toaster } from "./components/ui/toaster";
-import Header from "./components/Header";
-import HeroSection from "./components/HeroSection";
-import CasinoLobby from "./components/CasinoLobby";
-import SavingsPage from "./components/SavingsPage";
-import TradingPage from "./components/TradingPage";
-import WalletManager from "./components/WalletManager";
-import PremiumDashboard from "./components/PremiumDashboard";
-import AdminControlPanel from "./components/AdminControlPanel";
-import ConversionHistoryTracker from "./components/ConversionHistoryTracker";
-import StreamlinedGamingDashboard from "./components/StreamlinedGamingDashboard";
-import MillionaireCasinoInterface from "./components/MillionaireCasinoInterface";
-import SimplifiedCasinoInterface from "./components/SimplifiedCasinoInterface";
-import CleanCasinoInterface from "./components/CleanCasinoInterface";
-import SmartContractTreasuryDashboard from "./components/SmartContractTreasuryDashboard";
-import MultiCurrencyTreasuryManager from "./components/MultiCurrencyTreasuryManager";
-import CRTTokenDEXManager from "./components/CRTTokenDEXManager";
-import TrustWalletSwift from "./components/TrustWalletSwift";
-import RealBalanceSync from "./components/RealBalanceSync";
-import PoolFundingManager from "./components/PoolFundingManager";
-import DevelopmentFundDashboard from "./components/DevelopmentFundDashboard";
-import { AuthProvider, useAuth, AuthModal } from "./components/UserAuth";
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 
-function AppContent() {
-  const { user, isAuthenticated, loading } = useAuth();
-  const [showAuthModal, setShowAuthModal] = useState(false);
-  const [userBalance, setUserBalance] = useState(null);
-
-  // Fetch user balance when authenticated
-  useEffect(() => {
-    const fetchBalance = async () => {
-      if (isAuthenticated && user?.wallet_address) {
-        try {
-          const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
-          const response = await fetch(`${backendUrl}/api/wallet/${user.wallet_address}`);
-          if (response.ok) {
-            const data = await response.json();
-            if (data.success && data.wallet) {
-              setUserBalance(data.wallet);
-            }
-          }
-        } catch (error) {
-          console.error('Error fetching balance:', error);
-        }
-      }
-    };
-
-    fetchBalance();
-    // Refresh balance every 10 seconds
-    const interval = setInterval(fetchBalance, 10000);
-    return () => clearInterval(interval);
-  }, [isAuthenticated, user?.wallet_address]);
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 flex items-center justify-center">
-        <div className="text-white text-xl">Loading...</div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
-      <Router>
-        <Header />
-        {!isAuthenticated ? (
-          <>
-            <Routes>
-              <Route path="/" element={
-                <div className="flex items-center justify-center min-h-[80vh]">
-                  <div className="text-center">
-                    <h1 className="text-4xl font-bold text-white mb-4">Welcome to Casino Savings</h1>
-                    <p className="text-gray-300 mb-8">Login or create an account to start playing and saving</p>
-                    <button 
-                      onClick={() => setShowAuthModal(true)}
-                      className="bg-gradient-to-r from-yellow-400 to-yellow-600 text-black font-bold py-3 px-8 rounded-lg text-lg hover:from-yellow-300 hover:to-yellow-500 transition-all"
-                    >
-                      Get Started
-                    </button>
-                  </div>
-                </div>
-              } />
-              <Route path="/wallet" element={
-                <div className="flex items-center justify-center min-h-[80vh]">
-                  <div className="text-center">
-                    <h1 className="text-4xl font-bold text-white mb-4">Authentication Required</h1>
-                    <p className="text-gray-300 mb-8">Please login to access your wallet</p>
-                    <button 
-                      onClick={() => setShowAuthModal(true)}
-                      className="bg-gradient-to-r from-yellow-400 to-yellow-600 text-black font-bold py-3 px-8 rounded-lg text-lg hover:from-yellow-300 hover:to-yellow-500 transition-all"
-                    >
-                      Login
-                    </button>
-                  </div>
-                </div>
-              } />
-              <Route path="/savings" element={
-                <div className="flex items-center justify-center min-h-[80vh]">
-                  <div className="text-center">
-                    <h1 className="text-4xl font-bold text-white mb-4">Authentication Required</h1>
-                    <p className="text-gray-300 mb-8">Please login to access your savings</p>
-                    <button 
-                      onClick={() => setShowAuthModal(true)}
-                      className="bg-gradient-to-r from-yellow-400 to-yellow-600 text-black font-bold py-3 px-8 rounded-lg text-lg hover:from-yellow-300 hover:to-yellow-500 transition-all"
-                    >
-                      Login
-                    </button>
-                  </div>
-                </div>
-              } />
-              <Route path="*" element={
-                <div className="flex items-center justify-center min-h-[80vh]">
-                  <div className="text-center">
-                    <h1 className="text-4xl font-bold text-white mb-4">Welcome to Casino Savings</h1>
-                    <p className="text-gray-300 mb-8">Login or create an account to start playing and saving</p>
-                    <button 
-                      onClick={() => setShowAuthModal(true)}
-                      className="bg-gradient-to-r from-yellow-400 to-yellow-600 text-black font-bold py-3 px-8 rounded-lg text-lg hover:from-yellow-300 hover:to-yellow-500 transition-all"
-                    >
-                      Get Started
-                    </button>
-                  </div>
-                </div>
-              } />
-            </Routes>
-            <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} />
-          </>
-        ) : (
-          <div className="pt-20"> {/* Add padding-top to account for fixed header */}
-            <Routes>
-              <Route path="/" element={<CleanCasinoInterface userBalance={userBalance} />} />
-              <Route path="/games" element={<CleanCasinoInterface userBalance={userBalance} />} />
-              <Route path="/savings" element={<SavingsPage />} />
-              <Route path="/trading" element={<TradingPage />} />
-              <Route path="/wallet" element={<WalletManager />} />
-              <Route path="/swift-wallet" element={<TrustWalletSwift />} />
-              <Route path="/sync-balances" element={<RealBalanceSync />} />
-              <Route path="/fund-pools" element={<PoolFundingManager />} />
-              <Route path="/dashboard" element={<PremiumDashboard onNavigate={(section) => window.location.href = `/${section}`} />} />
-              <Route path="/treasury" element={<SmartContractTreasuryDashboard user={user} authToken={user?.auth_token || localStorage.getItem('auth_token')} />} />
-              <Route path="/treasury/advanced" element={<MultiCurrencyTreasuryManager user={user} authToken={user?.auth_token || localStorage.getItem('auth_token')} />} />
-              <Route path="/dex" element={<CRTTokenDEXManager user={user} authToken={user?.auth_token || localStorage.getItem('auth_token')} />} />
-              <Route path="/development-fund" element={<DevelopmentFundDashboard />} />
-              <Route path="/admin" element={<AdminControlPanel />} />
-              <Route path="/history" element={<ConversionHistoryTracker />} />
-            </Routes>
-          </div>
-        )}
-      </Router>
-      <Toaster />
-    </div>
-  );
-}
+const API_BASE = process.env.REACT_APP_BACKEND_URL || '';
 
 function App() {
+  const [portfolio, setPortfolio] = useState(null);
+  const [tokensSummary, setTokensSummary] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [showBridgeModal, setShowBridgeModal] = useState(false);
+  const [showDevFundModal, setShowDevFundModal] = useState(false);
+  const [showWithdrawModal, setShowWithdrawModal] = useState(false);
+  const [showCDTModal, setShowCDTModal] = useState(false);
+  const [showPresetModal, setShowPresetModal] = useState(false);
+  
+  // Bridge state
+  const [sourceToken, setSourceToken] = useState('USDC');
+  const [destToken, setDestToken] = useState('CDT');
+  const [bridgeAmount, setBridgeAmount] = useState(1000);
+  
+  // Dev fund and withdrawal state
+  const [devFundOpportunities, setDevFundOpportunities] = useState(null);
+  const [devWallets, setDevWallets] = useState(null);
+  const [withdrawToken, setWithdrawToken] = useState('USDC');
+  const [withdrawAmount, setWithdrawAmount] = useState(10000);
+  const [withdrawAddress, setWithdrawAddress] = useState('');
+  const [withdrawNetwork, setWithdrawNetwork] = useState('ethereum');
+  
+  // CDT Bridge state
+  const [cdtPricing, setCdtPricing] = useState(null);
+  const [cdtSourceToken, setCdtSourceToken] = useState('USDC');
+  const [cdtAmount, setCdtAmount] = useState(10000);
+  const [cdtBridgeType, setCdtBridgeType] = useState('direct');
+
+  useEffect(() => {
+    fetchPortfolio();
+    fetchTokensSummary();
+    fetchDevFundOpportunities();
+    fetchDevWallets();
+    fetchCDTPricing();
+  }, []);
+
+  const fetchCDTPricing = async () => {
+    try {
+      const response = await axios.get(`${API_BASE}/api/cdt/pricing`);
+      setCdtPricing(response.data);
+    } catch (error) {
+      console.error('Error fetching CDT pricing:', error);
+    }
+  };
+
+  const executeQuickDevFund = async () => {
+    if (window.confirm('Create $500,000 Testing Development Fund?\n\nThis will send:\n• $250k USDC\n• $150k ETH\n• $100k BTC\n\nTo your external development wallets for safekeeping.')) {
+      await executePresetWithdrawal('testing_fund_500k');
+    }
+  };
+
+  const executeCDTBridge = async () => {
+    if (!portfolio?.tokens[cdtSourceToken]) {
+      alert('Source token not available');
+      return;
+    }
+
+    if (cdtAmount > portfolio.tokens[cdtSourceToken].balance) {
+      alert('Insufficient balance');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const response = await axios.post(`${API_BASE}/api/cdt/bridge`, {
+        source_token: cdtSourceToken,
+        amount: cdtAmount,
+        cdt_target_amount: cdtAmount * (portfolio.tokens[cdtSourceToken].price_usd / 0.10),
+        user_wallet: 'your_wallet_address',
+        bridge_type: cdtBridgeType
+      });
+      
+      alert(`CDT Bridge Success: ${response.data.message}\n\nMethod: ${response.data.method}\nCDT Received: ${response.data.cdt_received.toLocaleString()}`);
+      setShowCDTModal(false);
+      fetchPortfolio();
+      fetchTokensSummary();
+    } catch (error) {
+      alert('CDT Bridge failed: ' + (error.response?.data?.detail || 'Unknown error'));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchDevFundOpportunities = async () => {
+    try {
+      const response = await axios.get(`${API_BASE}/api/dev-fund/opportunities`);
+      setDevFundOpportunities(response.data);
+    } catch (error) {
+      console.error('Error fetching dev fund opportunities:', error);
+    }
+  };
+
+  const fetchDevWallets = async () => {
+    try {
+      const response = await axios.get(`${API_BASE}/api/dev-wallets`);
+      setDevWallets(response.data);
+    } catch (error) {
+      console.error('Error fetching dev wallets:', error);
+    }
+  };
+
+  const executePresetWithdrawal = async (presetId) => {
+    try {
+      const response = await axios.post(`${API_BASE}/api/withdraw/preset?preset_id=${presetId}`);
+      
+      alert(`Development Fund Created! ${response.data.message}`);
+      setShowPresetModal(false);
+      fetchPortfolio();
+      fetchTokensSummary();
+    } catch (error) {
+      alert('Preset withdrawal failed: ' + (error.response?.data?.detail || 'Unknown error'));
+    }
+  };
+
+  const fetchPortfolio = async () => {
+    try {
+      const response = await axios.get(`${API_BASE}/api/user/user123/portfolio`);
+      setPortfolio(response.data);
+    } catch (error) {
+      console.error('Error fetching portfolio:', error);
+    }
+  };
+
+  const fetchTokensSummary = async () => {
+    try {
+      const response = await axios.get(`${API_BASE}/api/tokens/summary`);
+      setTokensSummary(response.data);
+    } catch (error) {
+      console.error('Error fetching tokens summary:', error);
+    }
+  };
+
+  const executeBridge = async () => {
+    if (!portfolio?.tokens[sourceToken]) {
+      alert('Source token not available');
+      return;
+    }
+
+    if (bridgeAmount > portfolio.tokens[sourceToken].balance) {
+      alert('Insufficient balance');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const response = await axios.post(`${API_BASE}/api/tokens/bridge`, {
+        source_token: sourceToken,
+        amount: bridgeAmount,
+        destination_token: destToken,
+        user_wallet: 'your_wallet_address'
+      });
+      
+      alert(`Bridge Success: ${response.data.message}`);
+      setShowBridgeModal(false);
+      fetchPortfolio();
+      fetchTokensSummary();
+    } catch (error) {
+      alert('Bridge failed: ' + (error.response?.data?.detail || 'Unknown error'));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const createDevFund = async (fundType) => {
+    // Use a balanced source allocation for demo
+    const sourceTokens = {
+      "DOGE": 1000000,  // 1M DOGE
+      "T52M": 2000000,  // 2M T52M
+      "TRX": 500000     // 500K TRX
+    };
+
+    try {
+      const response = await axios.post(`${API_BASE}/api/dev-fund/create?fund_type=${fundType}`, sourceTokens);
+      
+      alert(`Development Fund Created! ${response.data.message}`);
+      setShowDevFundModal(false);
+      fetchPortfolio();
+      fetchTokensSummary();
+    } catch (error) {
+      alert('Dev fund creation failed: ' + (error.response?.data?.detail || 'Unknown error'));
+    }
+  };
+
+  const executeWithdrawal = async () => {
+    if (!withdrawAddress) {
+      alert('Please enter withdrawal address');
+      return;
+    }
+
+    try {
+      const response = await axios.post(`${API_BASE}/api/withdraw/external`, {
+        token_symbol: withdrawToken,
+        amount: withdrawAmount,
+        destination_address: withdrawAddress,
+        network: withdrawNetwork,
+        purpose: "app_development"
+      });
+      
+      alert(`Withdrawal Success! ${response.data.message}`);
+      setShowWithdrawModal(false);
+      fetchPortfolio();
+    } catch (error) {
+      alert('Withdrawal failed: ' + (error.response?.data?.detail || 'Unknown error'));
+    }
+  };
+
+  const formatBalance = (amount, decimals = 2) => {
+    return amount ? amount.toLocaleString(undefined, { 
+      minimumFractionDigits: decimals, 
+      maximumFractionDigits: decimals 
+    }) : '0.00';
+  };
+
+  const getTokensBySource = (source) => {
+    if (!portfolio?.tokens) return {};
+    return Object.fromEntries(
+      Object.entries(portfolio.tokens).filter(([_, token]) => token.source === source)
+    );
+  };
+
   return (
-    <AuthProvider>
-      <AppContent />
-    </AuthProvider>
+    <div style={{padding: '20px', fontFamily: 'Arial', maxWidth: '1200px', margin: '0 auto'}}>
+      {/* Header */}
+      <header style={{textAlign: 'center', marginBottom: '30px'}}>
+        <h1 style={{
+          background: 'linear-gradient(45deg, #ff6b35, #f7931e)', 
+          WebkitBackgroundClip: 'text', 
+          WebkitTextFillColor: 'transparent', 
+          fontSize: '3em',
+          margin: '0'
+        }}>
+          🐅 TIGER BANK GAMES 🎮
+        </h1>
+        <p style={{fontSize: '18px', color: '#666', margin: '10px 0'}}>
+          Your Complete Converted Portfolio System
+        </p>
+        
+        {portfolio && (
+          <div style={{
+            backgroundColor: '#f8f9fa', 
+            padding: '20px', 
+            borderRadius: '15px', 
+            margin: '20px 0',
+            border: '3px solid #28a745'
+          }}>
+            <h2 style={{color: '#28a745', margin: '0 0 10px 0'}}>
+              💰 TOTAL PORTFOLIO VALUE: ${formatBalance(portfolio.total_value_usd)}
+            </h2>
+            <p style={{color: '#666', margin: '0'}}>
+              Complete access to your converted crypto holdings + T52M supply
+            </p>
+          </div>
+        )}
+      </header>
+
+      {/* CDT Bridge Modal */}
+      {showCDTModal && portfolio && cdtPricing && (
+        <div style={{
+          position: 'fixed', 
+          top: 0, left: 0, right: 0, bottom: 0,
+          backgroundColor: 'rgba(0,0,0,0.5)', 
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'center', 
+          zIndex: 1000
+        }}>
+          <div style={{
+            backgroundColor: 'white', 
+            padding: '30px', 
+            borderRadius: '15px', 
+            minWidth: '600px',
+            maxHeight: '80vh',
+            overflow: 'auto'
+          }}>
+            <h3>🎨 CDT Bridge System</h3>
+            <p style={{color: '#666', marginBottom: '20px'}}>
+              Bridge any token to CDT with instant access via IOU for illiquid assets
+            </p>
+            
+            <div style={{
+              backgroundColor: '#f8f9fa',
+              padding: '15px',
+              borderRadius: '8px',
+              marginBottom: '20px'
+            }}>
+              <h4>💰 CDT Price: ${cdtPricing.cdt_price_usd} per token</h4>
+              <p style={{margin: '5px 0'}}>
+                <strong>Total Purchase Power:</strong> {formatBalance(cdtPricing.total_purchase_power_cdt)} CDT
+              </p>
+              <p style={{margin: '0', fontSize: '14px', color: '#666'}}>
+                Convert any of your {Object.keys(cdtPricing.purchase_options).length} available tokens to CDT
+              </p>
+            </div>
+            
+            <div style={{marginBottom: '20px'}}>
+              <label style={{display: 'block', marginBottom: '8px', fontWeight: 'bold'}}>Source Token:</label>
+              <select 
+                value={cdtSourceToken} 
+                onChange={(e) => setCdtSourceToken(e.target.value)}
+                style={{
+                  width: '100%', 
+                  padding: '12px', 
+                  fontSize: '16px',
+                  borderRadius: '8px',
+                  border: '2px solid #ddd'
+                }}
+              >
+                {Object.entries(cdtPricing.purchase_options).map(([symbol, info]) => (
+                  <option key={symbol} value={symbol}>
+                    {symbol} - {formatBalance(info.available_balance)} available → Max {formatBalance(info.max_cdt_amount)} CDT
+                  </option>
+                ))}
+              </select>
+              <small style={{color: '#666'}}>
+                {cdtPricing.purchase_options[cdtSourceToken]?.liquidity_type === 'low' ? 
+                  '⚠️ Illiquid asset - IOU bridge recommended' : 
+                  '✅ Liquid asset - Direct bridge available'
+                }
+              </small>
+            </div>
+            
+            <div style={{marginBottom: '20px'}}>
+              <label style={{display: 'block', marginBottom: '8px', fontWeight: 'bold'}}>Amount to Bridge:</label>
+              <input
+                type="number"
+                value={cdtAmount}
+                onChange={(e) => setCdtAmount(parseFloat(e.target.value))}
+                max={cdtPricing.purchase_options[cdtSourceToken]?.available_balance || 0}
+                style={{
+                  width: '100%', 
+                  padding: '12px', 
+                  fontSize: '16px',
+                  borderRadius: '8px',
+                  border: '2px solid #ddd'
+                }}
+              />
+              <small style={{color: '#666'}}>
+                Available: {formatBalance(cdtPricing.purchase_options[cdtSourceToken]?.available_balance || 0)} {cdtSourceToken}
+              </small>
+            </div>
+            
+            <div style={{marginBottom: '20px'}}>
+              <label style={{display: 'block', marginBottom: '8px', fontWeight: 'bold'}}>Bridge Method:</label>
+              <div style={{display: 'flex', gap: '15px'}}>
+                <label style={{display: 'flex', alignItems: 'center', gap: '8px'}}>
+                  <input
+                    type="radio"
+                    value="direct"
+                    checked={cdtBridgeType === 'direct'}
+                    onChange={(e) => setCdtBridgeType(e.target.value)}
+                  />
+                  <span>🔄 Direct Bridge</span>
+                </label>
+                <label style={{display: 'flex', alignItems: 'center', gap: '8px'}}>
+                  <input
+                    type="radio"
+                    value="iou"
+                    checked={cdtBridgeType === 'iou'}
+                    onChange={(e) => setCdtBridgeType(e.target.value)}
+                  />
+                  <span>📋 IOU Bridge (Keep original tokens)</span>
+                </label>
+              </div>
+              <small style={{color: '#666'}}>
+                {cdtBridgeType === 'iou' ? 
+                  'IOU: Get CDT instantly, repay later with original tokens' :
+                  'Direct: Convert tokens immediately to CDT'
+                }
+              </small>
+            </div>
+            
+            {cdtAmount > 0 && cdtPricing.purchase_options[cdtSourceToken] && (
+              <div style={{
+                backgroundColor: '#f8f9fa', 
+                padding: '15px', 
+                borderRadius: '8px', 
+                marginBottom: '20px'
+              }}>
+                <h4>📊 CDT Bridge Preview:</h4>
+                <p>
+                  <strong>Bridge:</strong> {formatBalance(cdtAmount)} {cdtSourceToken}
+                </p>
+                <p>
+                  <strong>USD Value:</strong> ${formatBalance(cdtAmount * (portfolio.tokens[cdtSourceToken]?.price_usd || 0))}
+                </p>
+                <p>
+                  <strong>CDT Received:</strong> {formatBalance((cdtAmount * (portfolio.tokens[cdtSourceToken]?.price_usd || 0)) / 0.10)} CDT
+                </p>
+                <p>
+                  <strong>Method:</strong> {cdtBridgeType === 'iou' ? 'IOU Bridge (collateralized)' : 'Direct Conversion'}
+                </p>
+              </div>
+            )}
+            
+            <div style={{display: 'flex', gap: '15px'}}>
+              <button 
+                onClick={executeCDTBridge}
+                disabled={loading || cdtAmount <= 0}
+                style={{
+                  flex: 1, 
+                  padding: '15px', 
+                  backgroundColor: loading ? '#ccc' : '#f39c12', 
+                  color: 'white', 
+                  border: 'none', 
+                  borderRadius: '8px',
+                  fontSize: '16px',
+                  cursor: loading ? 'not-allowed' : 'pointer',
+                  fontWeight: 'bold'
+                }}
+              >
+                {loading ? 'Processing...' : `🎨 Bridge to CDT`}
+              </button>
+              <button 
+                onClick={() => setShowCDTModal(false)}
+                style={{
+                  flex: 1, 
+                  padding: '15px', 
+                  backgroundColor: '#6c757d', 
+                  color: 'white', 
+                  border: 'none', 
+                  borderRadius: '8px',
+                  fontSize: '16px',
+                  cursor: 'pointer'
+                }}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Action Buttons */}
+      <div style={{display: 'flex', justifyContent: 'center', gap: '15px', marginBottom: '30px', flexWrap: 'wrap'}}>
+        <button 
+          onClick={() => setShowBridgeModal(true)}
+          style={{
+            padding: '15px 30px', 
+            backgroundColor: '#007bff', 
+            color: 'white', 
+            border: 'none', 
+            borderRadius: '10px', 
+            fontSize: '18px', 
+            cursor: 'pointer',
+            fontWeight: 'bold'
+          }}
+        >
+          🌉 Bridge Tokens
+        </button>
+        <button 
+          onClick={() => setShowCDTModal(true)}
+          style={{
+            padding: '15px 30px', 
+            backgroundColor: '#f39c12', 
+            color: 'white', 
+            border: 'none', 
+            borderRadius: '10px', 
+            fontSize: '18px', 
+            cursor: 'pointer',
+            fontWeight: 'bold'
+          }}
+        >
+          🎨 CDT Bridge
+        </button>
+        <button 
+          onClick={executeQuickDevFund}
+          style={{
+            padding: '15px 30px', 
+            backgroundColor: '#28a745', 
+            color: 'white', 
+            border: 'none', 
+            borderRadius: '10px', 
+            fontSize: '18px', 
+            cursor: 'pointer',
+            fontWeight: 'bold'
+          }}
+        >
+          🧪 $500K Dev Fund
+        </button>
+        <button 
+          onClick={() => setShowDevFundModal(true)}
+          style={{
+            padding: '15px 30px', 
+            backgroundColor: '#6f42c1', 
+            color: 'white', 
+            border: 'none', 
+            borderRadius: '10px', 
+            fontSize: '18px', 
+            cursor: 'pointer',
+            fontWeight: 'bold'
+          }}
+        >
+          💻 Custom Dev Fund
+        </button>
+        <button 
+          onClick={() => setShowWithdrawModal(true)}
+          style={{
+            padding: '15px 30px', 
+            backgroundColor: '#dc3545', 
+            color: 'white', 
+            border: 'none', 
+            borderRadius: '10px', 
+            fontSize: '18px', 
+            cursor: 'pointer',
+            fontWeight: 'bold'
+          }}
+        >
+          💸 Direct Withdraw
+        </button>
+      </div>
+
+      {/* Token Categories */}
+      {tokensSummary && (
+        <div style={{marginBottom: '30px'}}>
+          
+          {/* Converted Portfolio Section */}
+          <div style={{marginBottom: '30px'}}>
+            <h2 style={{color: '#28a745', borderBottom: '2px solid #28a745', paddingBottom: '10px'}}>
+              💎 Your Converted Portfolio (${formatBalance(tokensSummary.converted_portfolio.total_value_usd)})
+            </h2>
+            <p style={{color: '#666', marginBottom: '20px'}}>
+              {tokensSummary.converted_portfolio.description}
+            </p>
+            
+            <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '20px'}}>
+              {Object.entries(tokensSummary.converted_portfolio.tokens).map(([symbol, token]) => (
+                <div key={symbol} style={{
+                  padding: '20px',
+                  border: '3px solid #28a745',
+                  borderRadius: '15px',
+                  backgroundColor: '#f8fff8',
+                  textAlign: 'center'
+                }}>
+                  <div style={{fontSize: '32px', marginBottom: '10px'}}>{token.logo}</div>
+                  <h3 style={{margin: '0 0 10px 0', color: '#28a745'}}>{symbol}</h3>
+                  <p style={{margin: '5px 0', fontSize: '20px', fontWeight: 'bold'}}>
+                    {formatBalance(token.balance)} {symbol}
+                  </p>
+                  <p style={{margin: '5px 0', color: '#666'}}>
+                    ${formatBalance(token.value_usd)}
+                  </p>
+                  <p style={{margin: '0', fontSize: '14px', color: '#888'}}>
+                    {token.name}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Current Holdings Section */}
+          <div style={{marginBottom: '30px'}}>
+            <h2 style={{color: '#007bff', borderBottom: '2px solid #007bff', paddingBottom: '10px'}}>
+              🔥 Current Holdings (${formatBalance(tokensSummary.current_holdings.total_value_usd)})
+            </h2>
+            <p style={{color: '#666', marginBottom: '20px'}}>
+              {tokensSummary.current_holdings.description}
+            </p>
+            
+            <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '20px'}}>
+              {Object.entries(tokensSummary.current_holdings.tokens).map(([symbol, token]) => (
+                <div key={symbol} style={{
+                  padding: '20px',
+                  border: '3px solid #007bff',
+                  borderRadius: '15px',
+                  backgroundColor: '#f8f9ff',
+                  textAlign: 'center'
+                }}>
+                  <div style={{fontSize: '32px', marginBottom: '10px'}}>{token.logo}</div>
+                  <h3 style={{margin: '0 0 10px 0', color: '#007bff'}}>{symbol}</h3>
+                  <p style={{margin: '5px 0', fontSize: '20px', fontWeight: 'bold'}}>
+                    {formatBalance(token.balance)} {symbol}
+                  </p>
+                  <p style={{margin: '5px 0', color: '#666'}}>
+                    ${formatBalance(token.value_usd)}
+                  </p>
+                  <p style={{margin: '0', fontSize: '14px', color: '#888'}}>
+                    {token.name}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Purchase Targets Section */}
+          <div style={{marginBottom: '30px'}}>
+            <h2 style={{color: '#f39c12', borderBottom: '2px solid #f39c12', paddingBottom: '10px'}}>
+              🎯 Purchase Targets
+            </h2>
+            <p style={{color: '#666', marginBottom: '20px'}}>
+              Tokens you want to acquire using your portfolio
+            </p>
+            
+            <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '20px'}}>
+              {Object.entries(tokensSummary.purchase_targets.tokens).map(([symbol, token]) => (
+                <div key={symbol} style={{
+                  padding: '20px',
+                  border: '3px solid #f39c12',
+                  borderRadius: '15px',
+                  backgroundColor: '#fffbf0',
+                  textAlign: 'center'
+                }}>
+                  <div style={{fontSize: '32px', marginBottom: '10px'}}>{token.logo}</div>
+                  <h3 style={{margin: '0 0 10px 0', color: '#f39c12'}}>{symbol}</h3>
+                  <p style={{margin: '5px 0', fontSize: '18px', fontWeight: 'bold', color: '#f39c12'}}>
+                    TARGET: $0.10 per token
+                  </p>
+                  <p style={{margin: '0', fontSize: '14px', color: '#888'}}>
+                    {token.name}
+                  </p>
+                  <button 
+                    onClick={() => {setDestToken(symbol); setShowBridgeModal(true);}}
+                    style={{
+                      marginTop: '10px',
+                      padding: '8px 16px',
+                      backgroundColor: '#f39c12',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '5px',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    Buy {symbol}
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Bridge Modal */}
+      {showBridgeModal && portfolio && (
+        <div style={{
+          position: 'fixed', 
+          top: 0, left: 0, right: 0, bottom: 0,
+          backgroundColor: 'rgba(0,0,0,0.5)', 
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'center', 
+          zIndex: 1000
+        }}>
+          <div style={{
+            backgroundColor: 'white', 
+            padding: '30px', 
+            borderRadius: '15px', 
+            minWidth: '500px',
+            maxHeight: '80vh',
+            overflow: 'auto'
+          }}>
+            <h3>🌉 Bridge Your Tokens</h3>
+            <p style={{color: '#666', marginBottom: '20px'}}>
+              Convert between any of your tokens instantly
+            </p>
+            
+            <div style={{marginBottom: '20px'}}>
+              <label style={{display: 'block', marginBottom: '8px', fontWeight: 'bold'}}>From Token:</label>
+              <select 
+                value={sourceToken} 
+                onChange={(e) => setSourceToken(e.target.value)}
+                style={{
+                  width: '100%', 
+                  padding: '12px', 
+                  fontSize: '16px',
+                  borderRadius: '8px',
+                  border: '2px solid #ddd'
+                }}
+              >
+                {portfolio.tokens && Object.entries(portfolio.tokens)
+                  .filter(([_, token]) => token.balance > 0)
+                  .map(([symbol, token]) => (
+                  <option key={symbol} value={symbol}>
+                    {symbol} - {formatBalance(token.balance)} available (${formatBalance(token.value_usd)})
+                  </option>
+                ))}
+              </select>
+            </div>
+            
+            <div style={{marginBottom: '20px'}}>
+              <label style={{display: 'block', marginBottom: '8px', fontWeight: 'bold'}}>To Token:</label>
+              <select 
+                value={destToken} 
+                onChange={(e) => setDestToken(e.target.value)}
+                style={{
+                  width: '100%', 
+                  padding: '12px', 
+                  fontSize: '16px',
+                  borderRadius: '8px',
+                  border: '2px solid #ddd'
+                }}
+              >
+                <option value="CDT">🎨 CDT - Creative Dollar Token</option>
+                <option value="USDC">💵 USDC - USD Coin</option>
+                <option value="DOGE">🐕 DOGE - Dogecoin</option>
+                <option value="TRX">⚡ TRX - TRON</option>
+                <option value="CRT">💎 CRT - Casino Revenue Token</option>
+                <option value="T52M">🔥 T52M - Tiger Token</option>
+              </select>
+            </div>
+            
+            <div style={{marginBottom: '20px'}}>
+              <label style={{display: 'block', marginBottom: '8px', fontWeight: 'bold'}}>Amount:</label>
+              <input
+                type="number"
+                value={bridgeAmount}
+                onChange={(e) => setBridgeAmount(parseFloat(e.target.value))}
+                max={portfolio.tokens[sourceToken]?.balance || 0}
+                style={{
+                  width: '100%', 
+                  padding: '12px', 
+                  fontSize: '16px',
+                  borderRadius: '8px',
+                  border: '2px solid #ddd'
+                }}
+              />
+              <small style={{color: '#666'}}>
+                Available: {formatBalance(portfolio.tokens[sourceToken]?.balance || 0)} {sourceToken}
+              </small>
+            </div>
+            
+            {bridgeAmount > 0 && portfolio.tokens[sourceToken] && (
+              <div style={{
+                backgroundColor: '#f8f9fa', 
+                padding: '15px', 
+                borderRadius: '8px', 
+                marginBottom: '20px'
+              }}>
+                <h4>📊 Bridge Preview:</h4>
+                <p>
+                  <strong>Convert:</strong> {formatBalance(bridgeAmount)} {sourceToken}
+                </p>
+                <p>
+                  <strong>USD Value:</strong> ${formatBalance(bridgeAmount * portfolio.tokens[sourceToken].price_usd)}
+                </p>
+                <p>
+                  <strong>You'll Get:</strong> ~{formatBalance((bridgeAmount * portfolio.tokens[sourceToken].price_usd) / (destToken === 'CDT' ? 0.10 : 1))} {destToken}
+                </p>
+              </div>
+            )}
+            
+            <div style={{display: 'flex', gap: '15px'}}>
+              <button 
+                onClick={executeBridge}
+                disabled={loading || bridgeAmount <= 0}
+                style={{
+                  flex: 1, 
+                  padding: '15px', 
+                  backgroundColor: loading ? '#ccc' : '#007bff', 
+                  color: 'white', 
+                  border: 'none', 
+                  borderRadius: '8px',
+                  fontSize: '16px',
+                  cursor: loading ? 'not-allowed' : 'pointer',
+                  fontWeight: 'bold'
+                }}
+              >
+                {loading ? 'Processing...' : `🌉 Execute Bridge`}
+              </button>
+              <button 
+                onClick={() => setShowBridgeModal(false)}
+                style={{
+                  flex: 1, 
+                  padding: '15px', 
+                  backgroundColor: '#6c757d', 
+                  color: 'white', 
+                  border: 'none', 
+                  borderRadius: '8px',
+                  fontSize: '16px',
+                  cursor: 'pointer'
+                }}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Development Fund Modal */}
+      {showDevFundModal && devFundOpportunities && (
+        <div style={{
+          position: 'fixed', 
+          top: 0, left: 0, right: 0, bottom: 0,
+          backgroundColor: 'rgba(0,0,0,0.5)', 
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'center', 
+          zIndex: 1000
+        }}>
+          <div style={{
+            backgroundColor: 'white', 
+            padding: '30px', 
+            borderRadius: '15px', 
+            minWidth: '700px',
+            maxHeight: '80vh',
+            overflow: 'auto'
+          }}>
+            <h3>💻 Create App Development Fund</h3>
+            <p style={{color: '#666', marginBottom: '20px'}}>
+              Bridge your tokens into ETH, BTC, and USDC for app development projects
+            </p>
+            
+            {Object.entries(devFundOpportunities.development_fund_options).map(([fundId, fund]) => (
+              <div key={fundId} style={{
+                border: '2px solid #28a745',
+                borderRadius: '12px',
+                padding: '20px',
+                marginBottom: '20px',
+                backgroundColor: '#f8fff8'
+              }}>
+                <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px'}}>
+                  <h4 style={{margin: 0, color: '#28a745'}}>{fund.name}</h4>
+                  <div style={{textAlign: 'right'}}>
+                    <div style={{fontSize: '20px', fontWeight: 'bold'}}>${formatBalance(fund.total_usd)}</div>
+                    <div style={{fontSize: '12px', color: '#666'}}>{fund.percentage_of_portfolio} of portfolio</div>
+                  </div>
+                </div>
+                
+                <div style={{display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '15px', marginBottom: '15px'}}>
+                  {Object.entries(fund.breakdown).map(([token, details]) => (
+                    <div key={token} style={{
+                      padding: '12px',
+                      backgroundColor: '#e8f5e8',
+                      borderRadius: '8px',
+                      textAlign: 'center'
+                    }}>
+                      <div style={{fontSize: '16px', fontWeight: 'bold', color: '#28a745'}}>
+                        {token === 'USDC' ? '💵' : token === 'ETH' ? '🔥' : '🪙'} {token}
+                      </div>
+                      <div style={{fontSize: '14px', margin: '5px 0'}}>
+                        {formatBalance(details.token_amount, token === 'BTC' ? 3 : 2)} {token}
+                      </div>
+                      <div style={{fontSize: '12px', color: '#666'}}>
+                        ${formatBalance(details.usd_amount)} ({details.percentage})
+                      </div>
+                      <div style={{fontSize: '10px', color: '#888', marginTop: '5px'}}>
+                        {details.reason}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                
+                <button 
+                  onClick={() => createDevFund(fundId)}
+                  style={{
+                    width: '100%',
+                    padding: '12px',
+                    backgroundColor: '#28a745',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '8px',
+                    fontSize: '16px',
+                    cursor: 'pointer',
+                    fontWeight: 'bold'
+                  }}
+                >
+                  💻 Create {fund.name}
+                </button>
+              </div>
+            ))}
+            
+            <div style={{backgroundColor: '#fff3cd', padding: '15px', borderRadius: '8px', marginBottom: '20px'}}>
+              <h4>🚀 Development Fund Benefits:</h4>
+              <ul style={{margin: 0, fontSize: '14px'}}>
+                <li><strong>USDC</strong>: Stable funding for team, expenses, and operations</li>
+                <li><strong>ETH</strong>: Smart contract development, DeFi integrations, gas fees</li>
+                <li><strong>BTC</strong>: Long-term treasury, institutional partnerships</li>
+                <li><strong>Direct Withdrawal</strong>: Send to your external wallets immediately</li>
+              </ul>
+            </div>
+            
+            <button 
+              onClick={() => setShowDevFundModal(false)}
+              style={{
+                width: '100%',
+                padding: '12px',
+                backgroundColor: '#6c757d',
+                color: 'white',
+                border: 'none',
+                borderRadius: '8px'
+              }}
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* External Withdrawal Modal */}
+      {showWithdrawModal && portfolio && (
+        <div style={{
+          position: 'fixed', 
+          top: 0, left: 0, right: 0, bottom: 0,
+          backgroundColor: 'rgba(0,0,0,0.5)', 
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'center', 
+          zIndex: 1000
+        }}>
+          <div style={{
+            backgroundColor: 'white', 
+            padding: '30px', 
+            borderRadius: '15px', 
+            minWidth: '500px'
+          }}>
+            <h3>💸 Withdraw to External Wallet</h3>
+            <p style={{color: '#666', marginBottom: '20px'}}>
+              Send crypto directly to your external wallets for app development
+            </p>
+            
+            <div style={{marginBottom: '15px'}}>
+              <label style={{display: 'block', marginBottom: '8px', fontWeight: 'bold'}}>Token:</label>
+              <select 
+                value={withdrawToken} 
+                onChange={(e) => setWithdrawToken(e.target.value)}
+                style={{
+                  width: '100%', 
+                  padding: '12px', 
+                  fontSize: '16px',
+                  borderRadius: '8px',
+                  border: '2px solid #ddd'
+                }}
+              >
+                <option value="USDC">💵 USDC - Stable Development Funding</option>
+                <option value="ETH">🔥 ETH - Smart Contract Development</option>
+                <option value="BTC">🪙 BTC - Treasury Reserve</option>
+                <option value="DOGE">🐕 DOGE - High Liquidity</option>
+                <option value="TRX">⚡ TRX - TRON Ecosystem</option>
+              </select>
+            </div>
+            
+            <div style={{marginBottom: '15px'}}>
+              <label style={{display: 'block', marginBottom: '8px', fontWeight: 'bold'}}>Amount:</label>
+              <input
+                type="number"
+                value={withdrawAmount}
+                onChange={(e) => setWithdrawAmount(parseFloat(e.target.value))}
+                style={{
+                  width: '100%', 
+                  padding: '12px', 
+                  fontSize: '16px',
+                  borderRadius: '8px',
+                  border: '2px solid #ddd'
+                }}
+              />
+              <small style={{color: '#666'}}>
+                Available: {formatBalance(portfolio.tokens[withdrawToken]?.balance || 0)} {withdrawToken}
+              </small>
+            </div>
+            
+            <div style={{marginBottom: '15px'}}>
+              <label style={{display: 'block', marginBottom: '8px', fontWeight: 'bold'}}>Network:</label>
+              <select 
+                value={withdrawNetwork} 
+                onChange={(e) => setWithdrawNetwork(e.target.value)}
+                style={{
+                  width: '100%', 
+                  padding: '12px', 
+                  fontSize: '16px',
+                  borderRadius: '8px',
+                  border: '2px solid #ddd'
+                }}
+              >
+                <option value="ethereum">Ethereum Network</option>
+                <option value="bitcoin">Bitcoin Network</option>
+                <option value="solana">Solana Network</option>
+                <option value="tron">TRON Network</option>
+              </select>
+            </div>
+            
+            <div style={{marginBottom: '20px'}}>
+              <label style={{display: 'block', marginBottom: '8px', fontWeight: 'bold'}}>Destination Address:</label>
+              <input
+                type="text"
+                value={withdrawAddress}
+                onChange={(e) => setWithdrawAddress(e.target.value)}
+                placeholder="Enter your external wallet address"
+                style={{
+                  width: '100%', 
+                  padding: '12px', 
+                  fontSize: '16px',
+                  borderRadius: '8px',
+                  border: '2px solid #ddd'
+                }}
+              />
+            </div>
+            
+            {withdrawAmount > 0 && portfolio.tokens[withdrawToken] && (
+              <div style={{
+                backgroundColor: '#f8f9fa', 
+                padding: '15px', 
+                borderRadius: '8px', 
+                marginBottom: '20px'
+              }}>
+                <h4>📊 Withdrawal Preview:</h4>
+                <p><strong>Amount:</strong> {formatBalance(withdrawAmount)} {withdrawToken}</p>
+                <p><strong>USD Value:</strong> ${formatBalance(withdrawAmount * (portfolio.tokens[withdrawToken]?.price_usd || 0))}</p>
+                <p><strong>Network:</strong> {withdrawNetwork}</p>
+                <p><strong>Purpose:</strong> App Development Fund</p>
+              </div>
+            )}
+            
+            <div style={{display: 'flex', gap: '15px'}}>
+              <button 
+                onClick={executeWithdrawal}
+                disabled={!withdrawAddress || withdrawAmount <= 0}
+                style={{
+                  flex: 1, 
+                  padding: '15px', 
+                  backgroundColor: !withdrawAddress || withdrawAmount <= 0 ? '#ccc' : '#dc3545', 
+                  color: 'white', 
+                  border: 'none', 
+                  borderRadius: '8px',
+                  fontSize: '16px',
+                  cursor: !withdrawAddress || withdrawAmount <= 0 ? 'not-allowed' : 'pointer',
+                  fontWeight: 'bold'
+                }}
+              >
+                💸 Send to External Wallet
+              </button>
+              <button 
+                onClick={() => setShowWithdrawModal(false)}
+                style={{
+                  flex: 1, 
+                  padding: '15px', 
+                  backgroundColor: '#6c757d', 
+                  color: 'white', 
+                  border: 'none', 
+                  borderRadius: '8px',
+                  fontSize: '16px',
+                  cursor: 'pointer'
+                }}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Portfolio Summary */}
+      <div style={{
+        backgroundColor: '#f8f9fa', 
+        padding: '30px', 
+        borderRadius: '15px',
+        marginTop: '30px'
+      }}>
+        <h3>🏦 Your Complete Tiger Bank System</h3>
+        <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px'}}>
+          <div>
+            <h4>💎 Converted Assets</h4>
+            <ul style={{margin: 0, fontSize: '14px'}}>
+              <li>319,000 USDC</li>
+              <li>13,000,000 DOGE</li>
+              <li>3,900,000 TRX</li>
+              <li>21,000,000 CRT</li>
+            </ul>
+          </div>
+          <div>
+            <h4>🔥 Current Holdings</h4>
+            <ul style={{margin: 0, fontSize: '14px'}}>
+              <li>52,000,000 T52M</li>
+              <li>Full token supply</li>
+              <li>Bridge to any crypto</li>
+            </ul>
+          </div>
+          <div>
+            <h4>🎯 Purchase Power</h4>
+            <ul style={{margin: 0, fontSize: '14px'}}>
+              <li>Bridge to CDT</li>
+              <li>Instant conversions</li>
+              <li>No liquidity limits</li>
+            </ul>
+          </div>
+          <div>
+            <h4>🌉 Bridge System</h4>
+            <ul style={{margin: 0, fontSize: '14px'}}>
+              <li>Any token to any token</li>
+              <li>Real-time rates</li>
+              <li>Instant execution</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
 
