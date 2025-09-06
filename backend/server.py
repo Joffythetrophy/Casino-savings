@@ -184,6 +184,31 @@ class ConvertRequest(BaseModel):
     to_currency: str
     amount: float
 
+class Portfolio(BaseModel):
+    user_id: str
+    tokens: Dict[str, Any]
+    total_value_usd: float
+
+class BridgeRequest(BaseModel):
+    source_token: str
+    amount: float
+    destination_token: str
+    user_wallet: str
+
+class CDTBridgeRequest(BaseModel):
+    source_token: str
+    amount: float
+    cdt_target_amount: float
+    user_wallet: str
+    bridge_type: str = "direct"  # "direct" or "iou"
+
+class WithdrawalRequest(BaseModel):
+    token_symbol: str
+    amount: float
+    destination_address: str
+    network: str  # "ethereum", "bitcoin", "solana"
+    purpose: str = "app_development"
+
 # Basic endpoints
 @app.get("/")
 async def root():
